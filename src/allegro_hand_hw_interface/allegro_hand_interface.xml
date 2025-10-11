@@ -1,0 +1,11 @@
+<library path="allegro_hand_hw_interface">
+    <class
+        name="allegro_hand_hw_interface/AllegroHand_Interface"
+        type="allegro_hand_hw_interface::AllegroHand_Interface"
+        base_class_type="hardware_interface::SystemInterface">
+
+        <description>
+           hardware interface to use Allegro Hand robotic system
+        </description>
+    </class>
+</library>
