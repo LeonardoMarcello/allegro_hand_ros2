@@ -1,7 +1,9 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
-from launch.actions import DeclareLaunchArgument, ExecuteProcess, OpaqueFunction
+from launch.actions import RegisterEventHandler,IncludeLaunchDescription, DeclareLaunchArgument, ExecuteProcess, OpaqueFunction
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, Command
+from launch.event_handlers import OnProcessStart
 from ament_index_python.packages import get_package_share_directory
 import os
 import getpass
@@ -29,7 +31,7 @@ def setup_can(context, xacro_file):
 
     commands = [
         f"sudo ip link set {can_port} down",
-        f"sudo ip link set {can_port} type can bitrate 1000000",
+        #f"sudo ip link set {can_port} type can bitrate 1000000",
         f"sudo ip link set {can_port} up"
     ]
 
@@ -62,6 +64,15 @@ def generate_launch_description():
     # Controller manager params file (optional)
     config_path = os.path.join(pkg_share, 'config', 'allegro_controllers.yaml')
 
+    # robot state publisher
+    rsp = IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(
+                    [os.path.join(get_package_share_directory(pkg_name),'launch','rsp.launch.py')]
+                ),
+                launch_arguments={'use_sim_time': 'false', 'use_ros2_control': 'true'}.items()
+    )
+
+
     # controller node
     controller_node =   Node(
             package='controller_manager',
@@ -73,6 +84,32 @@ def generate_launch_description():
             output='screen'
     )
 
+    # joint broadcaster node (publish /joint_state)
+    joint_broad_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["joint_state_broadcaster"],
+    )
+    delayed_joint_broad_spawner = RegisterEventHandler(
+        event_handler=OnProcessStart(
+            target_action=controller_node,
+            on_start=[joint_broad_spawner],
+        )
+    )
+
+    # Effort controller node (apply torqu on hw)
+    effort_controller = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["allegro_effort_controller"],
+    )
+    delayed_effort_controller = RegisterEventHandler(
+        event_handler=OnProcessStart(
+            target_action=controller_node,
+            on_start=[effort_controller],
+        )
+    )
+
     # get setup_can function handle
     setup_can_func = partial(setup_can, xacro_file=xacro_file)
 
@@ -81,8 +118,17 @@ def generate_launch_description():
         # setup can device
         OpaqueFunction(function=setup_can_func),
 
+        # Launch robot state publisher
+        rsp,
+
         ## Load the controller manager with your hardware interface
         controller_node,
+
+        ## Delay the joint broadcaster until the controller manager is up
+        delayed_joint_broad_spawner,
+
+        ## Delay the effort controller until the controller manager is up
+        delayed_effort_controller,
 
         ## Spawn the joint_state_broadcaster
         #ExecuteProcess(
