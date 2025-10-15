@@ -156,7 +156,16 @@ void AllegroNode::updateController() {
         current_position_filtered[i] = current_position[i];
         current_velocity[i] =
                 (current_position[i] - previous_position[i]) / dt;
-        current_velocity_filtered[i] =  current_velocity[i];;
+        current_velocity_filtered[i] =  current_velocity[i];
+        /*current_position_filtered[i] = (0.6 * current_position_filtered[i]) +
+                                       (0.198 * previous_position[i]) +
+                                       (0.198 * current_position[i]);
+        current_velocity[i] =
+                (current_position_filtered[i] - previous_position_filtered[i]) / dt;
+        current_velocity_filtered[i] = (0.6 * current_velocity_filtered[i]) +
+                                       (0.198 * previous_velocity[i]) +
+                                       (0.198 * current_velocity[i]);
+        current_velocity[i] = (current_position[i] - previous_position[i]) / dt;*/
       }
 
       OperatingMode = 0;

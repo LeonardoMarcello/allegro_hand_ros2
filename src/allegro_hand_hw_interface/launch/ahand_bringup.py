@@ -1,12 +1,55 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
-from launch.actions import DeclareLaunchArgument, ExecuteProcess
+from launch.actions import DeclareLaunchArgument, ExecuteProcess, OpaqueFunction
 from launch.substitutions import LaunchConfiguration, Command
 from ament_index_python.packages import get_package_share_directory
 import os
+import getpass
+
 
 from ament_index_python.packages import get_package_share_directory
+import xml.etree.ElementTree as ET
+from functools import partial
 
+
+def setup_can(context, xacro_file):
+    # --- Generate URDF from xacro ---
+    urdf_str = os.popen(f"xacro {xacro_file}").read()
+
+    # --- Parse URDF for the ros2_control hardware params ---
+    root = ET.fromstring(urdf_str)
+    can_port = "can0"  # default 'can0'
+    for ros2_control in root.findall('ros2_control'):
+        hw_tag = ros2_control.find('hardware')
+        if hw_tag is not None:
+            for param in hw_tag.findall('param'):
+                if param.attrib.get('name') == 'device':
+                    can_port = param.text.strip()
+                    break
+
+    commands = [
+        f"sudo ip link set {can_port} down",
+        f"sudo ip link set {can_port} type can bitrate 1000000",
+        f"sudo ip link set {can_port} up"
+    ]
+
+    while True:
+        password = getpass.getpass('Enter sudo password: ')
+        success = True
+        for cmd in commands:
+            result = os.system(f'echo "{password}" | sudo -S {cmd}')
+            if result != 0:
+                print(f"Command failed: {cmd}")
+                success = False
+                break
+        if success:
+            print(f'{can_port} setup completed')
+            break
+        else:
+            print(f'{can_port} setup failed. Please try again.')
+
+
+    return []
 
 def generate_launch_description():
     pkg_name = 'allegro_hand_hw_interface'
@@ -30,9 +73,13 @@ def generate_launch_description():
             output='screen'
     )
 
-    # Execute process
+    # get setup_can function handle
+    setup_can_func = partial(setup_can, xacro_file=xacro_file)
 
+    # Execute process
     return LaunchDescription([
+        # setup can device
+        OpaqueFunction(function=setup_can_func),
 
         ## Load the controller manager with your hardware interface
         controller_node,
