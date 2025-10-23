@@ -122,12 +122,27 @@ def generate_launch_description():
 			            {'hand_info/which_type': LaunchConfiguration('TYPE')},
             		    {'comm/CAN_CH': LaunchConfiguration('CAN_DEVICE')}],
             arguments=[LaunchConfiguration('POLLING')],
+			remappings=[
+				('allegroHand/lib_cmd',PythonExpression(["'allegroHand_",LaunchConfiguration('NUM'),"/lib_cmd'"])),
+            			('allegroHand/joint_states',PythonExpression(["'allegroHand_",LaunchConfiguration('NUM'),"/joint_states'"])),
+                    		('allegroHand/joint_cmd',PythonExpression(["'allegroHand_",LaunchConfiguration('NUM'),"/joint_cmd'"])),
+                    		('allegroHand/torque_cmd',PythonExpression(["'allegroHand_",LaunchConfiguration('NUM'),"/torque_cmd'"])),
+                    		('allegroHand/envelop_torque',PythonExpression(["'allegroHand_",LaunchConfiguration('NUM'),"/envelop_torque'"])),
+				('allegroHand/tactile_sensors',PythonExpression(["'allegroHand_",LaunchConfiguration('NUM'),"/tactile_sensors'"])),
+                    		('forcechange',PythonExpression(["'allegroHand_",LaunchConfiguration('NUM'),"/force_chg'"])),
+                    		('timechange',PythonExpression(["'allegroHand_",LaunchConfiguration('NUM'),"/time_chg'"])),
+			]
         ),
         Node(
             package='robot_state_publisher',
             output='screen',
             executable='robot_state_publisher',
             parameters=[{'robot_description': Command(['xacro ', urdf_path])}],
+            remappings=[
+                ('tf', PythonExpression(["'allegroHand_",LaunchConfiguration('NUM'),"/tf'"])),
+                ('joint_states',PythonExpression(["'allegroHand_",LaunchConfiguration('NUM'),"/joint_states'"])),
+                ('robot_description', 'allegro_hand_description')
+            ]
         ),
         # Include the allegro_viz.launch.py file if VISUALIZE is true
         IncludeLaunchDescription(

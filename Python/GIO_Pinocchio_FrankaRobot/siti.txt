@@ -1,0 +1,7 @@
+Per mostrare il robot con il Gepetto viewer:
+https://gepettoweb.laas.fr/doc/stack-of-tasks/pinocchio/master/doxygen-html/md_doc_b-examples_display_a-gepetto-viewer.html
+
+Per aggiungere il cubo in mano al robot sul file urdf:
+https://wiki.ros.org/urdf/XML/link
+
+

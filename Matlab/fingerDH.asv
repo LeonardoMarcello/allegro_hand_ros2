@@ -1,0 +1,32 @@
+    %% Load DH Allegro Hand finger model
+    % The kinematic chain is built until the flange frame, for that           %
+    % reason it seems to have 8 joints but, the last one is kept fixed.       %
+    % The format of the D-H table follows the example:                        %
+    % D-H table format example:                                               %
+    %  joint type | d_i | theta_i | a_i  | alpha_i                            %
+    %       1     | d1  |    q1   |  0   |   pi/2                             %
+    %                                                                         %
+    % joint type: 1 'revolute', 2 'prismatic'                                 %
+    % Convention: 'classic' (default) | 'modified'      
+    % j = ones(4,1);
+    % d = 10*  [0.017     0       0       0]';
+    % theta =  [0       -pi/2     0       0]';
+    % a = 10*  [0       0.0431  0.038   0.040]';
+    % alphas = [-pi/2     0       0      -pi/2]';
+    % Convention = 'classic';
+
+    d = 10*  [0   0.017     0       0     ]';
+    theta =  [0    0       -pi/2     0     ]';
+    a = 10*  [0    0       0.0431  0.038   ]';
+    alphas = [0   pi/2     0       0     ]';
+    Convention = 'modified';
+
+    DH = [j, d, theta, a, alphas];
+
+    chain = FramesChainFromDH(DH,zeros(4,1),Convention);
+
+    PlotChain(chain);
+    axis equal
+    xlim([-.5 .5]);   % adjust X range
+    ylim([-.5 .5]);   % adjust Y range
+    zlim([-.2 2]);      % adjust Z range

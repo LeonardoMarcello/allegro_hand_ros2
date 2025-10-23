@@ -8,6 +8,7 @@ namespace allegro_hand_hw_interface{
 
 
     AllegroHand_Interface::AllegroHand_Interface()
+    : Kf(16, Eigen::MatrixXd::Identity(16*3,16*3), Eigen::MatrixXd::Identity(16,16))
     {
         mutex = new std::mutex();
 
@@ -153,7 +154,7 @@ namespace allegro_hand_hw_interface{
         return command_interfaces;
     };
 
-    hardware_interface::return_type AllegroHand_Interface::read(const rclcpp::Time & , const rclcpp::Duration & )
+    hardware_interface::return_type AllegroHand_Interface::read(const rclcpp::Time & , const rclcpp::Duration & period)
     {
         /*
         // Calculate loop time;
@@ -168,7 +169,10 @@ namespace allegro_hand_hw_interface{
             return hardware_interface::return_type::ERROR;
         }*/
 
-        tstart = tnow;
+        //tstart = tnow;
+        //dt = ALLEGRO_CONTROL_TIME_INTERVAL;//1e-9 * (tnow - tstart).nanoseconds();
+
+        double dt = period.seconds();
 
         if (canDevice){
             // try to update joint positions through CAN comm:
@@ -189,9 +193,8 @@ namespace allegro_hand_hw_interface{
                 // low-pass filtering:
                 for (int i = 0; i < DOF_JOINTS; i++) {
                     current_position_filtered[i] = current_position[i];
-                    current_velocity[i] =
-                            (current_position[i] - previous_position[i]) / dt;
-                    current_velocity_filtered[i] =  current_velocity[i];;
+                    current_velocity[i] = (current_position[i] - previous_position[i]) / dt;
+                    current_velocity_filtered[i] =  current_velocity[i];
                 }
             }
         }
@@ -233,6 +236,7 @@ namespace allegro_hand_hw_interface{
         if (lEmergencyStop < 0) {
             RCLCPP_ERROR(rclcpp::get_logger(LOGGER_NAME),"Allegro Hand Node is Shutting Down! (Emergency Stop)");
             rclcpp::shutdown();
+            return hardware_interface::return_type::ERROR;
         }
 
         return hardware_interface::return_type::OK;
@@ -248,6 +252,7 @@ namespace allegro_hand_hw_interface{
         if (lEmergencyStop < 0) {
             RCLCPP_ERROR(rclcpp::get_logger(LOGGER_NAME),"Allegro Hand Node is Shutting Down! (Emergency Stop)");
             rclcpp::shutdown();
+            return hardware_interface::return_type::ERROR;
         }
 
         return hardware_interface::return_type::OK;

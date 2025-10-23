@@ -25,6 +25,7 @@ using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface
 #include <allegro_hand_driver/AllegroHandDrv.h>
 using namespace allegro;
 #include "bhand/BHand.h"
+#include <allegro_hand_hw_interface/kalman_filter_joint.hpp>
 
 #define HW_IF_PRESSURE "pressure"
 #define ALLEGRO_CONTROL_TIME_INTERVAL 0.002
@@ -45,7 +46,7 @@ namespace allegro_hand_hw_interface{
                 std::vector<hardware_interface::StateInterface> export_state_interfaces() override;
                 std::vector<hardware_interface::CommandInterface> export_command_interfaces() override;
 
-                hardware_interface::return_type read(const rclcpp::Time & , const rclcpp::Duration & ) override;
+                hardware_interface::return_type read(const rclcpp::Time & , const rclcpp::Duration & period) override;
                 hardware_interface::return_type write(const rclcpp::Time & , const rclcpp::Duration & ) override;
 
             private:
@@ -62,6 +63,7 @@ namespace allegro_hand_hw_interface{
 
                 std::string pressureSensorNames[DOF_JOINTS] =  {"index_sensor", "middle_sensor", "ring_sensor", "thumb_sensor"};
 
+                kalman_filter_joint::KalmanFilterJoint Kf;
                 double position_offset[DOF_JOINTS] = {0.0};
 
                 double current_position[DOF_JOINTS] = {0.0};
@@ -98,11 +100,6 @@ namespace allegro_hand_hw_interface{
 
                 double motion_time = 1.0;
                 double force_get = 2.0f;
-
-                // ROS Time
-                rclcpp::Time tstart;
-                rclcpp::Time tnow;
-                double dt;
 
                 // other
                 bool pressure_req_ = true;

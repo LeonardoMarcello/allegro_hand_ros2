@@ -31,7 +31,7 @@ def setup_can(context, xacro_file):
 
     commands = [
         f"sudo ip link set {can_port} down",
-        #f"sudo ip link set {can_port} type can bitrate 1000000",
+        f"sudo ip link set {can_port} type can bitrate 1000000",
         f"sudo ip link set {can_port} up"
     ]
 

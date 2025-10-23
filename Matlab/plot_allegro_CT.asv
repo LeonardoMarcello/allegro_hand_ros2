@@ -1,0 +1,156 @@
+close all
+%% Plot Allegro Hand Joint States from ROS2 bag
+% Make sure you have ROS Toolbox installed
+addpath(genpath("description"))
+
+ANIMATE = false;
+EXPORT = false;
+
+% Path to the rosbag folder (ros2 bag record creates a folder)
+bagFolder = '/home/leo/Desktop/allegro_hand_ros2_ws/workdir/allegro_hand_torque_bag';
+% bagFolder = '/home/leo/Desktop/allegro_hand_ros2_ws/workdir/allegro_hand_bag';
+urdfFile = "description/urdf/allegro_hand_description_right_B.urdf";
+% Open the ros2 bag
+bag = ros2bag(bagFolder);
+
+% Select the /allegroHand/joint_states topic
+ts = select(bag, 'Topic', '/allegroHand_0/joint_states');
+
+% Read all messages
+msgs = readMessages(ts);
+
+% Number of messages
+N = numel(msgs);
+
+% Extract joint names (from the first message)
+jointNames = msgs{1}.name;   % cell array of 16 joint names
+numJoints = numel(jointNames);
+
+% Preallocate arrays
+positions = zeros(N, numJoints);
+efforts   = zeros(N, numJoints);
+time      = zeros(N, 1);
+
+% Loop through messages
+for i = 1:N
+    msg = msgs{i};
+    positions(i,:) = msg.position;
+    efforts(i,:)   = msg.effort;
+    time(i) = double(msg.header.stamp.sec) + double(msg.header.stamp.nanosec)*1e-9;
+end
+
+% Normalize time to start at 0
+time = time - time(1);
+
+
+%% 
+pwm_limits = [-240,240];
+tau2pwm = 1.43 * 1000;
+
+%% write to csv
+if EXPORT    
+    % Build column names
+    timeHeader = "time";
+    posHeaders = "pos_" + string(jointNames(:))';
+    velHeaders = "vel_" + string(jointNames(:))';
+    accHeaders = "acc_" + string(jointNames(:))';
+    effHeaders = "eff_" + string(jointNames(:))';
+    headers = [timeHeader, posHeaders, velHeaders, accHeaders, effHeaders];  % now all row vectors
+    
+    % Convert to table
+    T = array2table(data, 'VariableNames', headers);
+    
+    % Write to CSV
+    outputFile = fullfile(bagFolder, 'allegro_joint_data.csv');
+    writetable(T, outputFile);
+    fprintf('✅ Exported time series to %s\n', outputFile);
+    
+    outputFile = fullfile('.', 'allegro_joint_data.csv');
+    writetable(T, outputFile);
+    fprintf('✅ Exported time series to %s\n', outputFile);
+end
+%% Plot joint positions
+figure('Name','Joint Positions','NumberTitle','off');
+for j = 5:8
+    plot(time, positions(:,j), 'LineWidth', 1.5);
+    hold on;
+end
+xlabel('Time [s]');
+ylabel('Joint Position [rad]');
+title('Allegro Hand Joint Positions');
+legend(jointNames([5 6 7 8]), 'Interpreter', 'none');
+grid on;
+
+%% Plot joint efforts
+figure('Name','Joint Efforts','NumberTitle','off');
+for j = 5:8
+    plot(time, efforts(:,j), 'LineWidth', 1.5);
+    hold on;
+end
+yline(pwm_limits(1)/tau2pwm)
+yline(pwm_limits(2)/tau2pwm)
+xlabel('Time [s]');
+ylabel('Joint Effort [Nm]');
+title('Allegro Hand Joint Efforts');
+legend(jointNames([5 6 7 8]), 'Interpreter', 'none');
+grid on;
+
+
+%% Plot tau3 CG
+figure('Name','Joint3 barycenter','NumberTitle','off');
+q1 = positions(:,6);
+q2 = positions(:,7);
+q3 = positions(:,8);
+m3 = 0.0057;
+plot(time, efforts(:,8)./(m3*9.81*sin(q1+q2+q3)), 'LineWidth', 1.5);
+xlabel('Time [s]');
+ylabel('l3 [m]');
+title('Allegro Hand Last link barycenter');
+legend('l3', 'Interpreter', 'none');
+grid on;
+
+
+%% Animate
+if ANIMATE
+    %% Load URDF into RigidBodyTree
+    hand = importrobot(urdfFile);
+    hand.DataFormat = 'row';
+    hand.Gravity = [0 0 -9.81];
+    
+    %% Animation
+    % Create figure for robot visualization
+    fig2 = figure('Name','Allegro Hand 3D','NumberTitle','off');
+    ax = axes(fig2);
+    view(3); axis equal;
+    show(hand, positions(1,:), 'Parent', ax, 'PreservePlot', false, 'Frames','off');
+    timeText = text(ax, -0.08, 0.08, 0.1, sprintf('Time: %.2f s', 0), ...
+        'FontSize', 12, 'FontWeight', 'bold', 'Color', 'r');
+    hold on;
+    
+    % Loop through messages to animate
+    fprintf("Starting animation\n")
+    for i = 1:200:N
+        reordered_pos = positions(i,:);
+        reordered_pos = reordered_pos([1 2 3 4 13 14 15 16 5 6 7 8 9 10 11 12]);
+        show(hand, reordered_pos, 'Parent', ax, 'PreservePlot', false, 'Frames','off');
+        drawnow;
+    
+        % Update running time text
+        set(timeText, 'String', sprintf('Time: %.2f s', time(i)));
+        
+        % Optional: highlight current joint in plots
+        for j = 1:4
+            posPlot(j).Marker = 'o';
+            posPlot(j).MarkerIndices = i;
+            effPlot(j).Marker = 'o';
+            effPlot(j).MarkerIndices = i;
+        end
+        
+        if i < N
+            % Pause for the actual time difference between messages
+            dt = (time(i+200) - time(i))/1000.0;
+            pause(dt);
+        end
+    end
+    fprintf("Ended animation\n")
+end

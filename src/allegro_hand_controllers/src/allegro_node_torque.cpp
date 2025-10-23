@@ -14,14 +14,15 @@ std::string pkg1_path;
 std::string data_path;
 
 AllegroNodeTorque::AllegroNodeTorque(const std::string nodeName)
-        : AllegroNode(nodeName){//,pBHand(nullptr) {
+        : AllegroNode(nodeName)//,pBHand(nullptr) 
+{
   initController(whichHand,whichType);
 
   torque_cmd_sub = this->create_subscription<sensor_msgs::msg::JointState>(
           TORQUE_TOPIC, 3, std::bind(&AllegroNodeTorque::setTorqueCallback, this, std::placeholders::_1));
   lib_cmd_sub = this->create_subscription<std_msgs::msg::String>(
           LIB_CMD_TOPIC, 1, std::bind(&AllegroNodeTorque::libCmdCallback, this, std::placeholders::_1));
-  }
+ }
 
 AllegroNodeTorque::~AllegroNodeTorque() {
   RCLCPP_INFO(this->get_logger(), "Torque controller node is shutting down");

@@ -16,6 +16,7 @@ find_package(tf2 REQUIRED)
 find_package(rosbag2_cpp REQUIRED)
 find_package(allegro_hand_driver REQUIRED)
 find_package(bhand REQUIRED)
+find_package(Eigen3 REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -24,6 +25,7 @@ include_directories(
   include
   ${allegro_hand_driver_INCLUDE_DIRS}
   ${bhand_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIRS}
 )
 
 
@@ -31,6 +33,7 @@ add_library(
   ${PROJECT_NAME}
   SHARED
   src/allegro_hand_interface.cpp
+  src/kalman_filter_joint.cpp
 )
 
 #target_include_directories(
