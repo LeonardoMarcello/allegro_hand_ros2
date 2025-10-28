@@ -54,7 +54,7 @@ dynamics:
   link 3:
     inertial:
       symb: [1,1,1,1,1,1,1,1,1,1]
-      mass: 0.00367 # 0.0367
+      mass: 0.0367 # 0.0367
       CoM_x: 0.0
       CoM_y: 0.0
       CoM_z: 0.0

@@ -25,10 +25,10 @@ from thunder_franka_as_py import thunder_franka_as
 MESH_DIR = './description/urdf/meshes/'
 URDF_PATH = './description/urdf/allegro_hand_description_right_B.urdf'
 XML_PATH = './description/urdf/allegro_hand_description_right_B.xml'
-BAG_PATH = '/home/leo/Desktop/allegro_hand_ros2_ws/workdir/allegro_hand_torque_bag'
+BAG_PATH = '/home/leo/Desktop/allegro_hand_ros2_ws/workdir/allegro_hand_my_torque_bag'
 NEW_BAG_PATH = '/home/leo/Desktop/allegro_hand_ros2_ws/workdir/allegro_hand_torque_filtered_bag'
 JOINT_NAMES = ['joint_4_0', 'joint_5_0', 'joint_6_0', 'joint_7_0']
-SAVE_FILENAME = '/home/leo/Desktop/ahand_dynamic_friction.txt'
+SAVE_FILENAME = '/home/leo/Desktop/ahand_dynamic_mine.txt'
 
 MASSES_URDF = [0.0176, 0.086, 0.0367, 0.0057] # [Kg]
 INERTIAS_URDF = [[1.32064e-05, 1.22498e-05, 2.64678e-06],
@@ -56,6 +56,7 @@ def read_bag(file_path, store=False, path_out=None):
     while reader.has_next():
         (topic, data, t) = reader.read_next()
         if topic == '/allegroHand_0/joint_states':
+        #if topic == '/allegroHand_0/joint_cmd':
             msg = deserialize_message(data, JointState)
             joint_names = msg.name
 
@@ -250,24 +251,23 @@ def load_dynamics(filename, num_joints): # filename -> (hat_Pi, dict)
 
 
     return hat_Pi, dynamics
-
 def print_result(hat_Pi, par_per_link):
-    masses = [(hat_Pi[i*par_per_link]).item() for i in range(n)]
+    masses = [(hat_Pi[i*10 + 0]).item() for i in range(n)]
 
-    CoMs_x = [(hat_Pi[i*par_per_link+1]/masses[i]).item() for i in range(n)]        #pi = m*cx
-    CoMs_y = [(hat_Pi[i*par_per_link+2]/masses[i]).item() for i in range(n)]
-    CoMs_z = [(hat_Pi[i*par_per_link+3]/masses[i]).item() for i in range(n)]
+    CoMs_x = [(hat_Pi[i*10 + 1]/masses[i]).item() for i in range(n)]        # pi  = m*CoM
+    CoMs_y = [(hat_Pi[i*10 + 2]/masses[i]).item() for i in range(n)]
+    CoMs_z = [(hat_Pi[i*10 + 3]/masses[i]).item() for i in range(n)]
 
-    Is_xx = [(hat_Pi[i*par_per_link+4] - (masses[i]*CoMs_y[i]**2 - masses[i]*CoMs_z[i]**2)).item()        for i in range(n)]
-    Is_xy = [(hat_Pi[i*par_per_link+5] - (masses[i]*CoMs_x[i]*CoMs_y[i])).item()                          for i in range(n)]
-    Is_xz = [(hat_Pi[i*par_per_link+5] - (masses[i]*CoMs_x[i]*CoMs_z[i])).item()                          for i in range(n)]
-    Is_yy = [(hat_Pi[i*par_per_link+7] - (masses[i]*CoMs_x[i]**2 - masses[i]*CoMs_z[i]**2)).item()        for i in range(n)]
-    Is_yz = [(hat_Pi[i*par_per_link+8] - (masses[i]*CoMs_y[i]*CoMs_z[i])).item()                          for i in range(n)]
-    Is_zz = [(hat_Pi[i*par_per_link+9] - (masses[i]*CoMs_x[i]**2 - masses[i]*CoMs_y[i]**2)).item()        for i in range(n)]
+    Is_xx = [(hat_Pi[i*10 + 4] - (masses[i]*CoMs_y[i]**2 - masses[i]*CoMs_z[i]**2)).item()        for i in range(n)]  # pi = J
+    Is_xy = [(hat_Pi[i*10 + 5] - (masses[i]*CoMs_x[i]*CoMs_y[i])).item()                          for i in range(n)]
+    Is_xz = [(hat_Pi[i*10 + 5] - (masses[i]*CoMs_x[i]*CoMs_z[i])).item()                          for i in range(n)]
+    Is_yy = [(hat_Pi[i*10 + 7] - (masses[i]*CoMs_x[i]**2 - masses[i]*CoMs_z[i]**2)).item()        for i in range(n)]
+    Is_yz = [(hat_Pi[i*10 + 8] - (masses[i]*CoMs_y[i]*CoMs_z[i])).item()                          for i in range(n)]
+    Is_zz = [(hat_Pi[i*10 + 9] - (masses[i]*CoMs_x[i]**2 - masses[i]*CoMs_y[i]**2)).item()        for i in range(n)]
 
     if par_per_link>10:
-        Ds = [(hat_Pi[i*par_per_link+10]).item()        for i in range(n)]
-        Fs = [(hat_Pi[i*par_per_link+11]).item()        for i in range(n)]
+        Ds = [(hat_Pi[40 + i]).item()        for i in range(n)]
+        Fs = [(hat_Pi[44 + i]).item()        for i in range(n)]
     print("=== Dynamic parameters ======")
     print("PI size:", hat_Pi.shape)
     for i in range(thunder_ahand.get_numJoints()):
@@ -467,16 +467,16 @@ for i in range(t_log.shape[0]):
     Y_s = np.diag(2/(1+np.exp(-20*qd_log[i])) - 1)
 
     # Convert Unit Measures
-    Y[0::10] = Y[0::10]/1e3                   # [Kg] -> [g]
-    Y[1::10] = Y[1::10]/(1e6)                 # [Kg*m] -> [g*mm]
-    Y[2::10] = Y[2::10]/(1e6)                 # [Kg*m] -> [g*mm]
-    Y[3::10] = Y[3::10]/(1e6)                 # [Kg*m] -> [g*mm]
-    Y[4::10] = Y[4::10]/(1e9)                 # [Kg*m^2] -> [g*mm^2]
-    Y[5::10] = Y[5::10]/(1e9)                 # [Kg*m^2] -> [g*mm^2]
-    Y[6::10] = Y[6::10]/(1e9)                 # [Kg*m^2] -> [g*mm^2]
-    Y[7::10] = Y[7::10]/(1e9)                 # [Kg*m^2] -> [g*mm^2]
-    Y[8::10] = Y[8::10]/(1e9)                 # [Kg*m^2] -> [g*mm^2]
-    Y[9::10] = Y[9::10]/(1e9)                 # [Kg*m^2] -> [g*mm^2]
+    Y[:, 0:40:10] = Y[:, 0:40:10]/1e3                   # [Kg] -> [g]
+    Y[:, 1:40:10] = Y[:, 1:40:10]/(1e6)                 # [Kg*m] -> [g*mm]
+    Y[:, 2:40:10] = Y[:, 2:40:10]/(1e6)                 # [Kg*m] -> [g*mm]
+    Y[:, 3:40:10] = Y[:, 3:40:10]/(1e6)                 # [Kg*m] -> [g*mm]
+    Y[:, 4:40:10] = Y[:, 4:40:10]/(1e9)                 # [Kg*m^2] -> [g*mm^2]
+    Y[:, 5:40:10] = Y[:, 5:40:10]/(1e9)                 # [Kg*m^2] -> [g*mm^2]
+    Y[:, 6:40:10] = Y[:, 6:40:10]/(1e9)                 # [Kg*m^2] -> [g*mm^2]
+    Y[:, 7:40:10] = Y[:, 7:40:10]/(1e9)                 # [Kg*m^2] -> [g*mm^2]
+    Y[:, 8:40:10] = Y[:, 8:40:10]/(1e9)                 # [Kg*m^2] -> [g*mm^2]
+    Y[:, 9:40:10] = Y[:, 9:40:10]/(1e9)                 # [Kg*m^2] -> [g*mm^2]
     Y_log.append(np.hstack([Y, Y_d, Y_s]))
 
 
@@ -495,7 +495,8 @@ print("Shape TTau (Mnx1): ", TTau.shape)
 # Method 1 - Pinv
 print("Computing initial guess by pseudoinverse")
 hat_Pi = np.linalg.pinv(YY)@TTau
-print_result(hat_Pi, par_per_link)
+print("resid: " + str(np.linalg.norm(TTau - YY@hat_Pi)))
+#print_result(hat_Pi, par_per_link)
 
 # Method 2 - Least Squares
 print("Defining costrained minimization problem")
@@ -508,14 +509,14 @@ lb = []         # Lower bound
 
 for i in range(n):
     # Mass must be positive
-    g.append(hat_Pi_sym[i*par_per_link])
+    g.append(hat_Pi_sym[i*10 + 0])
     lb.append(MASSES_URDF[i]*1000)          # [g]
     ub.append(MASSES_URDF[i]*1000)
 
     # CoM inside a spere of radius r
-    cx = hat_Pi_sym[i*par_per_link + 1]/hat_Pi_sym[i*par_per_link]
-    cy = hat_Pi_sym[i*par_per_link + 2]/hat_Pi_sym[i*par_per_link]
-    cz = hat_Pi_sym[i*par_per_link + 3]/hat_Pi_sym[i*par_per_link]
+    cx = hat_Pi_sym[i*10 + 1]/hat_Pi_sym[i*10]
+    cy = hat_Pi_sym[i*10 + 2]/hat_Pi_sym[i*10]
+    cz = hat_Pi_sym[i*10 + 3]/hat_Pi_sym[i*10]
     c = np.array([cx,cy,cz])
 
     g.append(np.sqrt(c@c.T))
@@ -523,16 +524,16 @@ for i in range(n):
     ub.append(100)
 
     # Semi-definite inertia matrix
-    Jxx = hat_Pi_sym[i*par_per_link + 4]
-    Jxy = hat_Pi_sym[i*par_per_link + 5]
-    Jxz = hat_Pi_sym[i*par_per_link + 6]
-    Jyy = hat_Pi_sym[i*par_per_link + 7]
-    Jyz = hat_Pi_sym[i*par_per_link + 8]
-    Jzz = hat_Pi_sym[i*par_per_link + 9]
+    Jxx = hat_Pi_sym[i*10 + 4]
+    Jxy = hat_Pi_sym[i*10 + 5]
+    Jxz = hat_Pi_sym[i*10 + 6]
+    Jyy = hat_Pi_sym[i*10 + 7]
+    Jyz = hat_Pi_sym[i*10 + 8]
+    Jzz = hat_Pi_sym[i*10 + 9]
     J = np.array([[Jxx, Jxy, Jxz],
                    [Jxy, Jyy, Jyz],
                    [Jxz, Jyz, Jzz]])
-    Ib = J - hat_Pi_sym[i*par_per_link] * skew(c)@skew(c).T
+    Ib = J - hat_Pi_sym[i*10] * skew(c)@skew(c).T
 
     _,l = def_powerm(Ib, niter=40)
     g.append((Ib[0,0]+Ib[1,1]+Ib[2,2])/2 - l[0])
@@ -543,11 +544,11 @@ for i in range(n):
     if par_per_link>10:
         # Friction
         # Damping
-        g.append(hat_Pi_sym[i*par_per_link+10])
+        g.append(hat_Pi_sym[40+i])
         lb.append(0)
         ub.append(0.2)
         # Static
-        g.append(hat_Pi_sym[i*par_per_link+11])
+        g.append(hat_Pi_sym[44+i])
         lb.append(0)
         ub.append(0.01)
 
@@ -573,10 +574,10 @@ solver = casadi.nlpsol('sol', 'ipopt', prob, opts)
 # Initial guess <---------------------------------------------------------
 #hat_Pi_0 = np.random.rand(p,1)
 hat_Pi_0 = 0.0001*np.ones((p,1))
-hat_Pi_0[0::par_per_link] = np.array(MASSES_URDF).reshape(hat_Pi_0[0::par_per_link].shape)
-hat_Pi_0[4::par_per_link] = np.array([(INERTIAS_URDF[i][0]) for i in range(n)]).reshape(hat_Pi_0[4::par_per_link].shape)
-hat_Pi_0[7::par_per_link] = np.array([(INERTIAS_URDF[i][1]) for i in range(n)]).reshape(hat_Pi_0[7::par_per_link].shape)
-hat_Pi_0[9::par_per_link] = np.array([(INERTIAS_URDF[i][2]) for i in range(n)]).reshape(hat_Pi_0[8::par_per_link].shape)
+hat_Pi_0[0:40:10] = np.array(MASSES_URDF).reshape(hat_Pi_0[0:40:10].shape)
+hat_Pi_0[4:40:10] = np.array([(INERTIAS_URDF[i][0]) for i in range(n)]).reshape(hat_Pi_0[4:40:10].shape)
+hat_Pi_0[7:40:10] = np.array([(INERTIAS_URDF[i][1]) for i in range(n)]).reshape(hat_Pi_0[7:40:10].shape)
+hat_Pi_0[9:40:10] = np.array([(INERTIAS_URDF[i][2]) for i in range(n)]).reshape(hat_Pi_0[9:40:10].shape)
 
 sol = solver(x0=hat_Pi_0, lbg=lb,ubg=ub)
 hat_Pi = sol['x'].full()
@@ -588,58 +589,23 @@ print("> Extracting dinamic parameters")
 print(par_per_link)
 
 # reconvert Unit Measures
-hat_Pi[0::12] = hat_Pi[0::12]/1e3                   # [g] -> [Kg]
-hat_Pi[1::12] = hat_Pi[1::12]/(1e6)                 # [g*mm] -> [Kg*m]
-hat_Pi[2::12] = hat_Pi[2::12]/(1e6)                 # [g*mm] -> [Kg*m]
-hat_Pi[3::12] = hat_Pi[3::12]/(1e6)                 # [g*mm] -> [Kg*m]
-hat_Pi[4::12] = hat_Pi[4::12]/(1e9)                 # [g*mm^2] -> [Kg*m^2]
-hat_Pi[5::12] = hat_Pi[5::12]/(1e9)                 # [g*mm^2] -> [Kg*m^2]
-hat_Pi[6::12] = hat_Pi[6::12]/(1e9)                 # [g*mm^2] -> [Kg*m^2]
-hat_Pi[7::12] = hat_Pi[7::12]/(1e9)                 # [g*mm^2] -> [Kg*m^2]
-hat_Pi[8::12] = hat_Pi[8::12]/(1e9)                 # [g*mm^2] -> [Kg*m^2]
-hat_Pi[9::12] = hat_Pi[9::12]/(1e9)                 # [g*mm^2] -> [Kg*m^2]
+hat_Pi[0:40:10] = hat_Pi[0:40:10]/1e3                   # [g] -> [Kg]
+hat_Pi[1:40:10] = hat_Pi[1:40:10]/(1e6)                 # [g*mm] -> [Kg*m]
+hat_Pi[2:40:10] = hat_Pi[2:40:10]/(1e6)                 # [g*mm] -> [Kg*m]
+hat_Pi[3:40:10] = hat_Pi[3:40:10]/(1e6)                 # [g*mm] -> [Kg*m]
+hat_Pi[4:40:10] = hat_Pi[4:40:10]/(1e9)                 # [g*mm^2] -> [Kg*m^2]
+hat_Pi[5:40:10] = hat_Pi[5:40:10]/(1e9)                 # [g*mm^2] -> [Kg*m^2]
+hat_Pi[6:40:10] = hat_Pi[6:40:10]/(1e9)                 # [g*mm^2] -> [Kg*m^2]
+hat_Pi[7:40:10] = hat_Pi[7:40:10]/(1e9)                 # [g*mm^2] -> [Kg*m^2]
+hat_Pi[8:40:10] = hat_Pi[8:40:10]/(1e9)                 # [g*mm^2] -> [Kg*m^2]
+hat_Pi[9:40:10] = hat_Pi[9:40:10]/(1e9)                 # [g*mm^2] -> [Kg*m^2]
 
-masses = [(hat_Pi[i*par_per_link]).item() for i in range(n)]
+print_result(hat_Pi, par_per_link)
+save_dynamics(SAVE_FILENAME, hat_Pi, n)                            # <-------------------- STORE PARAMS
 
-CoMs_x = [(hat_Pi[i*par_per_link+1]/masses[i]).item() for i in range(n)]        # pi  = m*CoM
-CoMs_y = [(hat_Pi[i*par_per_link+2]/masses[i]).item() for i in range(n)]
-CoMs_z = [(hat_Pi[i*par_per_link+3]/masses[i]).item() for i in range(n)]
-
-Is_xx = [(hat_Pi[i*par_per_link+4] - (masses[i]*CoMs_y[i]**2 - masses[i]*CoMs_z[i]**2)).item()        for i in range(n)]  # pi = J
-Is_xy = [(hat_Pi[i*par_per_link+5] - (masses[i]*CoMs_x[i]*CoMs_y[i])).item()                          for i in range(n)]
-Is_xz = [(hat_Pi[i*par_per_link+5] - (masses[i]*CoMs_x[i]*CoMs_z[i])).item()                          for i in range(n)]
-Is_yy = [(hat_Pi[i*par_per_link+7] - (masses[i]*CoMs_x[i]**2 - masses[i]*CoMs_z[i]**2)).item()        for i in range(n)]
-Is_yz = [(hat_Pi[i*par_per_link+8] - (masses[i]*CoMs_y[i]*CoMs_z[i])).item()                          for i in range(n)]
-Is_zz = [(hat_Pi[i*par_per_link+9] - (masses[i]*CoMs_x[i]**2 - masses[i]*CoMs_y[i]**2)).item()        for i in range(n)]
-
-if par_per_link>10:
-    Ds = [(hat_Pi[i*par_per_link+10]).item()        for i in range(n)]
-    Fs = [(hat_Pi[i*par_per_link+11]).item()        for i in range(n)]
-
-print("=== Dynamic parameters ======")
-print("PI size:", hat_Pi.shape)
-for i in range(thunder_ahand.get_numJoints()):
-    print(f"\tlink {i+1}:")
-    print(f"\t\tinertial:")
-    print(f"\t\t\tsymb: [1,1,1,1,1,1,1,1,1,1]")
-    print(f"\t\t\tmass: {masses[i]}")
-    print(f"\t\t\tCoM_x: {CoMs_x[i]}")
-    print(f"\t\t\tCoM_y: {CoMs_y[i]}")
-    print(f"\t\t\tCoM_z: {CoMs_z[i]}")
-    print(f"\t\t\tIxx: {Is_xx[i]}")
-    print(f"\t\t\tIxy: {Is_xy[i]}")
-    print(f"\t\t\tIxz: {Is_xz[i]}")
-    print(f"\t\t\tIyy: {Is_yy[i]}")
-    print(f"\t\t\tIyz: {Is_yz[i]}")
-    print(f"\t\t\tIzz: {Is_zz[i]}")
-    if par_per_link>10:
-        print(f"\t\tfriction: ")
-        print(f"\t\t\tsymb: [1,1]")
-        print(f"\t\t\tDl: [{Ds[i]},{Fs[i]}]")
-print("=============================")
-#save_dynamics(SAVE_FILENAME, hat_Pi, n)                            # <-------------------- STORE PARAMS
-
-thunder_ahand.set_par_DYN(hat_Pi)
+friction_idx = np.zeros_like(hat_Pi, dtype=bool)
+friction_idx[[40, 41, 42, 43, 44, 45, 46, 47]] = True
+thunder_ahand.set_par_REG(hat_Pi[~friction_idx])
 delta_tau = []
 for i in range(len(t_log)):
     #q =q_log[i,:]
@@ -742,7 +708,7 @@ plt.show(block=False)
 plt.figure(figsize=(12,8))
 for i in range(4):
     plt.subplot(2,2,i+1)
-    plt.plot(t_log, resid[i::4], label = 'delta_tau')
+    plt.plot(t_log, resid[i::4], label = 'tau_resid')
     plt.xlabel('Time [s]')
     plt.ylabel('Torque [Nm]')
     plt.title(f'Joint {JOINT_NAMES[i]}')

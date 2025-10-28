@@ -49,11 +49,11 @@ def generate_launch_description():
         description='Specify which type to use: A(non-geared) or B(geared)'
     )
 
-    #declare_polling_arg = DeclareLaunchArgument(
-    #    'POLLING',
-    #    default_value='true',
-    #    description='true, false for polling the CAN communication'
-    #)
+    declare_polling_arg = DeclareLaunchArgument(
+        'POLLING',
+        default_value='true',
+        description='true, false for polling the CAN communication'
+    )
     #
     #declare_can_device_arg = DeclareLaunchArgument(
     #	'CAN_DEVICE', 
@@ -74,44 +74,45 @@ def generate_launch_description():
 
     return LaunchDescription([
         declare_visualize_arg,
-        #declare_polling_arg,
+        declare_polling_arg,
+        declare_hand_arg,
+        declare_type_arg,
         #declare_can_device_arg,
         declare_num_arg,
         declare_moveit_arg,
 		declare_gui_arg,
 		declare_sim_arg,
-        #Node(
-        #    package='allegro_hand_controllers',
-        #    executable='allegro_node_grasp',
-        #    output='screen',
-        #    parameters=[{'hand_info/which_hand': LaunchConfiguration('HAND')}, # Pass HAND argument to parameter
-		#	            {'hand_info/which_type': LaunchConfiguration('TYPE')},
-        #    		    {'comm/CAN_CH': LaunchConfiguration('CAN_DEVICE')}],
-        #    arguments=[LaunchConfiguration('POLLING')],
-		#	remappings=[
-		#		('allegroHand/lib_cmd',PythonExpression(["'allegroHand_",LaunchConfiguration('NUM'),"/lib_cmd'"])),
-        #    			('allegroHand/joint_states',PythonExpression(["'allegroHand_",LaunchConfiguration('NUM'),"/joint_states'"])),
-        #            		('allegroHand/joint_cmd',PythonExpression(["'allegroHand_",LaunchConfiguration('NUM'),"/joint_cmd'"])),
-        #            		('allegroHand/envelop_torque',PythonExpression(["'allegroHand_",LaunchConfiguration('NUM'),"/envelop_torque'"])),
-		#		('allegroHand/tactile_sensors',PythonExpression(["'allegroHand_",LaunchConfiguration('NUM'),"/tactile_sensors'"])),
-        #            		('forcechange',PythonExpression(["'allegroHand_",LaunchConfiguration('NUM'),"/force_chg'"])),
-        #            		('timechange',PythonExpression(["'allegroHand_",LaunchConfiguration('NUM'),"/time_chg'"])),
-		#	]
-        #),
-        #Node(
-        #    package='robot_state_publisher',
-        #    output='screen',
-        #    executable='robot_state_publisher',
-        #    parameters=[{'robot_description': Command(['xacro ', urdf_path])},
-        #                {'use_sim_time': True}   # << Added this line to use simulation time
-        #                ],
-        #    
-        #    remappings=[
-        #        ('tf', PythonExpression(["'allegroHand_",LaunchConfiguration('NUM'),"/tf'"])),
-        #        ('joint_states',PythonExpression(["'allegroHand_",LaunchConfiguration('NUM'),"/joint_states'"])),
-        #        ('robot_description', 'allegro_hand_description')
-        #    ]
-        #),
+        Node(
+            package='allegro_hand_controllers',
+            executable='allegro_node_sim',
+            output='screen',
+            parameters=[{'hand_info/which_hand': LaunchConfiguration('HAND')}, # Pass HAND argument to parameter
+			            {'hand_info/which_type': LaunchConfiguration('TYPE')}],
+            arguments=[LaunchConfiguration('POLLING')],
+			remappings=[
+				('allegroHand/lib_cmd',PythonExpression(["'allegroHand_",LaunchConfiguration('NUM'),"/lib_cmd'"])),
+            			('allegroHand/joint_states',PythonExpression(["'allegroHand_",LaunchConfiguration('NUM'),"/joint_states'"])),
+                    		('allegroHand/joint_cmd',PythonExpression(["'allegroHand_",LaunchConfiguration('NUM'),"/joint_cmd'"])),
+                    		('allegroHand/envelop_torque',PythonExpression(["'allegroHand_",LaunchConfiguration('NUM'),"/envelop_torque'"])),
+				('allegroHand/tactile_sensors',PythonExpression(["'allegroHand_",LaunchConfiguration('NUM'),"/tactile_sensors'"])),
+                    		('forcechange',PythonExpression(["'allegroHand_",LaunchConfiguration('NUM'),"/force_chg'"])),
+                    		('timechange',PythonExpression(["'allegroHand_",LaunchConfiguration('NUM'),"/time_chg'"])),
+			]
+        ),
+        Node(
+            package='robot_state_publisher',
+            output='screen',
+            executable='robot_state_publisher',
+            parameters=[{'robot_description': Command(['xacro ', urdf_path])},
+                        {'use_sim_time': True}   # << Added this line to use simulation time
+                        ],
+
+            remappings=[
+                ('tf', PythonExpression(["'allegroHand_",LaunchConfiguration('NUM'),"/tf'"])),
+                ('joint_states',PythonExpression(["'allegroHand_",LaunchConfiguration('NUM'),"/joint_states'"])),
+                ('robot_description', 'allegro_hand_description')
+            ]
+        ),
         # Include the allegro_viz.launch.py file if VISUALIZE is true
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(os.path.join(allegro_hand_controllers_share, 'launch', 'allegro_viz.launch.py')),
@@ -119,7 +120,7 @@ def generate_launch_description():
             launch_arguments={'NUM': LaunchConfiguration('NUM'),
                               'use_sim_time': 'true'}.items()
         ),
-        # Include the demo.launch.py file if MOVEIT is true       
+        # Include the demo.launch.py file if MOVEIT is true
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(os.path.join(allegro_hand_moveit_share, 'launch', 'demo_isaac.launch.py')),
             condition=IfCondition(LaunchConfiguration('MOVEIT')),

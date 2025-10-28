@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
-sys.path.append("/home/leo/thunder_dynamics/ahand_finger_generatedFiles/build") # Where the .so file is located. 
+sys.path.append("/home/leo/thunder_dynamics/ahand_finger_generatedFiles_py/build") # Where the .so file is located. 
 sys.path.append("/home/leo/thunder_dynamics/franka_as_generatedFiles/build") # Where the .so file is located. 
 # Note: This is not needed if the .so file is in the same directory as the python script
 
@@ -19,6 +19,7 @@ robot.load_conf("/home/leo/thunder_dynamics/ahand_finger_generatedFiles/ahand_fi
 print("Number of joints: ", robot.get_numJoints())
 curr_q = np.array([0,0, 0,0], dtype=float)
 robot.set_q(np.random.rand(robot.get_numJoints()))
+robot.set_q(curr_q)
 #print("Current joint positions: ", robot.get_q())
 dq = np.random.rand(robot.get_numJoints())
 robot.set_dq(dq)
@@ -40,6 +41,7 @@ C = robot.get_C()
 print("Coriolis Matrix: \n", C)
 G = robot.get_G()
 print("Gravity Vector: \n", G)
+print("G reg:\n", robot.get_reg_G())
 Yr = robot.get_Yr()
 Y = robot.get_reg_M() + robot.get_reg_C() + robot.get_reg_G()
 print("Regressor: \n", Y[:,[3,4,5,6,7,8,9,     13,14,15,16,17,18,19,   23,24,25,26,27,28,29,   33,34,35,36,37,38,39]])

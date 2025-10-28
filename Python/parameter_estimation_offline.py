@@ -25,7 +25,7 @@ from thunder_franka_as_py import thunder_franka_as
 MESH_DIR = './description/urdf/meshes/'
 URDF_PATH = './description/urdf/allegro_hand_description_right_B.urdf'
 XML_PATH = './description/urdf/allegro_hand_description_right_B.xml'
-BAG_PATH = '/home/leo/Desktop/allegro_hand_ros2_ws/workdir/allegro_hand_torque_bag'
+BAG_PATH = '/home/leo/Desktop/allegro_hand_ros2_ws/workdir/allegro_hand_moveit_bag'
 NEW_BAG_PATH = '/home/leo/Desktop/allegro_hand_ros2_ws/workdir/allegro_hand_torque_filtered_bag'
 JOINT_NAMES = ['joint_4_0', 'joint_5_0', 'joint_6_0', 'joint_7_0']
 SAVE_FILENAME = '/home/leo/Desktop/ahand_dynamic_friction.txt'
@@ -441,7 +441,7 @@ t_acc = t_log.copy()
 tau_filt = filtfilt(b, a, tau_log, axis=0)
 tau_log = tau_filt
 
-#write_filtered_bag(NEW_BAG_PATH, t_log, q_log, tau_log, JOINT_NAMES)
+#write_filtered_bag(NEW_BAG_PATH, t_log, q_log, tau_log, JOINT_NAMES)   # <------------------ STORE FILTERED
 # =========================================================================================================================== Compute regressor
 print("\t - Computing Regressor")
 thunder_ahand = thunder_ahand_finger()

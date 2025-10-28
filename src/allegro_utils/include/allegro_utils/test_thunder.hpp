@@ -27,6 +27,7 @@ private:
 
     // Forward joint command (sensor_msgs/JointState).
     rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr cmd_pub_;
+    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr lib_cmd_pub_;
 
     // Handles external joint command (sensor_msgs/JointState).
     rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_des_sub_;

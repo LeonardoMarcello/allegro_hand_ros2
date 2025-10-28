@@ -29,7 +29,8 @@ https://github.com/Wonikrobotics-git/allegro_hand_ros2_v5.git
 # pressure in (Pa) units
 # Oss: credo nuovo firmware non ne abbia bisogno, hanno cambiat ID
 
-
+# Run Joint publisher GUI for sliders controller
+ros2 run joint_state_publisher_gui joint_state_publisher_gui /home/leo/Desktop/allegro_hand_ros2_ws/src/allegro_hand_controllers/urdf/allegro_hand_description_right_B.urdf --ros-args -r /joint_states:=/allegroHand_0/joint_cmd
 # -----------------------------------------------------------------------------------------------------
 # If conda environment is active `ros2 run allegro_hand_gui allegro_hand_gui_node' may not work.
 # Link the system lib GLIBCXX_3.4.30 in the conda environment by typing:

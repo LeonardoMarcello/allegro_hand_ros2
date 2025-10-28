@@ -82,7 +82,7 @@ class JointRelay(Node):
 
         # =============== Define here target trajectory =========================================
         for i in [4,5,6,7]:
-            amplitude = 0.5 * (self.q_bar[i] - JOINT_LIMITS[i,0])
+            amplitude = 0.4 * (self.q_bar[i] - JOINT_LIMITS[i,0])
             frequency = 0.1
             omega = 2 * np.pi * frequency
             q_target[i] = amplitude * np.sin(omega * delta_t) + self.q_bar[i]

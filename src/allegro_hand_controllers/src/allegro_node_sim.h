@@ -27,13 +27,16 @@ class AllegroNodeSim : public AllegroNode {
 
     void initController(const std::string &whichHand, const std::string &whichType);
 
-    void computeDesiredTorque();
-
     void updateController();
+
+    void setJointCallback(const sensor_msgs::msg::JointState::SharedPtr msg);
 
     void doIt(bool polling);
 
  protected:
+     // Handles external joint command (sensor_msgs/JointState).
+    rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_cmd_sub;
+
 
 };
 

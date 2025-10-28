@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
 project(allegro_utils)
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -18,6 +17,11 @@ find_package(sensor_msgs REQUIRED)
 
 find_package(Eigen3 REQUIRED)
 find_package(yaml-cpp REQUIRED)
+find_package(bhand REQUIRED)
+
+message(STATUS "bhand include dirs: ${bhand_INCLUDE_DIRS}")
+message(STATUS "bhand libraries: ${bhand_LIBRARIES}")
+
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -28,7 +32,10 @@ include_directories(
   include
   ${EIGEN3_INCLUDE_DIRS}
 	${YAML_CPP_INCLUDE_DIRS}
+  ${bhand_INCLUDE_DIRS}
+  ${CMAKE_CURRENT_SOURCE_DIR}/../bhand/include
 )
+
 # Create Cpp Libraries
 add_library(${PROJECT_NAME}
 	src/thunder_ahand_finger.cpp
@@ -49,6 +56,18 @@ target_link_libraries(test_thunder
 ament_target_dependencies(test_thunder rclcpp std_msgs sensor_msgs)
 
 
+add_executable(test_controller
+  src/test_controller.cpp
+)
+target_link_libraries(test_controller
+  ${PROJECT_NAME}
+  yaml-cpp
+  ${bhand_LIBRARIES}
+)
+ament_target_dependencies(test_controller rclcpp std_msgs sensor_msgs bhand)
+
+
+
 # Install Cpp executables
 install(
   DIRECTORY include/${PROJECT_NAME}
@@ -56,9 +75,9 @@ install(
 )
 install(TARGETS
   test_thunder
+  test_controller
   DESTINATION lib/${PROJECT_NAME}
 )
-
 
 # === Python ===
 # Install Python modules

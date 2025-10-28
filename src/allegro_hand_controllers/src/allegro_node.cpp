@@ -59,8 +59,8 @@ AllegroNode::AllegroNode(const std::string nodeName, bool sim /* = false */)
   }
 
   // ============================ LEO ===============================================
-  double tau2pwm = canDevice->torqueConversion();
-  RCLCPP_INFO(this->get_logger(), "TORQUE TO PWM: %f", tau2pwm);
+  //double tau2pwm = canDevice->torqueConversion();
+  //RCLCPP_INFO(this->get_logger(), "TORQUE TO PWM: %f", tau2pwm);
   // ============================ LEO ===============================================
 
 

@@ -47,6 +47,9 @@ AllegroNodeSim::AllegroNodeSim(const std::string nodeName)
   : AllegroNode(nodeName, true)
 {
   initController(whichHand, whichType);
+  joint_cmd_sub = this->create_subscription<sensor_msgs::msg::JointState>(
+          DESIRED_STATE_TOPIC, 3, std::bind(&AllegroNodeSim::setJointCallback, this, std::placeholders::_1));
+  
 }
 
 AllegroNodeSim::~AllegroNodeSim() {
@@ -54,10 +57,10 @@ AllegroNodeSim::~AllegroNodeSim() {
   rclcpp::shutdown();
 }
 
-void AllegroNodeSim::computeDesiredTorque() {
+void AllegroNodeSim::setJointCallback(const sensor_msgs::msg::JointState::SharedPtr msg) {
   // Just set current = desired.
   for (int idx = 0; idx < DOF_JOINTS; ++idx) {
-    current_position[idx] = desired_joint_state.position[idx];
+    current_position[idx] = msg->position[idx];
   }
 }
 
@@ -144,12 +147,8 @@ void AllegroNodeSim::updateController() {
     current_velocity_filtered[i] =  current_velocity[i];;
   }
 
-  // calculate control torque:
-  computeDesiredTorque();
-
   // publish joint positions to ROS topic:
   publishData();
-
   frame++;
 }
 
@@ -182,6 +181,7 @@ int main(int argc, char **argv) {
   }
   //printf("Start controller with polling = %d\n", polling);
   //bool is_sim = std::find(clean_argv.begin(), clean_argv.end(), "--sim") != clean_argv.end();
+
   AllegroNodeSim allegroNode("allegro_node_sim");
   allegroNode.doIt(polling);
 }
