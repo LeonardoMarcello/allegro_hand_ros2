@@ -82,7 +82,7 @@ private:
     BHand *pBHand = NULL;
     long frame = 0;
 
-    kalman_filter_joint::KalmanFilterJoint kf;
+    kalman_filter_joint::KalmanFilterJoint kf[16];
     thunder_ahand_finger ahand_index;
     Eigen::VectorXd q_encoder;
     Eigen::VectorXd q;

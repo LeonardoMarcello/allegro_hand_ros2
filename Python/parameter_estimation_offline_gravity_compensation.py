@@ -23,7 +23,7 @@ from thunder_ahand_finger_py import thunder_ahand_finger
 MESH_DIR = './description/urdf/meshes/'
 URDF_PATH = './description/urdf/allegro_hand_description_right_B.urdf'
 XML_PATH = './description/urdf/allegro_hand_description_right_B.xml'
-BAG_PATH = '/home/leo/Desktop/allegro_hand_ros2_ws/workdir/allegro_hand_moveit_bag'
+BAG_PATH = '/home/leo/Desktop/allegro_hand_ros2_ws/workdir/allegro_hand_pb_gc_bag'
 JOINT_NAMES = ['joint_4_0', 'joint_5_0', 'joint_6_0', 'joint_7_0']
 SAVE_FILENAME = '/home/leo/Desktop/ahand_dynamic_gravity_compensation.txt'
 

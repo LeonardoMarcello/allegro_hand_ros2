@@ -3,7 +3,8 @@
 
 DummyNode::DummyNode()
 : Node("dummy_node"),
-  kf(16, 1e-1, 1e-7*Eigen::MatrixXd::Identity(16,16)) // n_of_joint, process noise, measurement noise
+  kf(1e-1, 1e-7) // n_of_joint, process noise, measurement noise
+  //kf(16, 1e-1, 1e-7*Eigen::MatrixXd::Identity(16,16)) // n_of_joint, process noise, measurement noise
   //kf(16, 1*Eigen::MatrixXd::Identity(48,48), 1e-4*Eigen::MatrixXd::Identity(16,16)) // n_of_joint, process noise, measurement noise
 {
     RCLCPP_INFO(this->get_logger(), "Dummy node started!");
@@ -52,13 +53,14 @@ DummyNode::DummyNode()
 
 void DummyNode::timer_callback(){
     // filtering joint position
+    /*
     kf.prediction(0.002);
     mutex->lock();
     kf.update(q_encoder);
     count += 1;
     mutex->unlock();
     kf.get_q(q);kf.get_dq(dq);kf.get_ddq(ddq);
-
+    */
     // Safe interrupt
     auto dq_abs = dq.cwiseAbs();
     if (*std::max_element(dq_abs.begin(), dq_abs.end()) > 2) {

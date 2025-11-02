@@ -23,7 +23,7 @@ from thunder_ahand_finger_py import thunder_ahand_finger
 MESH_DIR = './description/urdf/meshes/'
 URDF_PATH = './description/urdf/allegro_hand_description_right_B.urdf'
 XML_PATH = './description/urdf/allegro_hand_description_right_B.xml'
-BAG_PATH = '/home/leo/Desktop/allegro_hand_ros2_ws/workdir/allegro_hand_bag'
+BAG_PATH = '/home/leo/Desktop/allegro_hand_ros2_ws/workdir/allegro_hand_pb_gc_bag'
 JOINT_NAMES = ['joint_4_0', 'joint_5_0', 'joint_6_0', 'joint_7_0']
 SAVE_FILENAME = '/home/leo/Desktop/ahand_dynamic_gravity_compensation.txt'
 
@@ -45,7 +45,8 @@ def read_bag(file_path, store=False, path_out=None):
     # scroll the bag
     while reader.has_next():
         (topic, data, t) = reader.read_next()
-        if topic == '/allegroHand_0/joint_states':
+        #if topic == '/allegroHand_0/joint_states':
+        if topic == '/allegroHand_0_GC/torque_cmd':
             msg = deserialize_message(data, JointState)
             joint_names = msg.name
 
@@ -57,10 +58,10 @@ def read_bag(file_path, store=False, path_out=None):
                 # get header
                 pos_header    = [f"pos_{name}" for name in selected_joint_names]
                 effort_header = [f"eff_{name}" for name in selected_joint_names]
-                vel_header    = [f"vel_{name}" for name in selected_joint_names]
+                #vel_header    = [f"vel_{name}" for name in selected_joint_names]
                 #acc_header    = [f"acc_{name}" for name in selected_joint_names]
                 #header = ['t'] + pos_header + vel_header + acc_header + effort_header
-                header = ['t'] + pos_header + effort_header + vel_header
+                header = ['t'] + pos_header + effort_header #+ vel_header
                 first = False
             elif joint_names != msg.name:
                 raise ValueError("Joint names do not match")
@@ -68,8 +69,8 @@ def read_bag(file_path, store=False, path_out=None):
             # Store data
             selected_positions = [msg.position[i] for i in indices]
             selected_effort = [msg.effort[i] for i in indices]
-            selected_vel = [msg.velocity[i] for i in indices]
-            row = [t/1e9] + selected_positions + selected_effort + selected_vel
+            #selected_vel = [msg.velocity[i] for i in indices]
+            row = [t/1e9] + selected_positions + selected_effort #+ selected_vel
             dataset.append(row)
 
     # store in dataframe
@@ -201,7 +202,8 @@ print("\t - Filtering position and estimating velocities")
 t_log = df['t'].to_numpy()
 q_log = df[[col for col in df.columns if col.startswith('pos_')]].to_numpy()
 tau_log = df[[col for col in df.columns if col.startswith('eff_')]].to_numpy()
-qd_log = df[[col for col in df.columns if col.startswith('vel_')]].to_numpy()
+#qd_log = df[[col for col in df.columns if col.startswith('vel_')]].to_numpy()
+qd_log = q_log.copy()
 
 
 
@@ -254,7 +256,7 @@ for i in range(thunder_ahand.get_numJoints()):
     #lb.append(0)
     #ub.append(5)  
     lb.append(MASSES_URDF[i])
-    ub.append(MASSES_URDF[i])  
+    ub.append(MASSES_URDF[i]+0.1)  
     #lb.append(HCK_MASSES_URDF[i])
     #ub.append(HCK_MASSES_URDF[i])             # [Kg]
 

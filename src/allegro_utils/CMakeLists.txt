@@ -87,6 +87,7 @@ install(PROGRAMS
   scripts/gui.py
   scripts/moveit_joint_broadcaster.py
   scripts/wave.py
+  scripts/test_traject.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

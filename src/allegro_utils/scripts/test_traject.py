@@ -25,6 +25,8 @@ JOINT_LIMITS = np.array([
     [-0.09, 1.80],  # Thumb 3
 ])
 
+FREQUENCY = np.array([0, 0.2, 0.4, 0.6, 0.8, 1, 1.2])
+PHASE = np.array([0, np.pi/3, np.pi/4, np.pi/2, 3*np.pi/4, np.pi])
 
 class JointRelay(Node):
     def __init__(self):
@@ -46,9 +48,6 @@ class JointRelay(Node):
             1
         )
         self.oninit=True
-        self.fast = True
-        self.freq_counter = 0
-        self.frequency = 1
 
         self.msg = JointState()
         self.msg.name = [
@@ -82,6 +81,8 @@ class JointRelay(Node):
         self.timer = self.create_timer(1/rate, self.timer_callback)
         self.t0 = self.get_clock().now()
 
+        self.frequency = np.zeros_like(self.q_bar)
+        self.phase = np.zeros_like(self.q_bar)
         #self.get_logger().info(f"Waving publisher at {rate} Hz and {self.speed} rad/s")
 
     def init_pos(self, msg):
@@ -100,35 +101,19 @@ class JointRelay(Node):
         dq_target = np.zeros_like(self.q_bar)
 
         # =============== Define here target trajectory =========================================
-        for i in [4,5,6,7]:
-            amplitude = 0.4 * (self.q_bar[i] - JOINT_LIMITS[i,0])
-            frequency = 0.1*1.2  # old version
-            frequency = self.frequency
-            omega = 2 * np.pi * frequency
-            self.q_target[i] = amplitude * np.sin(omega * delta_t) + self.q_bar[i]
-            dq_target[i] = omega * amplitude * np.cos(omega * delta_t)
-            #q_target[i] = self.q_bar[i]
-            #dq_target[i] = 0
+        if delta_t > 15:
+            for i in [4,5,6,7]:
+                self.frequency[i] = np.random.choice(FREQUENCY)
+                self.phase[i] = np.random.choice(PHASE)
+            self.t0 = t
 
-            if np.cos(omega * delta_t) >= 0.999999:
-                print("Bip")
-                if self.freq_counter > 20:
-                    if self.fast:
-                        if self.frequency < 2:
-                            self.frequency+=1
-                        else:
-                            self.frequency-=1
-                            self.fast = False
-                    else:
-                        if self.frequency > 1:
-                            self.frequency-=1
-                        else:
-                            self.frequency+=1
-                            self.fast = True
-                    self.t0 = t
-                    self.freq_counter = 0
-                else:
-                    self.freq_counter += 1
+        for i in [4,5,6,7]:
+            amplitude = 0.3 * (self.q_bar[i] - JOINT_LIMITS[i,0])
+            frequency = self.frequency[i]
+            phase = self.phase[i]
+            omega = 2 * np.pi * frequency
+            self.q_target[i] = amplitude * np.sin(omega * delta_t + phase) + self.q_bar[i]
+            dq_target[i] = omega * amplitude * np.cos(omega * delta_t)
 
         # =======================================================================================
 

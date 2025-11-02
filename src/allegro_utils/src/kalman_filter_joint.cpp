@@ -2,74 +2,42 @@
 
 using namespace kalman_filter_joint;
 
-KalmanFilterJoint::KalmanFilterJoint(int n, double sigma_u, Eigen::MatrixXd Rk){
-    hat_x = Eigen::VectorXd::Zero(3*n);
-    Pk = Eigen::MatrixXd::Identity(3*n,3*n);
+KalmanFilterJoint::KalmanFilterJoint(double sigma_u, double sigma_r){
+    hat_x = Eigen::VectorXd::Zero(3);
+    Pk = Eigen::MatrixXd::Identity(3,3);
 
-    Eigen::MatrixXd I = Eigen::MatrixXd::Identity(n,n);
-    Eigen::Matrix3d A;
-    A << 0, 1, 0,
-         0, 0, 1,
-         0, 0, 0;
-    Eigen::Matrix3d A2;
-    A2 << 0, 0, 1,
-          0, 0, 0,
+    Ak.resize(3,3); A2k.resize(3,3); Hk.resize(1,3);
+    Ak << 0, 1, 0,
+          0, 0, 1,
           0, 0, 0;
-    Eigen::RowVector3d C;
-    C << 1, 0, 0;
-
-    Fk = Eigen::KroneckerProduct(I, A);
-    F2k = Eigen::KroneckerProduct(I, A2);
-    Hk = Eigen::KroneckerProduct(I, C);
+    A2k << 0, 0, 1,
+           0, 0, 0,
+           0, 0, 0;
+    Hk << 1, 0, 0;
 
     this->sigma_u = sigma_u;
-    this->Rk = Rk;
-}
-KalmanFilterJoint::KalmanFilterJoint(int n, Eigen::MatrixXd Qk, Eigen::MatrixXd Rk){
-    hat_x = Eigen::VectorXd::Zero(3*n);
-    Pk = Eigen::MatrixXd::Identity(3*n,3*n);
-
-    Eigen::MatrixXd I = Eigen::MatrixXd::Identity(n,n);
-    Eigen::Matrix3d A;
-    A << 0, 1, 0,
-         0, 0, 1,
-         0, 0, 0;
-    Eigen::Matrix3d A2;
-    A2 << 0, 0, 1,
-          0, 0, 0,
-          0, 0, 0;
-    Eigen::RowVector3d C;
-    C << 1, 0, 0;
-
-    Fk = Eigen::KroneckerProduct(I, A);
-    F2k = Eigen::KroneckerProduct(I, A2);
-    Hk = Eigen::KroneckerProduct(I, C);
-
-    this->Qk = Qk;
-    this->Rk = Rk;
+    this->Rk = sigma_r * Eigen::MatrixXd::Identity(1,1);
 }
 void KalmanFilterJoint::prediction(double dt){
-    int n = hat_x.size();
-    Eigen::MatrixXd I = Eigen::MatrixXd::Identity(n,n);
-    Eigen::MatrixXd Fd = Eigen::MatrixXd::Identity(n,n) + dt * Fk + dt*dt/2 * F2k;
+    Eigen::MatrixXd I = Eigen::MatrixXd::Identity(3,3);
+    Eigen::MatrixXd Fd = I + dt*Ak + dt*dt/2*A2k;
     hat_x = Fd * hat_x;
 
     Eigen::Vector3d G;
     G << 1/2*dt*dt, dt, 1;
 
-    //std::cout << "Q:    " << Eigen::KroneckerProduct(I, G*G.transpose()).rows()    << "x"  << Eigen::KroneckerProduct(I, G*G.transpose()).cols() << std::endl;
-    //std::cout << "Pk:    " << Pk.rows()    << "x"  << Pk.cols() << std::endl;
-    Eigen::MatrixXd Qk = (sigma_u*sigma_u)* Eigen::KroneckerProduct(Eigen::MatrixXd::Identity(n/3,n/3), G*G.transpose());
+    Eigen::MatrixXd Qk = (sigma_u*sigma_u)*G*G.transpose();
 
     Pk = Fd * Pk * Fd.transpose() + Qk;
 }
+
 void KalmanFilterJoint::update(Eigen::VectorXd z){
-    int n = hat_x.size();
+    Eigen::MatrixXd I = Eigen::MatrixXd::Identity(3,3);
     Eigen::VectorXd yk = z - Hk * hat_x;
     Eigen::MatrixXd Sk = Hk * Pk * Hk.transpose() + Rk;
     Eigen::MatrixXd Kk = Pk * Hk.transpose() * Sk.inverse();
     hat_x = hat_x + Kk * yk;
-    Eigen::MatrixXd I = Eigen::MatrixXd::Identity(n, n);
+
     Pk = (I - Kk * Hk) * Pk * (I - Kk * Hk).transpose() + Kk * Rk * Kk.transpose();
 }
 void KalmanFilterJoint::get_q(Eigen::VectorXd &q){
@@ -101,4 +69,24 @@ void KalmanFilterJoint::get_ddq(Eigen::VectorXd &ddq){
     }else{
 		std::cout<<"in get_ddq: invalid dimensions of vector ddq\n";
     }
+}
+
+
+void KalmanFilterJoint::update(double z){
+    Eigen::MatrixXd I = Eigen::MatrixXd::Identity(3,3);
+    Eigen::VectorXd yk = z*Eigen::MatrixXd::Identity(1,1) - Hk * hat_x;
+    Eigen::MatrixXd Sk = Hk * Pk * Hk.transpose() + Rk;
+    Eigen::MatrixXd Kk = Pk * Hk.transpose() * Sk.inverse();
+    hat_x = hat_x + Kk * yk;
+
+    Pk = (I - Kk * Hk) * Pk * (I - Kk * Hk).transpose() + Kk * Rk * Kk.transpose();
+}
+void KalmanFilterJoint::get_q(double &q){
+    q = hat_x(0);
+}
+void KalmanFilterJoint::get_dq(double &dq){
+    dq = hat_x(1);
+}
+void KalmanFilterJoint::get_ddq(double &ddq){
+    ddq = hat_x(2);
 }

@@ -25,7 +25,7 @@ from thunder_franka_as_py import thunder_franka_as
 MESH_DIR = './description/urdf/meshes/'
 URDF_PATH = './description/urdf/allegro_hand_description_right_B.urdf'
 XML_PATH = './description/urdf/allegro_hand_description_right_B.xml'
-BAG_PATH = '/home/leo/Desktop/allegro_hand_ros2_ws/workdir/allegro_hand_moveit_bag'
+BAG_PATH = '/home/leo/Desktop/allegro_hand_ros2_ws/workdir/allegro_hand_test_traject_bag'
 NEW_BAG_PATH = '/home/leo/Desktop/allegro_hand_ros2_ws/workdir/allegro_hand_torque_filtered_bag'
 JOINT_NAMES = ['joint_4_0', 'joint_5_0', 'joint_6_0', 'joint_7_0']
 SAVE_FILENAME = '/home/leo/Desktop/ahand_dynamic_friction.txt'
@@ -40,7 +40,7 @@ np.random.seed(41)
 
 # =========================================================================================================================== Define Function
 # Bag Read/Write
-def read_bag(file_path, store=False, path_out=None):
+def read_bag(file_path, topic_name = '/allegroHand_0/joint_states', store=False, path_out=None):
     first = True
     # Open the bag reader
     reader = rosbag2_py.SequentialReader()
@@ -55,7 +55,8 @@ def read_bag(file_path, store=False, path_out=None):
     # scroll the bag
     while reader.has_next():
         (topic, data, t) = reader.read_next()
-        if topic == '/allegroHand_0/joint_states':
+        if topic == topic_name:
+        #if topic == '/allegroHand_0/torque_cmd':
             msg = deserialize_message(data, JointState)
             joint_names = msg.name
 
@@ -67,18 +68,19 @@ def read_bag(file_path, store=False, path_out=None):
                 # get header
                 pos_header    = [f"pos_{name}" for name in selected_joint_names]
                 effort_header = [f"eff_{name}" for name in selected_joint_names]
-                #vel_header    = [f"vel_{name}" for name in selected_joint_names]
+                vel_header    = [f"vel_{name}" for name in selected_joint_names]
                 #acc_header    = [f"acc_{name}" for name in selected_joint_names]
                 #header = ['t'] + pos_header + vel_header + acc_header + effort_header
-                header = ['t'] + pos_header + effort_header
+                header = ['t'] + pos_header + effort_header + vel_header
                 first = False
             elif joint_names != msg.name:
                 raise ValueError("Joint names do not match")
 
             # Store data
             selected_positions = [msg.position[i] for i in indices]
+            selected_velocities = [msg.velocity[i] for i in indices]
             selected_effort = [msg.effort[i] for i in indices]
-            row = [t/1e9] + selected_positions + selected_effort
+            row = [t/1e9] + selected_positions + selected_effort + selected_velocities
             dataset.append(row)
 
     # store in dataframe
@@ -294,20 +296,35 @@ def print_result(hat_Pi, par_per_link):
 
 # =========================================================================================================================== Start
 print("> Loading position and effort arrays from bag")
-df = read_bag(BAG_PATH, store=False)
+df = read_bag(BAG_PATH, topic_name='/allegroHand_0/joint_states', store=False)
+df2 = read_bag(BAG_PATH, topic_name='/allegroHand_0/torque_cmd',store=False)
 # =========================================================================================================================== Process data
 print("> Processing data")
 print("\t - Filtering position and estimating velocities")
 # Process data
 t_log = df['t'].to_numpy()
+t0 = t_log[0]
+t_log = t_log - t0
 q_log = df[[col for col in df.columns if col.startswith('pos_')]].to_numpy()
+qd_log = df[[col for col in df.columns if col.startswith('vel_')]].to_numpy()
 tau_log = df[[col for col in df.columns if col.startswith('eff_')]].to_numpy()
-dt = np.mean(np.diff(t_log))    # sampling period
-f_s = 1.0 / dt                  # sampling frequency
+Dt = np.mean(np.diff(t_log))    # sampling period
+F_s = 1.0 / Dt                  # sampling frequency
 t_ori = t_log.copy()            # store original data
 q_ori = q_log.copy()
+qd_ori = qd_log.copy()
 tau_ori = tau_log.copy()
 
+
+t_log2 = df2['t'].to_numpy()
+t_log2 = t_log2 - t0
+q_log2 = df2[[col for col in df2.columns if col.startswith('pos_')]].to_numpy()
+qd_log2 = df2[[col for col in df2.columns if col.startswith('vel_')]].to_numpy()
+tau_log2 = df2[[col for col in df2.columns if col.startswith('eff_')]].to_numpy()
+t_ori2 = t_log2.copy()            # store original data
+q_ori2 = q_log2.copy()
+qd_ori2 = qd_log2.copy()
+tau_ori2 = tau_log2.copy()
 
 # 1. Filtering position
 """ Savitzy-golay
@@ -371,75 +388,113 @@ qdd_log = qdd_filt[edge:-edge,:]"""
 """ Kalman Filtering
 """
 class KalmanFilter():
-    def __init__(self, n):
+    def __init__(self, sigma_u, sigma_r):
         # state
-        self.hat_x = np.zeros(3*n) # x = {q, dq, ddq} [rad, rad/s, rad/s^2]
-        self.Pk = np.eye(3*n)
+        self.hat_x = np.zeros((3, 1)) # x = {q, dq, ddq} [rad, rad/s, rad/s^2]
+        #self.Pk = 1e-7*np.eye(3,3)
+        self.Pk = np.array([[7.43901056e-08, 2.43974556e-05, 4.00077293e-03],
+                            [2.43974556e-05, 1.59072400e-02, 3.90492122e+00],
+                            [4.00077293e-03, 3.90492122e+00, 1.28068298e+03]])
         # dynamics
-        self.Fk = np.kron(np.eye(n), np.array([[0, 1, 0],
-                                               [0, 0, 1],
-                                               [0, 0, 0]]))
-        self.Hk = np.kron(np.eye(n),np.array([1, 0, 0]))
+        self.Ak = np.array([[0, 1, 0],
+                            [0, 0, 1],
+                            [0, 0, 0]])
+        self.A2k = np.array([[0, 0, 1],
+                             [0, 0, 0],
+                             [0, 0, 0]])
+        self.Hk = np.array([[1, 0, 0]])
         # Kalman values
-        self.Qk = 1*np.eye(3*n) # process noise
-        self.Rk = 1*np.eye(n)   # measurement noise
+        self.sigma_u = sigma_u # process noise
+        self.Rk = sigma_r * np.eye(1)  # measurement noise
+
     def prediction(self, dt):
-        n = self.hat_x.shape[0]
-        Fk = (np.eye(n) + dt*self.Fk) # discrete transiction
-        self.hat_x = Fk @ self.hat_x
-        self.Pk = Fk @ self.Pk @ Fk.T + self.Qk
+        I = np.eye(3)
+        Fd = I + dt*self.Ak + dt*dt/2*self.A2k # discrete transiction
+        self.hat_x = Fd @ self.hat_x
+
+        G = np.array([[1/2*dt*dt],
+                      [dt],
+                      [1]])
+
+        Qk = (self.sigma_u*self.sigma_u)*(G @ G.T)
+
+        self.Pk = Fd @ self.Pk @ Fd.T + Qk
+
     def update(self, z):
-        n = self.hat_x.shape[0]
-        yk = z -self.Hk @ self.hat_x
+        I = np.eye(3)
+        yk = z - self.Hk @ self.hat_x
         Sk = self.Hk @ self.Pk @ self.Hk.T + self.Rk
         Kk = self.Pk @ self.Hk.T @ np.linalg.inv(Sk)
-        self.hat_x = self.hat_x + Kk@yk
-        self.Pk = (np.eye(n) - Kk@self.Hk) @ self.Pk @ (np.eye(n) - Kk@self.Hk).T + Kk @ self.Rk @ Kk.T
-    def get_q(self):
-        return self.hat_x[0::3]
-    def get_qd(self):
-        return self.hat_x[1::3]
-    def get_qdd(self):
-        return self.hat_x[2::3]
+        self.hat_x = self.hat_x + Kk @ yk
 
-KF = KalmanFilter(4)
+        self.Pk = (I - Kk @ self.Hk) @ self.Pk @ (I - Kk @ self.Hk).T + Kk @ self.Rk @ Kk.T
+
+    def get_q(self):
+        return self.hat_x[0]
+    def get_qd(self):
+        return self.hat_x[1]
+    def get_qdd(self):
+        return self.hat_x[2]
+
+KFs = []
+for i in range(4):
+    KFs.append(KalmanFilter(25, 1e-7))
+
 q_kf_filt = []
 qd_kf_filt = []
 qdd_kf_filt = []
+q_tmp = []
+qd_tmp = []
+qdd_tmp = []
+
 for i in range(len(t_log)):
-    try:
-        KF.prediction(t_log[i+1]-t_log[i])
-    except:
-        KF.prediction(t_log[i]-t_log[i-1])
-    KF.update(q_log[i])
-    q_kf_filt.append(KF.get_q())
-    qd_kf_filt.append(KF.get_qd())
-    qdd_kf_filt.append(KF.get_qdd())
+#for i in range(5):
+    for j in range(4):
+        try:
+            dt = t_log[i+1] - t_log[i]
+        except:
+            ft = t_log[i] - t_log[i-1]
+        if i == 0:
+            KFs[j].hat_x[0] = q_log[i][j]
+        KFs[j].prediction(0.002)
+        KFs[j].update(q_log[i][j])
+
+        q_tmp.append(KFs[j].get_q())
+        qd_tmp.append(KFs[j].get_qd())
+        qdd_tmp.append(KFs[j].get_qdd())
+
+    q_kf_filt.append(np.array(q_tmp))
+    qd_kf_filt.append(np.array(qd_tmp))
+    qdd_kf_filt.append(np.array(qdd_tmp))
+    q_tmp = []
+    qd_tmp = []
+    qdd_tmp = []
+
 
 q_kf_filt = np.array(q_kf_filt)
 qd_kf_filt = np.array(qd_kf_filt)
 qdd_kf_filt = np.array(qdd_kf_filt)
-# Butterworth filter + finite difference
-# Design Butterworth filter
-order = 4
-cutoff_freq = 1.0  # Hz
-b, a = butter(order, cutoff_freq / (0.5 * f_s), btype='low')
-# 1. Filter position
-q_filt = filtfilt(b, a, q_log, axis=0)
-q_log = q_filt
-# 2. First derivative → velocity
-qd = np.gradient(q_log, dt, axis=0)
-qd_filt = filtfilt(b, a, qd, axis=0)
-qd_log = qd_filt
-t_vel = t_log.copy()
-# 3. Second derivative → acceleration
-qdd = np.gradient(qd_log, dt, axis=0)
-qdd_filt = filtfilt(b, a, qdd, axis=0)
-qdd_log = qdd_filt
-t_acc = t_log.copy()
-# 4. commanded torque
-tau_filt = filtfilt(b, a, tau_log, axis=0)
-tau_log = tau_filt
+## Butterworth filter + finite difference
+## Design Butterworth filter
+#order = 4
+#cutoff_freq = 1.0  # Hz
+#b, a = butter(order, cutoff_freq / (0.5 * f_s), btype='low')
+## 1. Filter position
+#q_filt = filtfilt(b, a, q_log, axis=0)
+#q_log = q_filt
+## 2. First derivative → velocity
+#qd = np.gradient(q_log, dt, axis=0)
+#qd_filt = filtfilt(b, a, qd, axis=0)
+#qd_log = qd_filt
+#t_vel = t_log.copy()
+## 3. Second derivative → acceleration
+#qdd = np.gradient(qd_log, dt, axis=0)
+#qdd_filt = filtfilt(b, a, qdd, axis=0)
+#qdd_log = qdd_filt
+#t_acc = t_log.copy()
+## 4. commanded torque
+#tau_filt = filtfilt(b, a, tau_log, axis=0)
+#tau_log = tau_filt
 
 #write_filtered_bag(NEW_BAG_PATH, t_log, q_log, tau_log, JOINT_NAMES)   # <------------------ STORE FILTERED
 # =========================================================================================================================== Compute regressor
@@ -509,8 +564,8 @@ lb = []         # Lower bound
 for i in range(n):
     # Mass must be positive
     g.append(hat_Pi_sym[i*par_per_link])
-    lb.append(MASSES_URDF[i]*1000)          # [g]
-    ub.append(MASSES_URDF[i]*1000)
+    lb.append(MASSES_URDF[i]*10001)          # [g]
+    ub.append(MASSES_URDF[i]*999)
 
     # CoM inside a spere of radius r
     cx = hat_Pi_sym[i*par_per_link + 1]/hat_Pi_sym[i*par_per_link]
@@ -549,7 +604,7 @@ for i in range(n):
         # Static
         g.append(hat_Pi_sym[i*par_per_link+11])
         lb.append(0)
-        ub.append(0.01)
+        ub.append(0.1)
 
 # Problem
 prob = {}
@@ -564,7 +619,7 @@ opts = {
         "acceptable_tol": 1e-5,
         "dual_inf_tol": 1e-6,
         "compl_inf_tol": 1e-6,
-        "max_iter": 3000,
+        "max_iter": 5000,
     }
 }
 # Solver
@@ -572,7 +627,7 @@ solver = casadi.nlpsol('sol', 'ipopt', prob, opts)
 
 # Initial guess <---------------------------------------------------------
 #hat_Pi_0 = np.random.rand(p,1)
-hat_Pi_0 = 0.0001*np.ones((p,1))
+hat_Pi_0 = 1*np.ones((p,1))
 hat_Pi_0[0::par_per_link] = np.array(MASSES_URDF).reshape(hat_Pi_0[0::par_per_link].shape)
 hat_Pi_0[4::par_per_link] = np.array([(INERTIAS_URDF[i][0]) for i in range(n)]).reshape(hat_Pi_0[4::par_per_link].shape)
 hat_Pi_0[7::par_per_link] = np.array([(INERTIAS_URDF[i][1]) for i in range(n)]).reshape(hat_Pi_0[7::par_per_link].shape)
@@ -669,8 +724,8 @@ print("> Making Plot")
 plt.figure(figsize=(12,8))
 for i in range(4):
     plt.subplot(2,2,i+1)
-    plt.plot(t_log, q_ori[:,i], 'b', label='q')
-    plt.plot(t_log, q_log[:,i], 'r', label='q_filt')
+    plt.plot(t_log, q_log[:,i], 'b', label='q')
+    plt.plot(t_log2, q_log2[:,i], 'r', label='q_filt')
     plt.plot(t_log, q_kf_filt[:,i], linestyle='dotted', label='KF')
     #plt.plot(t_log, q_log[:,i] - e_log[:,i], 'b', linestyle='dotted', label='q_ref')# Plot joint desired trajectory
     #plt.hlines(JOINT_LIMITS[joint_indices[i], 0], t_log[0], t_log[-1], colors='k', linestyles='dotted', linewidth=1)
@@ -685,8 +740,8 @@ plt.show(block=False)
 plt.figure(figsize=(12,8))
 for i in range(4):
     plt.subplot(2,2,i+1)
-    plt.plot(t_log, qd[:,i], 'b', label='dq')
-    plt.plot(t_log, qd_log[:,i], 'r', label='dq_filt')
+    plt.plot(t_log, qd_log[:,i], 'b', label='dq')
+    plt.plot(t_log2, qd_log2[:,i], 'r', label='dq_filt')
     plt.plot(t_log, qd_kf_filt[:,i], linestyle='dotted', label='KF')
     plt.title(f'Joint {JOINT_NAMES[i]}')
     plt.grid(True)
@@ -697,8 +752,8 @@ plt.show(block=False)
 plt.figure(figsize=(12,8))
 for i in range(4):
     plt.subplot(2,2,i+1)
-    plt.plot(t_log, qdd[:,i], 'b', label='ddq')
-    plt.plot(t_log, qdd_log[:,i], 'r', label='ddq_filt')
+    #plt.plot(t_log, qdd[:,i], 'b', label='ddq')
+    #plt.plot(t_log, qdd_log[:,i], 'r', label='ddq_filt')
     plt.plot(t_log, qdd_kf_filt[:,i], linestyle='dotted', label='KF')
     plt.title(f'Joint {JOINT_NAMES[i]}')
     plt.grid(True)
