@@ -48,8 +48,9 @@ private:
     std::mutex *mutex;
     size_t count;
 
-    kalman_filter_joint::KalmanFilterJoint kf;
+    kalman_filter_joint::KalmanFilterJoint kf[16];
     thunder_ahand_finger ahand_index;
+    Eigen::VectorXd hat_pi;
     Eigen::VectorXd q_encoder;
     Eigen::VectorXd q;
 	Eigen::VectorXd dq;

@@ -25,7 +25,7 @@ JOINT_LIMITS = np.array([
     [-0.09, 1.80],  # Thumb 3
 ])
 
-FREQUENCY = np.array([0, 0.2, 0.4, 0.6, 0.8, 1, 1.2])
+FREQUENCY = np.array([0, 0.2, 0.4, 0.6, 0.8])#, 1, 1.2])
 PHASE = np.array([0, np.pi/3, np.pi/4, np.pi/2, 3*np.pi/4, np.pi])
 
 class JointRelay(Node):

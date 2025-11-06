@@ -211,10 +211,10 @@ void DummyNode::timer_callback(){
 
     //Eigen::MatrixXd tau_PD = G + D*dq.segment(4, 4) + fs;//kp*e + kd*de; // to do: compensazione di gravità e attriti
     //Eigen::MatrixXd tau_PD = G; // to do: compensazione di gravità e attriti
-    Eigen::MatrixXd tau_PD = kp*e + kd*de + pB_G.segment(4, 4); // to do: compensazione di gravità e attriti
+    //Eigen::MatrixXd tau_PD = kp*e + kd*de + pB_G.segment(4, 4); // to do: compensazione di gravità e attriti
     //Eigen::MatrixXd tau_PD = kp*e - kd*dq.segment(4, 4); // to do: compensazione di gravità e attriti
     //Eigen::MatrixXd tau_PD = kp*e - kd*dq.segment(4, 4) + pB_G.segment(4, 4); // to do: compensazione di gravità e attriti
-    //Eigen::MatrixXd tau_PD = pB_tau.segment(4, 4) + pB_G.segment(4, 4); // to do: compensazione di gravità e attriti
+    Eigen::MatrixXd tau_PD = pB_tau.segment(4, 4) + pB_G.segment(4, 4); // to do: compensazione di gravità e attriti
 
     // create msg
     joint_cmd.header.stamp = get_clock()->now();

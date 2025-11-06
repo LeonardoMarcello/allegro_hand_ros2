@@ -55,6 +55,7 @@ ros2 run allegro_utils wave --ros-args -p speed:=1.5    # publish finger wave wi
 ros2 run allegro_hand_keyboards allegro_hand_keyboard   # use built-in keyboard interface
 
 # for running using pinocchio conda environments. type the following in a terminal
+conda install -c conda-forge pinocchio=2.6.18                               # best way to instal pinocchio in conda
 conda activate pinocchio                                                    # activate conda environment
 export PYTHONPATH=$CONDA_PREFIX/lib/python3.10/site-packages:$PYTHONPATH    # run ros2 using conda environment
 export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH                   # use newer dynamic linker needed from pinocchio binary (GLIBCXX_3.4.31)
@@ -66,3 +67,16 @@ export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH                   # us
 # REINFORCEMENT LEARNING
 cd isaaclab
 ./isaaclab.sh -p scripts/reinforcement_learning/skrl/play.py --task=Isaac-Repose-Cube-Allegro-Direct-v0 --checkpoint=logs/skrl/allegro_hand/2025-09-13_17-29-41_ppo_torch/checkpoints/best_agent.pt --num_env=1
+
+
+
+
+
+
+
+# Friction statica
+            CW; CCW
+joint_7 -> 0.0140 Nm; -0.0150Nm
+joint_6 -> 0.0165 Nm; -0.0205Nm
+joint_5 -> ?
+joint_4 -> TODO

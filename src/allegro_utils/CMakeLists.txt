@@ -88,6 +88,7 @@ install(PROGRAMS
   scripts/moveit_joint_broadcaster.py
   scripts/wave.py
   scripts/test_traject.py
+  scripts/my_recorder.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

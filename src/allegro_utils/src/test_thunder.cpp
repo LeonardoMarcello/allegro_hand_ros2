@@ -2,8 +2,8 @@
 #include <ament_index_cpp/get_package_share_directory.hpp>
 
 DummyNode::DummyNode()
-: Node("dummy_node"),
-  kf(1e-1, 1e-7) // n_of_joint, process noise, measurement noise
+: Node("dummy_node")
+  //kf(1e-1, 1e-7) // n_of_joint, process noise, measurement noise
   //kf(16, 1e-1, 1e-7*Eigen::MatrixXd::Identity(16,16)) // n_of_joint, process noise, measurement noise
   //kf(16, 1*Eigen::MatrixXd::Identity(48,48), 1e-4*Eigen::MatrixXd::Identity(16,16)) // n_of_joint, process noise, measurement noise
 {
@@ -18,7 +18,7 @@ DummyNode::DummyNode()
 
     // publishers
     cmd_pub_ = this->create_publisher<sensor_msgs::msg::JointState>(
-        "allegroHand_fake/torque_cmd", 10);
+        "allegroHand_0/torque_cmd", 10);
     lib_cmd_pub_ = this->create_publisher<std_msgs::msg::String>(
         "allegroHand_0/lib_cmd", 10);
 
@@ -40,11 +40,69 @@ DummyNode::DummyNode()
 	  q_r = Eigen::VectorXd::Zero(4);
 	  dq_r = Eigen::VectorXd::Zero(4);
 	  ddq_r = Eigen::VectorXd::Zero(4);
+    // init kalman
+    for (int i = 0; i < 16; ++i){
+        //kf[i] = kalman_filter_joint::KalmanFilterJoint(1e-1, 1e-7);
+        //kf[i] = kalman_filter_joint::KalmanFilterJoint(10, 1e-7); // ok
+        kf[i] = kalman_filter_joint::KalmanFilterJoint(25, 1e-7);
+    }
     // init robot
     std::string pkg_path = ament_index_cpp::get_package_share_directory("allegro_utils");
     std::string conf_path = pkg_path + "/config/thunder/ahand_finger_conf.yaml";
     ahand_index.load_conf(conf_path); // or load_par_REG()
-
+    hat_pi = Eigen::VectorXd::Zero(48);
+    hat_pi <<    1.76000000e-02,           // Link 0
+                -4.78442140e-05,
+                -1.14320735e-04,
+                 4.22186813e-04,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                 9.45998017e-02,           // Link 1
+                -4.72628915e-03,
+                 1.86825081e-04,
+                -2.32345724e-26,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                 1.83500246e-02,           // Link 2
+                -1.75809683e-04,
+                 9.00482220e-04,
+                 2.58468134e-28,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                 5.13002363e-03,           // Link 3
+                 2.24959839e-04,
+                 1.23210083e-04,
+                -6.37137432e-32,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,                       // Damping coeff.
+                0.0,
+                0.0,
+                0.0,
+                0.0,                       // Damping coeff.
+                0.0,
+                0.0,
+                0.0;
+                //0.012162262038573382,      // Static coeff.
+                //0.04329252796383162,
+                //0.015131083167055543,
+                //0.01815215048950412;
 
   timer_ = this->create_wall_timer(
         std::chrono::milliseconds(2),
@@ -53,14 +111,11 @@ DummyNode::DummyNode()
 
 void DummyNode::timer_callback(){
     // filtering joint position
-    /*
-    kf.prediction(0.002);
-    mutex->lock();
-    kf.update(q_encoder);
-    count += 1;
-    mutex->unlock();
-    kf.get_q(q);kf.get_dq(dq);kf.get_ddq(ddq);
-    */
+    for (int i = 0; i < 16; ++i) {
+      kf[i].prediction(0.002);
+      kf[i].update(q_encoder(i));
+      kf[i].get_q(q(i)); kf[i].get_dq(dq(i)); kf[i].get_ddq(ddq(i));
+    }
     // Safe interrupt
     auto dq_abs = dq.cwiseAbs();
     if (*std::max_element(dq_abs.begin(), dq_abs.end()) > 2) {
@@ -71,9 +126,25 @@ void DummyNode::timer_callback(){
     }
 
     // update robot model
+    count += 1;
     ahand_index.setArguments(q.segment(4, 4), dq.segment(4, 4), dq_r, ddq_r);
 
     // Dynamics
+    Eigen::MatrixXd Y_r = ahand_index.get_reg_M() + ahand_index.get_reg_C() + ahand_index.get_reg_G();
+    Eigen::MatrixXd Y_G = ahand_index.get_reg_G();
+
+    Eigen::MatrixXd Y_d = dq.segment(4, 4).asDiagonal();
+    Eigen::VectorXd tmp_fs = (2.0 / (1.0 + (-20.0 * dq.segment(4, 4).array()).exp()) - 1.0);
+
+    Eigen::MatrixXd Y_s = tmp_fs.matrix().asDiagonal();
+
+    Eigen::MatrixXd Y(Y_G.rows(), Y_r.cols() + Y_d.cols() + Y_s.cols());
+    Y << Y_G, Y_d, Y_s;
+
+
+    // Print shape
+    //std::cout << "Y shape: " << Y.rows() << " x " << Y.cols() << std::endl;
+
     Eigen::MatrixXd M = ahand_index.get_M();
     Eigen::MatrixXd C = ahand_index.get_C();
     Eigen::MatrixXd G = ahand_index.get_G();
@@ -104,6 +175,7 @@ void DummyNode::timer_callback(){
 
     Eigen::MatrixXd tau_PD = G + D*dq.segment(4, 4) + fs;//kp*e + kd*de; // to do: compensazione di gravità e attriti
     Eigen::MatrixXd tau_GC = G; // to do: compensazione di gravità e attriti
+    Eigen::MatrixXd tau_ff = Y*hat_pi; // to do: compensazione di gravità e attriti
 
     // create msg
     joint_cmd.header.stamp = get_clock()->now();
@@ -112,7 +184,7 @@ void DummyNode::timer_callback(){
       joint_cmd.position[i] = q(i);
       joint_cmd.velocity[i] = dq(i);
       if (i>3 && i <=7){// && count < 200){
-        joint_cmd.effort[i] = tau_GC(i-4);
+        joint_cmd.effort[i] = tau_ff(i-4);
       }else{
         joint_cmd.effort[i] = 0.0;
       }

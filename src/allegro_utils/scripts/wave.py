@@ -102,33 +102,12 @@ class JointRelay(Node):
         # =============== Define here target trajectory =========================================
         for i in [4,5,6,7]:
             amplitude = 0.4 * (self.q_bar[i] - JOINT_LIMITS[i,0])
-            frequency = 0.1*1.2  # old version
-            frequency = self.frequency
+            frequency = 0.01  # old version
             omega = 2 * np.pi * frequency
             self.q_target[i] = amplitude * np.sin(omega * delta_t) + self.q_bar[i]
             dq_target[i] = omega * amplitude * np.cos(omega * delta_t)
             #q_target[i] = self.q_bar[i]
             #dq_target[i] = 0
-
-            if np.cos(omega * delta_t) >= 0.999999:
-                print("Bip")
-                if self.freq_counter > 20:
-                    if self.fast:
-                        if self.frequency < 2:
-                            self.frequency+=1
-                        else:
-                            self.frequency-=1
-                            self.fast = False
-                    else:
-                        if self.frequency > 1:
-                            self.frequency-=1
-                        else:
-                            self.frequency+=1
-                            self.fast = True
-                    self.t0 = t
-                    self.freq_counter = 0
-                else:
-                    self.freq_counter += 1
 
         # =======================================================================================
 
