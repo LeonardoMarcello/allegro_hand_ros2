@@ -7,9 +7,7 @@ namespace allegro_hand_hw_interface{
 
 
 
-    AllegroHand_Interface::AllegroHand_Interface()
-    : Kf(16, Eigen::MatrixXd::Identity(16*3,16*3), Eigen::MatrixXd::Identity(16,16))
-    {
+    AllegroHand_Interface::AllegroHand_Interface(){
         mutex = new std::mutex();
 
         // Initialize values: joint names should match URDF, desired torque and
@@ -37,6 +35,27 @@ namespace allegro_hand_hw_interface{
         whichHand = info.hardware_parameters.at("handness");
         whichType = info.hardware_parameters.at("type");
 
+        // iniitialize Joint Kalman Filter
+        for (int i = 0; i < DOF_JOINTS; i++) {
+            desired_torque[i] = 0.0;
+            current_velocity[i] = 0.0;
+            current_position_filtered[i] = 0.0;
+            current_velocity_filtered[i] = 0.0;
+            kf[i] = kalman_filter_joint::KalmanFilterJoint(std::stod(info.hardware_parameters.at("kalman_filter_process_noise")),
+                                                            std::stod(info.hardware_parameters.at("kalman_filter_measurement_noise")));
+        }
+
+        // set if pressure is requested (Default = true)
+        auto it = info.hardware_parameters.find("pressure");
+        if (it != info.hardware_parameters.end()) {
+            pressure_req_ = (it->second == "true" || it->second == "True" || it->second == "1");
+        } else {
+            RCLCPP_WARN(rclcpp::get_logger("AllegroHandInterface"),
+                        "Parameter 'pressure' not found, defaulting to True.");
+            pressure_req_ = true;
+        }
+
+
         return CallbackReturn::SUCCESS;
     };
 
@@ -54,6 +73,24 @@ namespace allegro_hand_hw_interface{
         }
 
         RCLCPP_INFO(rclcpp::get_logger(LOGGER_NAME), "CAN device initialized");
+
+
+        // Create ROS2 activate/deactivate service
+        auto node = rclcpp::Node::make_shared("allegro_hand_activation_server");
+        activate_service_ = node->create_service<std_srvs::srv::SetBool>(
+            "activate",
+            [this](const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
+                std::shared_ptr<std_srvs::srv::SetBool::Response> response) {
+                active_ = request->data;
+                response->success = true;
+                response->message = std::string("Security flag set to ") +
+                                    (active_ ? "true" : "false");
+                RCLCPP_INFO(rclcpp::get_logger(LOGGER_NAME),
+                            "Security flag toggled: %s",
+                            active_ ? "ENABLED" : "DISABLED");
+            });
+
+
         return CallbackReturn::SUCCESS;
     };
 
@@ -66,12 +103,14 @@ namespace allegro_hand_hw_interface{
 
     CallbackReturn AllegroHand_Interface::on_activate(const rclcpp_lifecycle::State&)
     {
+        active_ = true;
         RCLCPP_INFO(rclcpp::get_logger(LOGGER_NAME),"Pass activate");
         return CallbackReturn::SUCCESS;
     };
 
     CallbackReturn AllegroHand_Interface::on_deactivate(const rclcpp_lifecycle::State&)
     {
+        active_ = false;
         RCLCPP_INFO(rclcpp::get_logger(LOGGER_NAME),"Pass Deactvate");
         return CallbackReturn::SUCCESS;
     };
@@ -196,6 +235,21 @@ namespace allegro_hand_hw_interface{
                     current_velocity[i] = (current_position[i] - previous_position[i]) / dt;
                     current_velocity_filtered[i] =  current_velocity[i];
                 }
+                /*
+                // Kalman filtering:
+                for (int i = 0; i < DOF_JOINTS; i++) {
+                    kf[i].prediction(dt);
+                    kf[i].update(current_position[i]);
+                    kf[i].get_q(urrent_position_filtered[i]);
+                    kf[i].get_dq(current_velocity[i]);
+                }*/
+
+                // Store pressure values if needed
+                if (pressure_req_){
+                    for (int i = 0; i < DOF_JOINTS; i++) {
+                        tactile_sensor[i] = static_cast<double>(fingertip_sensor[i]);
+                    }
+                }
             }
         }
 
@@ -244,6 +298,11 @@ namespace allegro_hand_hw_interface{
 
     hardware_interface::return_type AllegroHand_Interface::write(const rclcpp::Time & , const rclcpp::Duration & )
     {
+        // check if hand is activate
+        if (!active_) {
+            return hardware_interface::return_type::OK;
+        }
+
         // set & write torque to each joint:
         canDevice->setTorque(desired_torque);
         lEmergencyStop = canDevice->writeJointTorque();

@@ -44,7 +44,7 @@ DummyNode::DummyNode()
     for (int i = 0; i < 16; ++i){
         //kf[i] = kalman_filter_joint::KalmanFilterJoint(1e-1, 1e-7);
         //kf[i] = kalman_filter_joint::KalmanFilterJoint(10, 1e-7); // ok
-        kf[i] = kalman_filter_joint::KalmanFilterJoint(25, 1e-7);
+        kf[i] = kalman_filter_joint::KalmanFilterJoint(1, 1e-7);
     }
     // init robot
     std::string pkg_path = ament_index_cpp::get_package_share_directory("allegro_utils");
@@ -52,9 +52,9 @@ DummyNode::DummyNode()
     ahand_index.load_conf(conf_path); // or load_par_REG()
     hat_pi = Eigen::VectorXd::Zero(48);
     hat_pi <<    1.76000000e-02,           // Link 0
-                -4.78442140e-05,
-                -1.14320735e-04,
-                 4.22186813e-04,
+                -4.78442140e-015,
+                -1.14320735e-014,
+                 4.22186813e-014,
                 0.0,
                 0.0,
                 0.0,
@@ -62,8 +62,8 @@ DummyNode::DummyNode()
                 0.0,
                 0.0,
                  9.45998017e-02,           // Link 1
-                -4.72628915e-03,
-                 1.86825081e-04,
+                -4.72628915e-13,
+                 1.86825081e-14,
                 -2.32345724e-26,
                 0.0,
                 0.0,
@@ -72,8 +72,8 @@ DummyNode::DummyNode()
                 0.0,
                 0.0,
                  1.83500246e-02,           // Link 2
-                -1.75809683e-04,
-                 9.00482220e-04,
+                -1.75809683e-14,
+                 9.00482220e-14,
                  2.58468134e-28,
                 0.0,
                 0.0,
@@ -82,8 +82,8 @@ DummyNode::DummyNode()
                 0.0,
                 0.0,
                  5.13002363e-03,           // Link 3
-                 2.24959839e-04,
-                 1.23210083e-04,
+                 2.24959839e-40,
+                 1.23210083e-40,
                 -6.37137432e-32,
                 0.0,
                 0.0,
@@ -95,14 +95,10 @@ DummyNode::DummyNode()
                 0.0,
                 0.0,
                 0.0,
-                0.0,                       // Damping coeff.
-                0.0,
-                0.0,
-                0.0;
-                //0.012162262038573382,      // Static coeff.
-                //0.04329252796383162,
-                //0.015131083167055543,
-                //0.01815215048950412;
+                0.012162262038573382,      // Static coeff.
+                0.01329252796383162,
+                0.015131083167055543,
+                0.01815215048950412;
 
   timer_ = this->create_wall_timer(
         std::chrono::milliseconds(2),

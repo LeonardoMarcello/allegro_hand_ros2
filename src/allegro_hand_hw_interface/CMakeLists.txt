@@ -17,6 +17,7 @@ find_package(rosbag2_cpp REQUIRED)
 find_package(allegro_hand_driver REQUIRED)
 find_package(bhand REQUIRED)
 find_package(Eigen3 REQUIRED)
+find_package(std_srvs REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -61,6 +62,7 @@ ament_target_dependencies(
   tf2
   allegro_hand_driver
   bhand
+  std_srvs
 )
 
 

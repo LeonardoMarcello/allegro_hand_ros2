@@ -17,10 +17,13 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/macros.hpp"
 #include "rclcpp/logger.hpp"
+
+#include <std_srvs/srv/set_bool.hpp>
+#include "tf2/LinearMath/Quaternion.h"
+#include "tf2_ros/transform_broadcaster.h"
+
 using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
 
-#include "tf2/tf2/LinearMath/Quaternion.h"
-#include "tf2_ros/tf2_ros/transform_broadcaster.h"
 
 #include <allegro_hand_driver/AllegroHandDrv.h>
 using namespace allegro;
@@ -63,7 +66,8 @@ namespace allegro_hand_hw_interface{
 
                 std::string pressureSensorNames[DOF_JOINTS] =  {"index_sensor", "middle_sensor", "ring_sensor", "thumb_sensor"};
 
-                kalman_filter_joint::KalmanFilterJoint Kf;
+
+                kalman_filter_joint::KalmanFilterJoint kf[16];
                 double position_offset[DOF_JOINTS] = {0.0};
 
                 double current_position[DOF_JOINTS] = {0.0};
@@ -78,11 +82,10 @@ namespace allegro_hand_hw_interface{
 
                 double desired_torque[DOF_JOINTS] = {0.0};
 
-
                 double current_joint_temperature[DOF_JOINTS] = {0.0};
                 double tactile_sensor[4] = {0.0};
 
-                int status_interval = 0;
+                //int status_interval = 0;
 
 
                 // ROS stuff
@@ -91,20 +94,19 @@ namespace allegro_hand_hw_interface{
                 // CAN device
                 allegro::AllegroHandDrv *canDevice;
                 std::string can_ch;
+
                 std::mutex *mutex;
-                BHand *pBHand = NULL;
 
-                // Flags
-                int lEmergencyStop = 0;
-                long frame = 0;
-
-                double motion_time = 1.0;
-                double force_get = 2.0f;
 
                 // other
                 bool pressure_req_ = true;
                 bool first_cycle_ = true;
                 int num_state_interfaces ;
+
+                // Flags
+                int lEmergencyStop = 0;             // can check
+                bool active_{false};                // switch for actiate deactivate hand
+                rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr activate_service_;
 
 
     };

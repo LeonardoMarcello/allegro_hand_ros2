@@ -72,6 +72,9 @@ cd isaaclab
 
 
 
+# CONDA EXPORT/LOAD ENVIRONMENT
+conda env export --name "$CONDA_DEFAULT_ENV" --no-builds > environment.yaml     # export current conda configuration 
+conda env create -f environment.yaml                                            # Create conda env from configuration file
 
 
 # Friction statica

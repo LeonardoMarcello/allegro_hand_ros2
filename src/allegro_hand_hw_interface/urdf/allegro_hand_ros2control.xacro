@@ -13,6 +13,10 @@
             <param name="device">can0</param>
             <param name="handness">right</param>
             <param name="type">B</param>
+            <param name="pressure">false</param>
+
+            <param name="kalman_filter_process_noise">1</param>
+            <param name="kalman_filter_measurement_noise">1e-7</param>
 
         </hardware>
 

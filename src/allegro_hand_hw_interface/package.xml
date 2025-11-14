@@ -21,6 +21,7 @@
   <depend>rosbag2_cpp</depend>
   <depend>allegro_hand_driver</depend>
   <depend>bhand</depend>
+  <depend>std_srvs</depend>
 
   <export>
     <build_type>ament_cmake</build_type>
