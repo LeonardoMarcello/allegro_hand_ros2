@@ -8,78 +8,78 @@ kinematics:
   symb: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
   DH: [0, 0, 0.17, *1, 0, *2, 0, *2, 0.431, 0, 0, 0, 0.38, 0, 0, 0]
 gravity:
-  symb: [1, 1, 1]
+  symb: [0, 0, 0]
   value: [0, 0, -9.81]
 Base_to_L0:
-  symb: [1, 1, 1, 1, 1, 1]
+  symb: [0, 0, 0, 0, 0, 0]
   tr: [0, 0, 0]
   ypr: [0, 0, 0]
 Ln_to_EE:
-  symb: [1, 1, 1, 1, 1, 1]
+  symb: [0, 0, 0, 0, 0, 0]
   tr: [0.4, 0, 0]
   ypr: [0, 0, 0]
 dynamics:
   link1:
     inertial:
       symb: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-      mass: 1.0
-      CoM_x: 1.0
-      CoM_y: 1.0
-      CoM_z: 1.0
-      Ixx: 1.0
-      Ixy: 1.0
-      Ixz: 1.0
-      Iyy: 1.0
-      Iyz: 1.0
-      Izz: 1.0
+      mass: 0.0176
+      CoM_x: 0.0
+      CoM_y: 0.0
+      CoM_z: 0.0
+      Ixx: .001
+      Ixy: 0.0
+      Ixz: 0.0
+      Iyy: .001
+      Iyz: 0.0
+      Izz: .001
     friction:
       symb: [1, 1]
       Dl: [0.1, 0.01]
   link2:
     inertial:
       symb: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-      mass: 1.0
-      CoM_x: 1.0
-      CoM_y: 1.0
-      CoM_z: 1.0
-      Ixx: 1.0
-      Ixy: 1.0
-      Ixz: 1.0
-      Iyy: 1.0
-      Iyz: 1.0
-      Izz: 1.0
+      mass: 0.086
+      CoM_x: 0.0
+      CoM_y: 0.0
+      CoM_z: 0.0
+      Ixx: .001
+      Ixy: 0.0
+      Ixz: 0.0
+      Iyy: .001
+      Iyz: 0.0
+      Izz: .001
     friction:
       symb: [1, 1]
       Dl: [0.1, 0.01]
   link3:
     inertial:
       symb: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-      mass: 1.0
-      CoM_x: 1.0
-      CoM_y: 1.0
-      CoM_z: 1.0
-      Ixx: 1.0
-      Ixy: 1.0
-      Ixz: 1.0
-      Iyy: 1.0
-      Iyz: 1.0
-      Izz: 1.0
+      mass: 0.0367
+      CoM_x: 0.0
+      CoM_y: 0.0
+      CoM_z: 0.0
+      Ixx: .001
+      Ixy: 0.0
+      Ixz: 0.0
+      Iyy: .001
+      Iyz: 0.0
+      Izz: .001
     friction:
       symb: [1, 1]
       Dl: [0.1, 0.01]
   link4:
     inertial:
       symb: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-      mass: 1.0
-      CoM_x: 1.0
-      CoM_y: 1.0
-      CoM_z: 1.0
-      Ixx: 1.0
-      Ixy: 1.0
-      Ixz: 1.0
-      Iyy: 1.0
-      Iyz: 1.0
-      Izz: 1.0
+      mass: 0.0057
+      CoM_x: 0.0
+      CoM_y: 0.0
+      CoM_z: 0.0
+      Ixx: .001
+      Ixy: 0.0
+      Ixz: 0.0
+      Iyy: .001
+      Iyz: 0.0
+      Izz: .001
     friction:
       symb: [1, 1]
       Dl: [0.1, 0.01]

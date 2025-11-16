@@ -836,7 +836,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_C(){
 	out.resize(4,4);
 	long long p3[ahand_finger_C_fun_SZ_IW];
 	double p4[ahand_finger_C_fun_SZ_W];
-	const double* input_[] = {q.data(), dq.data(), world2L0.data(), par_DYN.data()};
+	const double* input_[] = {q.data(), dq.data(), par_DYN.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_C_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -848,7 +848,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_C_ddot(){
 	out.resize(4,4);
 	long long p3[ahand_finger_C_ddot_fun_SZ_IW];
 	double p4[ahand_finger_C_ddot_fun_SZ_W];
-	const double* input_[] = {q.data(), dq.data(), ddq.data(), d3q.data(), world2L0.data(), par_DYN.data()};
+	const double* input_[] = {q.data(), dq.data(), ddq.data(), d3q.data(), par_DYN.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_C_ddot_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -860,7 +860,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_C_dot(){
 	out.resize(4,4);
 	long long p3[ahand_finger_C_dot_fun_SZ_IW];
 	double p4[ahand_finger_C_dot_fun_SZ_W];
-	const double* input_[] = {q.data(), dq.data(), ddq.data(), world2L0.data(), par_DYN.data()};
+	const double* input_[] = {q.data(), dq.data(), ddq.data(), par_DYN.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_C_dot_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -872,7 +872,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_C_std(){
 	out.resize(4,4);
 	long long p3[ahand_finger_C_std_fun_SZ_IW];
 	double p4[ahand_finger_C_std_fun_SZ_W];
-	const double* input_[] = {q.data(), dq.data(), world2L0.data(), par_DYN.data()};
+	const double* input_[] = {q.data(), dq.data(), par_DYN.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_C_std_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -884,7 +884,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_G(){
 	out.resize(4,1);
 	long long p3[ahand_finger_G_fun_SZ_IW];
 	double p4[ahand_finger_G_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data(), gravity.data(), par_DYN.data()};
+	const double* input_[] = {q.data(), par_DYN.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_G_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -896,7 +896,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_G_ddot(){
 	out.resize(4,1);
 	long long p3[ahand_finger_G_ddot_fun_SZ_IW];
 	double p4[ahand_finger_G_ddot_fun_SZ_W];
-	const double* input_[] = {q.data(), dq.data(), ddq.data(), world2L0.data(), gravity.data(), par_DYN.data()};
+	const double* input_[] = {q.data(), dq.data(), ddq.data(), par_DYN.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_G_ddot_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -908,7 +908,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_G_dot(){
 	out.resize(4,1);
 	long long p3[ahand_finger_G_dot_fun_SZ_IW];
 	double p4[ahand_finger_G_dot_fun_SZ_W];
-	const double* input_[] = {q.data(), dq.data(), world2L0.data(), gravity.data(), par_DYN.data()};
+	const double* input_[] = {q.data(), dq.data(), par_DYN.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_G_dot_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -920,7 +920,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_J_1(){
 	out.resize(6,4);
 	long long p3[ahand_finger_J_1_fun_SZ_IW];
 	double p4[ahand_finger_J_1_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data()};
+	const double* input_[] = {q.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_J_1_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -932,7 +932,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_J_2(){
 	out.resize(6,4);
 	long long p3[ahand_finger_J_2_fun_SZ_IW];
 	double p4[ahand_finger_J_2_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data()};
+	const double* input_[] = {q.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_J_2_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -944,7 +944,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_J_3(){
 	out.resize(6,4);
 	long long p3[ahand_finger_J_3_fun_SZ_IW];
 	double p4[ahand_finger_J_3_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data()};
+	const double* input_[] = {q.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_J_3_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -956,7 +956,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_J_4(){
 	out.resize(6,4);
 	long long p3[ahand_finger_J_4_fun_SZ_IW];
 	double p4[ahand_finger_J_4_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data()};
+	const double* input_[] = {q.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_J_4_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -968,7 +968,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_J_5(){
 	out.resize(6,4);
 	long long p3[ahand_finger_J_5_fun_SZ_IW];
 	double p4[ahand_finger_J_5_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data(), Ln2EE.data()};
+	const double* input_[] = {q.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_J_5_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -980,7 +980,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_J_cm_1(){
 	out.resize(6,4);
 	long long p3[ahand_finger_J_cm_1_fun_SZ_IW];
 	double p4[ahand_finger_J_cm_1_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data(), par_DYN.data()};
+	const double* input_[] = {q.data(), par_DYN.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_J_cm_1_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -992,7 +992,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_J_cm_2(){
 	out.resize(6,4);
 	long long p3[ahand_finger_J_cm_2_fun_SZ_IW];
 	double p4[ahand_finger_J_cm_2_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data(), par_DYN.data()};
+	const double* input_[] = {q.data(), par_DYN.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_J_cm_2_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1004,7 +1004,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_J_cm_3(){
 	out.resize(6,4);
 	long long p3[ahand_finger_J_cm_3_fun_SZ_IW];
 	double p4[ahand_finger_J_cm_3_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data(), par_DYN.data()};
+	const double* input_[] = {q.data(), par_DYN.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_J_cm_3_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1016,7 +1016,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_J_cm_4(){
 	out.resize(6,4);
 	long long p3[ahand_finger_J_cm_4_fun_SZ_IW];
 	double p4[ahand_finger_J_cm_4_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data(), par_DYN.data()};
+	const double* input_[] = {q.data(), par_DYN.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_J_cm_4_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1028,7 +1028,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_J_ee(){
 	out.resize(6,4);
 	long long p3[ahand_finger_J_ee_fun_SZ_IW];
 	double p4[ahand_finger_J_ee_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data(), Ln2EE.data()};
+	const double* input_[] = {q.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_J_ee_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1040,7 +1040,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_J_ee_ddot(){
 	out.resize(6,4);
 	long long p3[ahand_finger_J_ee_ddot_fun_SZ_IW];
 	double p4[ahand_finger_J_ee_ddot_fun_SZ_W];
-	const double* input_[] = {q.data(), dq.data(), ddq.data(), world2L0.data(), Ln2EE.data()};
+	const double* input_[] = {q.data(), dq.data(), ddq.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_J_ee_ddot_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1052,7 +1052,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_J_ee_dot(){
 	out.resize(6,4);
 	long long p3[ahand_finger_J_ee_dot_fun_SZ_IW];
 	double p4[ahand_finger_J_ee_dot_fun_SZ_W];
-	const double* input_[] = {q.data(), dq.data(), world2L0.data(), Ln2EE.data()};
+	const double* input_[] = {q.data(), dq.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_J_ee_dot_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1064,7 +1064,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_J_ee_pinv(){
 	out.resize(4,6);
 	long long p3[ahand_finger_J_ee_pinv_fun_SZ_IW];
 	double p4[ahand_finger_J_ee_pinv_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data(), Ln2EE.data()};
+	const double* input_[] = {q.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_J_ee_pinv_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1076,7 +1076,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_M(){
 	out.resize(4,4);
 	long long p3[ahand_finger_M_fun_SZ_IW];
 	double p4[ahand_finger_M_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data(), par_DYN.data()};
+	const double* input_[] = {q.data(), par_DYN.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_M_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1088,7 +1088,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_M_ddot(){
 	out.resize(4,4);
 	long long p3[ahand_finger_M_ddot_fun_SZ_IW];
 	double p4[ahand_finger_M_ddot_fun_SZ_W];
-	const double* input_[] = {q.data(), dq.data(), ddq.data(), world2L0.data(), par_DYN.data()};
+	const double* input_[] = {q.data(), dq.data(), ddq.data(), par_DYN.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_M_ddot_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1100,7 +1100,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_M_dot(){
 	out.resize(4,4);
 	long long p3[ahand_finger_M_dot_fun_SZ_IW];
 	double p4[ahand_finger_M_dot_fun_SZ_W];
-	const double* input_[] = {q.data(), dq.data(), world2L0.data(), par_DYN.data()};
+	const double* input_[] = {q.data(), dq.data(), par_DYN.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_M_dot_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1112,7 +1112,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_T_0(){
 	out.resize(4,4);
 	long long p3[ahand_finger_T_0_fun_SZ_IW];
 	double p4[ahand_finger_T_0_fun_SZ_W];
-	const double* input_[] = {world2L0.data()};
+	const double* input_[] = {};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_T_0_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1124,7 +1124,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_T_0_0(){
 	out.resize(4,4);
 	long long p3[ahand_finger_T_0_0_fun_SZ_IW];
 	double p4[ahand_finger_T_0_0_fun_SZ_W];
-	const double* input_[] = {world2L0.data()};
+	const double* input_[] = {};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_T_0_0_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1136,7 +1136,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_T_0_1(){
 	out.resize(4,4);
 	long long p3[ahand_finger_T_0_1_fun_SZ_IW];
 	double p4[ahand_finger_T_0_1_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data()};
+	const double* input_[] = {q.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_T_0_1_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1148,7 +1148,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_T_0_2(){
 	out.resize(4,4);
 	long long p3[ahand_finger_T_0_2_fun_SZ_IW];
 	double p4[ahand_finger_T_0_2_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data()};
+	const double* input_[] = {q.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_T_0_2_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1160,7 +1160,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_T_0_3(){
 	out.resize(4,4);
 	long long p3[ahand_finger_T_0_3_fun_SZ_IW];
 	double p4[ahand_finger_T_0_3_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data()};
+	const double* input_[] = {q.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_T_0_3_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1172,7 +1172,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_T_0_4(){
 	out.resize(4,4);
 	long long p3[ahand_finger_T_0_4_fun_SZ_IW];
 	double p4[ahand_finger_T_0_4_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data()};
+	const double* input_[] = {q.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_T_0_4_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1184,7 +1184,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_T_0_5(){
 	out.resize(4,4);
 	long long p3[ahand_finger_T_0_5_fun_SZ_IW];
 	double p4[ahand_finger_T_0_5_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data(), Ln2EE.data()};
+	const double* input_[] = {q.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_T_0_5_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1196,7 +1196,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_T_0_ee(){
 	out.resize(4,4);
 	long long p3[ahand_finger_T_0_ee_fun_SZ_IW];
 	double p4[ahand_finger_T_0_ee_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data(), Ln2EE.data()};
+	const double* input_[] = {q.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_T_0_ee_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1256,7 +1256,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_Yr(){
 	out.resize(4,40);
 	long long p3[ahand_finger_Yr_fun_SZ_IW];
 	double p4[ahand_finger_Yr_fun_SZ_W];
-	const double* input_[] = {q.data(), dq.data(), dqr.data(), ddqr.data(), world2L0.data(), gravity.data()};
+	const double* input_[] = {q.data(), dq.data(), dqr.data(), ddqr.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_Yr_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1268,7 +1268,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_reg_C(){
 	out.resize(4,40);
 	long long p3[ahand_finger_reg_C_fun_SZ_IW];
 	double p4[ahand_finger_reg_C_fun_SZ_W];
-	const double* input_[] = {q.data(), dq.data(), dqr.data(), world2L0.data()};
+	const double* input_[] = {q.data(), dq.data(), dqr.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_reg_C_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1280,7 +1280,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_reg_G(){
 	out.resize(4,40);
 	long long p3[ahand_finger_reg_G_fun_SZ_IW];
 	double p4[ahand_finger_reg_G_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data(), gravity.data()};
+	const double* input_[] = {q.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_reg_G_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1289,10 +1289,10 @@ Eigen::MatrixXd thunder_ahand_finger::get_reg_G(){
 // - Regressor matrix of the quantity J^T*w - //
 Eigen::MatrixXd thunder_ahand_finger::get_reg_JTw(){
 	Eigen::MatrixXd out;
-	out.resize(4,12);
+	out.resize(4,0);
 	long long p3[ahand_finger_reg_JTw_fun_SZ_IW];
 	double p4[ahand_finger_reg_JTw_fun_SZ_W];
-	const double* input_[] = {q.data(), w.data(), world2L0.data(), Ln2EE.data()};
+	const double* input_[] = {q.data(), w.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_reg_JTw_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1301,10 +1301,10 @@ Eigen::MatrixXd thunder_ahand_finger::get_reg_JTw(){
 // - Regressor matrix of the quantity J*dq - //
 Eigen::MatrixXd thunder_ahand_finger::get_reg_Jdq(){
 	Eigen::MatrixXd out;
-	out.resize(6,12);
+	out.resize(6,0);
 	long long p3[ahand_finger_reg_Jdq_fun_SZ_IW];
 	double p4[ahand_finger_reg_Jdq_fun_SZ_W];
-	const double* input_[] = {q.data(), dq.data(), world2L0.data(), Ln2EE.data()};
+	const double* input_[] = {q.data(), dq.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_reg_Jdq_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1316,7 +1316,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_reg_M(){
 	out.resize(4,40);
 	long long p3[ahand_finger_reg_M_fun_SZ_IW];
 	double p4[ahand_finger_reg_M_fun_SZ_W];
-	const double* input_[] = {q.data(), ddqr.data(), world2L0.data()};
+	const double* input_[] = {q.data(), ddqr.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_reg_M_fun(input_, output_, p3, p4, 0);
 	return out;
