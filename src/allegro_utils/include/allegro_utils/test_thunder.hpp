@@ -59,5 +59,4 @@ private:
 	Eigen::VectorXd dq_r;
 	Eigen::VectorXd ddq_r;
 	Eigen::VectorXd params;
-
 };

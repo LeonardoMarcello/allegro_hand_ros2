@@ -1,10 +1,6 @@
 #include "allegro_utils/thunder_ahand_finger.h"
 #include "allegro_utils/ahand_finger_gen.h"
 
-
-/*OPTIONAL PYBIND11 INCLUDE POINT*/
-
-
 thunder_ahand_finger::thunder_ahand_finger(){
 	resizeVariables();
 }
@@ -882,7 +878,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_G(){
 	out.resize(4,1);
 	long long p3[ahand_finger_G_fun_SZ_IW];
 	double p4[ahand_finger_G_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data(), par_DYN.data()};
+	const double* input_[] = {q.data(), world2L0.data(), gravity.data(), par_DYN.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_G_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -894,7 +890,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_G_ddot(){
 	out.resize(4,1);
 	long long p3[ahand_finger_G_ddot_fun_SZ_IW];
 	double p4[ahand_finger_G_ddot_fun_SZ_W];
-	const double* input_[] = {q.data(), dq.data(), ddq.data(), world2L0.data(), par_DYN.data()};
+	const double* input_[] = {q.data(), dq.data(), ddq.data(), world2L0.data(), gravity.data(), par_DYN.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_G_ddot_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -906,7 +902,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_G_dot(){
 	out.resize(4,1);
 	long long p3[ahand_finger_G_dot_fun_SZ_IW];
 	double p4[ahand_finger_G_dot_fun_SZ_W];
-	const double* input_[] = {q.data(), dq.data(), world2L0.data(), par_DYN.data()};
+	const double* input_[] = {q.data(), dq.data(), world2L0.data(), gravity.data(), par_DYN.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_G_dot_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -966,7 +962,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_J_5(){
 	out.resize(6,4);
 	long long p3[ahand_finger_J_5_fun_SZ_IW];
 	double p4[ahand_finger_J_5_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data()};
+	const double* input_[] = {q.data(), world2L0.data(), Ln2EE.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_J_5_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1026,7 +1022,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_J_ee(){
 	out.resize(6,4);
 	long long p3[ahand_finger_J_ee_fun_SZ_IW];
 	double p4[ahand_finger_J_ee_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data()};
+	const double* input_[] = {q.data(), world2L0.data(), Ln2EE.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_J_ee_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1038,7 +1034,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_J_ee_ddot(){
 	out.resize(6,4);
 	long long p3[ahand_finger_J_ee_ddot_fun_SZ_IW];
 	double p4[ahand_finger_J_ee_ddot_fun_SZ_W];
-	const double* input_[] = {q.data(), dq.data(), ddq.data(), world2L0.data()};
+	const double* input_[] = {q.data(), dq.data(), ddq.data(), world2L0.data(), Ln2EE.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_J_ee_ddot_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1050,7 +1046,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_J_ee_dot(){
 	out.resize(6,4);
 	long long p3[ahand_finger_J_ee_dot_fun_SZ_IW];
 	double p4[ahand_finger_J_ee_dot_fun_SZ_W];
-	const double* input_[] = {q.data(), dq.data(), world2L0.data()};
+	const double* input_[] = {q.data(), dq.data(), world2L0.data(), Ln2EE.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_J_ee_dot_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1062,7 +1058,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_J_ee_pinv(){
 	out.resize(4,6);
 	long long p3[ahand_finger_J_ee_pinv_fun_SZ_IW];
 	double p4[ahand_finger_J_ee_pinv_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data()};
+	const double* input_[] = {q.data(), world2L0.data(), Ln2EE.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_J_ee_pinv_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1182,7 +1178,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_T_0_5(){
 	out.resize(4,4);
 	long long p3[ahand_finger_T_0_5_fun_SZ_IW];
 	double p4[ahand_finger_T_0_5_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data()};
+	const double* input_[] = {q.data(), world2L0.data(), Ln2EE.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_T_0_5_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1194,7 +1190,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_T_0_ee(){
 	out.resize(4,4);
 	long long p3[ahand_finger_T_0_ee_fun_SZ_IW];
 	double p4[ahand_finger_T_0_ee_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data()};
+	const double* input_[] = {q.data(), world2L0.data(), Ln2EE.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_T_0_ee_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1254,7 +1250,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_Yr(){
 	out.resize(4,40);
 	long long p3[ahand_finger_Yr_fun_SZ_IW];
 	double p4[ahand_finger_Yr_fun_SZ_W];
-	const double* input_[] = {q.data(), dq.data(), dqr.data(), ddqr.data(), world2L0.data()};
+	const double* input_[] = {q.data(), dq.data(), dqr.data(), ddqr.data(), world2L0.data(), gravity.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_Yr_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1278,7 +1274,7 @@ Eigen::MatrixXd thunder_ahand_finger::get_reg_G(){
 	out.resize(4,40);
 	long long p3[ahand_finger_reg_G_fun_SZ_IW];
 	double p4[ahand_finger_reg_G_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data()};
+	const double* input_[] = {q.data(), world2L0.data(), gravity.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_reg_G_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1287,10 +1283,10 @@ Eigen::MatrixXd thunder_ahand_finger::get_reg_G(){
 // - Regressor matrix of the quantity J^T*w - //
 Eigen::MatrixXd thunder_ahand_finger::get_reg_JTw(){
 	Eigen::MatrixXd out;
-	out.resize(4,6);
+	out.resize(4,12);
 	long long p3[ahand_finger_reg_JTw_fun_SZ_IW];
 	double p4[ahand_finger_reg_JTw_fun_SZ_W];
-	const double* input_[] = {q.data(), w.data(), world2L0.data()};
+	const double* input_[] = {q.data(), w.data(), world2L0.data(), Ln2EE.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_reg_JTw_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1299,10 +1295,10 @@ Eigen::MatrixXd thunder_ahand_finger::get_reg_JTw(){
 // - Regressor matrix of the quantity J*dq - //
 Eigen::MatrixXd thunder_ahand_finger::get_reg_Jdq(){
 	Eigen::MatrixXd out;
-	out.resize(6,6);
+	out.resize(6,12);
 	long long p3[ahand_finger_reg_Jdq_fun_SZ_IW];
 	double p4[ahand_finger_reg_Jdq_fun_SZ_W];
-	const double* input_[] = {q.data(), dq.data(), world2L0.data()};
+	const double* input_[] = {q.data(), dq.data(), world2L0.data(), Ln2EE.data()};
 	double* output_[] = {out.data()};
 	int check = ahand_finger_reg_Jdq_fun(input_, output_, p3, p4, 0);
 	return out;
@@ -1319,9 +1315,4 @@ Eigen::MatrixXd thunder_ahand_finger::get_reg_M(){
 	int check = ahand_finger_reg_M_fun(input_, output_, p3, p4, 0);
 	return out;
 }
-
-
-
-
-/*#-OPTIONAL SPACE FOR PYTHON BINDINGS-#*/
 

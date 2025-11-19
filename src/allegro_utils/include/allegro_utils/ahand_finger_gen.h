@@ -114,7 +114,7 @@ extern "C" const casadi_int* ahand_finger_G_fun_sparsity_in(casadi_int i);
 extern "C" const casadi_int* ahand_finger_G_fun_sparsity_out(casadi_int i);
 extern "C" int ahand_finger_G_fun_work(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
 extern "C" int ahand_finger_G_fun_work_bytes(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
-#define ahand_finger_G_fun_SZ_ARG 3
+#define ahand_finger_G_fun_SZ_ARG 4
 #define ahand_finger_G_fun_SZ_RES 1
 #define ahand_finger_G_fun_SZ_IW 0
 #define ahand_finger_G_fun_SZ_W 0
@@ -135,7 +135,7 @@ extern "C" const casadi_int* ahand_finger_G_ddot_fun_sparsity_in(casadi_int i);
 extern "C" const casadi_int* ahand_finger_G_ddot_fun_sparsity_out(casadi_int i);
 extern "C" int ahand_finger_G_ddot_fun_work(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
 extern "C" int ahand_finger_G_ddot_fun_work_bytes(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
-#define ahand_finger_G_ddot_fun_SZ_ARG 5
+#define ahand_finger_G_ddot_fun_SZ_ARG 6
 #define ahand_finger_G_ddot_fun_SZ_RES 1
 #define ahand_finger_G_ddot_fun_SZ_IW 0
 #define ahand_finger_G_ddot_fun_SZ_W 0
@@ -156,7 +156,7 @@ extern "C" const casadi_int* ahand_finger_G_dot_fun_sparsity_in(casadi_int i);
 extern "C" const casadi_int* ahand_finger_G_dot_fun_sparsity_out(casadi_int i);
 extern "C" int ahand_finger_G_dot_fun_work(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
 extern "C" int ahand_finger_G_dot_fun_work_bytes(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
-#define ahand_finger_G_dot_fun_SZ_ARG 4
+#define ahand_finger_G_dot_fun_SZ_ARG 5
 #define ahand_finger_G_dot_fun_SZ_RES 1
 #define ahand_finger_G_dot_fun_SZ_IW 0
 #define ahand_finger_G_dot_fun_SZ_W 0
@@ -261,7 +261,7 @@ extern "C" const casadi_int* ahand_finger_J_5_fun_sparsity_in(casadi_int i);
 extern "C" const casadi_int* ahand_finger_J_5_fun_sparsity_out(casadi_int i);
 extern "C" int ahand_finger_J_5_fun_work(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
 extern "C" int ahand_finger_J_5_fun_work_bytes(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
-#define ahand_finger_J_5_fun_SZ_ARG 2
+#define ahand_finger_J_5_fun_SZ_ARG 3
 #define ahand_finger_J_5_fun_SZ_RES 1
 #define ahand_finger_J_5_fun_SZ_IW 0
 #define ahand_finger_J_5_fun_SZ_W 0
@@ -366,7 +366,7 @@ extern "C" const casadi_int* ahand_finger_J_ee_fun_sparsity_in(casadi_int i);
 extern "C" const casadi_int* ahand_finger_J_ee_fun_sparsity_out(casadi_int i);
 extern "C" int ahand_finger_J_ee_fun_work(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
 extern "C" int ahand_finger_J_ee_fun_work_bytes(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
-#define ahand_finger_J_ee_fun_SZ_ARG 2
+#define ahand_finger_J_ee_fun_SZ_ARG 3
 #define ahand_finger_J_ee_fun_SZ_RES 1
 #define ahand_finger_J_ee_fun_SZ_IW 0
 #define ahand_finger_J_ee_fun_SZ_W 0
@@ -387,7 +387,7 @@ extern "C" const casadi_int* ahand_finger_J_ee_ddot_fun_sparsity_in(casadi_int i
 extern "C" const casadi_int* ahand_finger_J_ee_ddot_fun_sparsity_out(casadi_int i);
 extern "C" int ahand_finger_J_ee_ddot_fun_work(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
 extern "C" int ahand_finger_J_ee_ddot_fun_work_bytes(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
-#define ahand_finger_J_ee_ddot_fun_SZ_ARG 4
+#define ahand_finger_J_ee_ddot_fun_SZ_ARG 5
 #define ahand_finger_J_ee_ddot_fun_SZ_RES 1
 #define ahand_finger_J_ee_ddot_fun_SZ_IW 0
 #define ahand_finger_J_ee_ddot_fun_SZ_W 0
@@ -408,7 +408,7 @@ extern "C" const casadi_int* ahand_finger_J_ee_dot_fun_sparsity_in(casadi_int i)
 extern "C" const casadi_int* ahand_finger_J_ee_dot_fun_sparsity_out(casadi_int i);
 extern "C" int ahand_finger_J_ee_dot_fun_work(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
 extern "C" int ahand_finger_J_ee_dot_fun_work_bytes(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
-#define ahand_finger_J_ee_dot_fun_SZ_ARG 3
+#define ahand_finger_J_ee_dot_fun_SZ_ARG 4
 #define ahand_finger_J_ee_dot_fun_SZ_RES 1
 #define ahand_finger_J_ee_dot_fun_SZ_IW 0
 #define ahand_finger_J_ee_dot_fun_SZ_W 0
@@ -429,7 +429,7 @@ extern "C" const casadi_int* ahand_finger_J_ee_pinv_fun_sparsity_in(casadi_int i
 extern "C" const casadi_int* ahand_finger_J_ee_pinv_fun_sparsity_out(casadi_int i);
 extern "C" int ahand_finger_J_ee_pinv_fun_work(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
 extern "C" int ahand_finger_J_ee_pinv_fun_work_bytes(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
-#define ahand_finger_J_ee_pinv_fun_SZ_ARG 2
+#define ahand_finger_J_ee_pinv_fun_SZ_ARG 3
 #define ahand_finger_J_ee_pinv_fun_SZ_RES 1
 #define ahand_finger_J_ee_pinv_fun_SZ_IW 0
 #define ahand_finger_J_ee_pinv_fun_SZ_W 0
@@ -639,7 +639,7 @@ extern "C" const casadi_int* ahand_finger_T_0_5_fun_sparsity_in(casadi_int i);
 extern "C" const casadi_int* ahand_finger_T_0_5_fun_sparsity_out(casadi_int i);
 extern "C" int ahand_finger_T_0_5_fun_work(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
 extern "C" int ahand_finger_T_0_5_fun_work_bytes(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
-#define ahand_finger_T_0_5_fun_SZ_ARG 2
+#define ahand_finger_T_0_5_fun_SZ_ARG 3
 #define ahand_finger_T_0_5_fun_SZ_RES 1
 #define ahand_finger_T_0_5_fun_SZ_IW 0
 #define ahand_finger_T_0_5_fun_SZ_W 0
@@ -660,7 +660,7 @@ extern "C" const casadi_int* ahand_finger_T_0_ee_fun_sparsity_in(casadi_int i);
 extern "C" const casadi_int* ahand_finger_T_0_ee_fun_sparsity_out(casadi_int i);
 extern "C" int ahand_finger_T_0_ee_fun_work(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
 extern "C" int ahand_finger_T_0_ee_fun_work_bytes(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
-#define ahand_finger_T_0_ee_fun_SZ_ARG 2
+#define ahand_finger_T_0_ee_fun_SZ_ARG 3
 #define ahand_finger_T_0_ee_fun_SZ_RES 1
 #define ahand_finger_T_0_ee_fun_SZ_IW 0
 #define ahand_finger_T_0_ee_fun_SZ_W 0
@@ -765,7 +765,7 @@ extern "C" const casadi_int* ahand_finger_Yr_fun_sparsity_in(casadi_int i);
 extern "C" const casadi_int* ahand_finger_Yr_fun_sparsity_out(casadi_int i);
 extern "C" int ahand_finger_Yr_fun_work(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
 extern "C" int ahand_finger_Yr_fun_work_bytes(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
-#define ahand_finger_Yr_fun_SZ_ARG 5
+#define ahand_finger_Yr_fun_SZ_ARG 6
 #define ahand_finger_Yr_fun_SZ_RES 1
 #define ahand_finger_Yr_fun_SZ_IW 0
 #define ahand_finger_Yr_fun_SZ_W 0
@@ -807,7 +807,7 @@ extern "C" const casadi_int* ahand_finger_reg_G_fun_sparsity_in(casadi_int i);
 extern "C" const casadi_int* ahand_finger_reg_G_fun_sparsity_out(casadi_int i);
 extern "C" int ahand_finger_reg_G_fun_work(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
 extern "C" int ahand_finger_reg_G_fun_work_bytes(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
-#define ahand_finger_reg_G_fun_SZ_ARG 2
+#define ahand_finger_reg_G_fun_SZ_ARG 3
 #define ahand_finger_reg_G_fun_SZ_RES 1
 #define ahand_finger_reg_G_fun_SZ_IW 0
 #define ahand_finger_reg_G_fun_SZ_W 0
@@ -828,7 +828,7 @@ extern "C" const casadi_int* ahand_finger_reg_JTw_fun_sparsity_in(casadi_int i);
 extern "C" const casadi_int* ahand_finger_reg_JTw_fun_sparsity_out(casadi_int i);
 extern "C" int ahand_finger_reg_JTw_fun_work(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
 extern "C" int ahand_finger_reg_JTw_fun_work_bytes(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
-#define ahand_finger_reg_JTw_fun_SZ_ARG 3
+#define ahand_finger_reg_JTw_fun_SZ_ARG 4
 #define ahand_finger_reg_JTw_fun_SZ_RES 1
 #define ahand_finger_reg_JTw_fun_SZ_IW 0
 #define ahand_finger_reg_JTw_fun_SZ_W 0
@@ -849,7 +849,7 @@ extern "C" const casadi_int* ahand_finger_reg_Jdq_fun_sparsity_in(casadi_int i);
 extern "C" const casadi_int* ahand_finger_reg_Jdq_fun_sparsity_out(casadi_int i);
 extern "C" int ahand_finger_reg_Jdq_fun_work(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
 extern "C" int ahand_finger_reg_Jdq_fun_work_bytes(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
-#define ahand_finger_reg_Jdq_fun_SZ_ARG 3
+#define ahand_finger_reg_Jdq_fun_SZ_ARG 4
 #define ahand_finger_reg_Jdq_fun_SZ_RES 1
 #define ahand_finger_reg_Jdq_fun_SZ_IW 0
 #define ahand_finger_reg_Jdq_fun_SZ_W 0

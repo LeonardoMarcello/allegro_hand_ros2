@@ -1,5 +1,10 @@
 #include "allegro_utils/test_thunder.hpp"
+#include "allegro_utils/ahand_finger_beta.h"
 #include <ament_index_cpp/get_package_share_directory.hpp>
+
+Eigen::SparseMatrix<double> beta;
+Eigen::SparseMatrix<double> beta_pinv;
+Eigen::VectorXd hat_pi_reduced;
 
 DummyNode::DummyNode()
 : Node("dummy_node")
@@ -100,6 +105,14 @@ DummyNode::DummyNode()
                 0.015131083167055543,
                 0.01815215048950412;
 
+  // Base Inertial Parameters
+  load_beta(beta);
+  load_beta_pinv(beta_pinv);
+  hat_pi_reduced = load_pi_hat();
+  std::cout << "beta shape: " << beta.rows() << " x " << beta.cols() << std::endl;
+  std::cout << "beta_pinv shape: " << beta_pinv.rows() << " x " << beta_pinv.cols() << std::endl;
+  std::cout << "hat_pi_reduced shape: " << hat_pi_reduced.rows() << " x " << hat_pi_reduced.cols() << std::endl;
+
   timer_ = this->create_wall_timer(
         std::chrono::milliseconds(2),
         std::bind(&DummyNode::timer_callback, this));
@@ -125,22 +138,34 @@ void DummyNode::timer_callback(){
     count += 1;
     ahand_index.setArguments(q.segment(4, 4), dq.segment(4, 4), dq_r, ddq_r);
 
-    // Dynamics
-    Eigen::MatrixXd Y_r = ahand_index.get_reg_M() + ahand_index.get_reg_C() + ahand_index.get_reg_G();
-    Eigen::MatrixXd Y_G = ahand_index.get_reg_G();
+    // // Dynamics
+    // Eigen::MatrixXd Y_r = ahand_index.get_reg_M() + ahand_index.get_reg_C() + ahand_index.get_reg_G();
+    // Eigen::MatrixXd Y_G = ahand_index.get_reg_G();
+
+    // Eigen::MatrixXd Y_d = dq.segment(4, 4).asDiagonal();
+    // Eigen::VectorXd tmp_fs = (2.0 / (1.0 + (-20.0 * dq.segment(4, 4).array()).exp()) - 1.0);
+
+    // Eigen::MatrixXd Y_s = tmp_fs.matrix().asDiagonal();
+
+    // Eigen::MatrixXd Y(Y_G.rows(), Y_r.cols() + Y_d.cols() + Y_s.cols());
+    // Y << Y_G, Y_d, Y_s;
+
+    // Dynamics (BASE INERTIAL PARAMETERS)
+    Eigen::MatrixXd Y_r = ahand_index.get_Yr()*beta_pinv;
+    Eigen::MatrixXd Y_G = ahand_index.get_reg_G()*beta_pinv;
 
     Eigen::MatrixXd Y_d = dq.segment(4, 4).asDiagonal();
-    Eigen::VectorXd tmp_fs = (2.0 / (1.0 + (-20.0 * dq.segment(4, 4).array()).exp()) - 1.0);
 
+    Eigen::VectorXd tmp_fs = (2.0 / (1.0 + (-20.0 * dq.segment(4, 4).array()).exp()) - 1.0);
     Eigen::MatrixXd Y_s = tmp_fs.matrix().asDiagonal();
 
-    Eigen::MatrixXd Y(Y_G.rows(), Y_r.cols() + Y_d.cols() + Y_s.cols());
+    Eigen::MatrixXd Y(Y_r.rows(), Y_r.cols() + Y_d.cols() + Y_s.cols());
     Y << Y_G, Y_d, Y_s;
-
-
+    
     // Print shape
     //std::cout << "Y shape: " << Y.rows() << " x " << Y.cols() << std::endl;
 
+    // Dynamics (Model)
     Eigen::MatrixXd M = ahand_index.get_M();
     Eigen::MatrixXd C = ahand_index.get_C();
     Eigen::MatrixXd G = ahand_index.get_G();
@@ -171,7 +196,7 @@ void DummyNode::timer_callback(){
 
     Eigen::MatrixXd tau_PD = G + D*dq.segment(4, 4) + fs;//kp*e + kd*de; // to do: compensazione di gravità e attriti
     Eigen::MatrixXd tau_GC = G; // to do: compensazione di gravità e attriti
-    Eigen::MatrixXd tau_ff = Y*hat_pi; // to do: compensazione di gravità e attriti
+    Eigen::MatrixXd tau_ff = Y*hat_pi_reduced; // to do: compensazione di gravità e attriti
 
     // create msg
     joint_cmd.header.stamp = get_clock()->now();
