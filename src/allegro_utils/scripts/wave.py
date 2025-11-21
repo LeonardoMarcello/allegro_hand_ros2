@@ -78,7 +78,7 @@ class JointRelay(Node):
         self.q_target = np.zeros_like(self.q_bar)
 
         # Timer for publishing
-        rate = 50 # (Hz)
+        rate = 100 # (Hz)
         self.timer = self.create_timer(1/rate, self.timer_callback)
         self.t0 = self.get_clock().now()
 
@@ -102,7 +102,7 @@ class JointRelay(Node):
         # =============== Define here target trajectory =========================================
         for i in [4,5,6,7]:
             amplitude = 0.4 * (self.q_bar[i] - JOINT_LIMITS[i,0])
-            frequency = 0.01  # old version
+            frequency = 0.1  # old version
             omega = 2 * np.pi * frequency
             self.q_target[i] = amplitude * np.sin(omega * delta_t) + self.q_bar[i]
             dq_target[i] = omega * amplitude * np.cos(omega * delta_t)

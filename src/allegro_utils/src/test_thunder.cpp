@@ -109,9 +109,11 @@ DummyNode::DummyNode()
   load_beta(beta);
   load_beta_pinv(beta_pinv);
   hat_pi_reduced = load_pi_hat();
-  std::cout << "beta shape: " << beta.rows() << " x " << beta.cols() << std::endl;
-  std::cout << "beta_pinv shape: " << beta_pinv.rows() << " x " << beta_pinv.cols() << std::endl;
-  std::cout << "hat_pi_reduced shape: " << hat_pi_reduced.rows() << " x " << hat_pi_reduced.cols() << std::endl;
+  //std::cout << "beta shape: " << beta.rows() << " x " << beta.cols() << std::endl;
+  //std::cout << "beta_pinv shape: " << beta_pinv.rows() << " x " << beta_pinv.cols() << std::endl;
+  //std::cout << "hat_pi_reduced shape: " << hat_pi_reduced.rows() << " x " << hat_pi_reduced.cols() << std::endl;
+  //std::cout << "hat_pi_reduced: " << hat_pi_reduced << std::endl;
+  //std::cout << "g: " << ahand_index.get_gravity() << std::endl;
 
   timer_ = this->create_wall_timer(
         std::chrono::milliseconds(2),
@@ -151,16 +153,24 @@ void DummyNode::timer_callback(){
     // Y << Y_G, Y_d, Y_s;
 
     // Dynamics (BASE INERTIAL PARAMETERS)
-    Eigen::MatrixXd Y_r = ahand_index.get_Yr()*beta_pinv;
-    Eigen::MatrixXd Y_G = ahand_index.get_reg_G()*beta_pinv;
+    Eigen::MatrixXd Yr = ahand_index.get_Yr();
+    Eigen::MatrixXd Y_Ir = 0*ddq.segment(4, 4).asDiagonal();
+    Eigen::MatrixXd Y_rIr(Yr.rows(), Yr.cols() + Y_Ir.cols());
+    Y_rIr << Yr, Y_Ir;
 
-    Eigen::MatrixXd Y_d = dq.segment(4, 4).asDiagonal();
+    Eigen::MatrixXd Y_r = Y_rIr*beta_pinv;
+  
+    //Eigen::MatrixXd Y_G = ahand_index.get_reg_G()*beta_pinv;
+    //std::cout << "Yr: " << Yr << std::endl;
+    //std::cout << "tau: " << Y_G * hat_pi_reduced.segment(0,24) << std::endl;
 
-    Eigen::VectorXd tmp_fs = (2.0 / (1.0 + (-20.0 * dq.segment(4, 4).array()).exp()) - 1.0);
+    Eigen::MatrixXd Y_d = 0*dq.segment(4, 4).asDiagonal();
+
+    Eigen::VectorXd tmp_fs = 0*(2.0 / (1.0 + (-20.0 * dq.segment(4, 4).array()).exp()) - 1.0);
     Eigen::MatrixXd Y_s = tmp_fs.matrix().asDiagonal();
 
     Eigen::MatrixXd Y(Y_r.rows(), Y_r.cols() + Y_d.cols() + Y_s.cols());
-    Y << Y_G, Y_d, Y_s;
+    Y << Y_r, Y_d, Y_s;
     
     // Print shape
     //std::cout << "Y shape: " << Y.rows() << " x " << Y.cols() << std::endl;

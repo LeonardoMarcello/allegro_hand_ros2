@@ -1,6 +1,8 @@
 #include "allegro_utils/thunder_ahand_finger.h"
 #include "allegro_utils/ahand_finger_gen.h"
 
+
+
 thunder_ahand_finger::thunder_ahand_finger(){
 	resizeVariables();
 }
@@ -1315,4 +1317,3 @@ Eigen::MatrixXd thunder_ahand_finger::get_reg_M(){
 	int check = ahand_finger_reg_M_fun(input_, output_, p3, p4, 0);
 	return out;
 }
-
