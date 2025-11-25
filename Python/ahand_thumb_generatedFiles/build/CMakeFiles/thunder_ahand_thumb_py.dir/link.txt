@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC -flto -shared  -o thunder_ahand_thumb_py.cpython-310-x86_64-linux-gnu.so CMakeFiles/thunder_ahand_thumb_py.dir/thunder_ahand_thumb.cpp.o CMakeFiles/thunder_ahand_thumb_py.dir/ahand_thumb_gen.cpp.o  _deps/yaml-cpp-build/libyaml-cpp.a 
