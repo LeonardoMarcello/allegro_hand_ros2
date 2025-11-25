@@ -1,29 +1,37 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
-sys.path.append("/home/leo/thunder_dynamics/ahand_finger_generatedFiles_py/build") # Where the .so file is located. 
-sys.path.append("/home/leo/thunder_dynamics/franka_as_generatedFiles/build") # Where the .so file is located. 
+import os
+
+build_paths = ["./ahand_finger_generatedFiles_py/build", "./ahand_thumb_generatedFiles/build", "./franka_generatedFiles/build"]
 # Note: This is not needed if the .so file is in the same directory as the python script
+for build_path in build_paths:
+    so_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), build_path)
+    if os.path.exists(so_path):
+        sys.path.append(os.path.abspath(so_path))
+    else:
+        print(f"Warning: path '{so_path}' does not exist.")
 
 from thunder_ahand_finger_py import thunder_ahand_finger
-from thunder_franka_as_py import thunder_franka_as
+from thunder_ahand_thumb_py import thunder_ahand_thumb
+from thunder_franka_py import thunder_franka
 
 # Load the robot model
 # ---------------------------------------------------------------------------
-robot = thunder_ahand_finger()
-robot.load_conf("/home/leo/thunder_dynamics/ahand_finger_generatedFiles/ahand_finger_conf.yaml")
+ring = thunder_ahand_finger()
+ring.load_conf("./ahand_finger_generatedFiles/ahand_finger_conf.yaml")
 
 #robot = thunder_franka_as()
 #robot.load_conf("/home/leo/thunder_dynamics/franka_as_generatedFiles/franka_as_conf.yaml")
 
-print("Number of joints: ", robot.get_numJoints())
+print("Number of joints: ", ring.get_numJoints())
 curr_q = np.array([0,0, 0,0], dtype=float)
-robot.set_q(np.random.rand(robot.get_numJoints()))
-robot.set_q(curr_q)
+ring.set_q(np.random.rand(ring.get_numJoints()))
+ring.set_q(curr_q)
 #print("Current joint positions: ", robot.get_q())
-dq = np.random.rand(robot.get_numJoints())
-robot.set_dq(dq)
-robot.set_dqr(dq)
+dq = np.random.rand(ring.get_numJoints())
+ring.set_dq(dq)
+ring.set_dqr(dq)
 #robot.set_dq(np.zeros(robot.get_numJoints()))
 #print("Current joint positions: ", robot.get_q())
 
@@ -31,19 +39,22 @@ robot.set_dqr(dq)
 
 
 
-print("End-effector pose: \n", robot.get_T_0_ee())
+print("End-effector pose: \n", ring.get_T_0_ee())
 
 
-J = robot.get_J_ee()
-M = robot.get_M()
+J = ring.get_J_ee()
+M = ring.get_M()
 print("Mass Matrix: \n", M)
-C = robot.get_C()
+C = ring.get_C()
 print("Coriolis Matrix: \n", C)
-G = robot.get_G()
+G = ring.get_G()
 print("Gravity Vector: \n", G)
-print("G reg:\n", robot.get_reg_G())
-Yr = robot.get_Yr()
-Y = robot.get_reg_M() + robot.get_reg_C() + robot.get_reg_G()
+print("G reg:\n", ring.get_reg_G())
+
+
+
+Yr = ring.get_Yr()
+Y = ring.get_reg_M() + ring.get_reg_C() + ring.get_reg_G()
 print("Regressor: \n", Y[:,[3,4,5,6,7,8,9,     13,14,15,16,17,18,19,   23,24,25,26,27,28,29,   33,34,35,36,37,38,39]])
 #print("Regressor pose: \n", Yr)
 
@@ -55,10 +66,10 @@ fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 
 frames = [np.eye(4)]  # Base frame
-for i in range(1, robot.get_numJoints()+1):
-    Ti = getattr(robot, f"get_T_0_{i}")()  # Dynamically call robot.get_T_0_i()
+for i in range(1, ring.get_numJoints()+1):
+    Ti = getattr(ring, f"get_T_0_{i}")()  # Dynamically call robot.get_T_0_i()
     frames.append(Ti)
-frames.append(robot.get_T_0_ee())  # End-Effecto frame
+frames.append(ring.get_T_0_ee())  # End-Effecto frame
 
 def plot_frame(T, ax, name=None, length=0.1):
     origin = T[:3, 3]
@@ -77,7 +88,7 @@ for i, T in enumerate(frames):
     print(f"T_0_{i}:\n", T[:3, 3])
     if i == 0:
         plot_frame(T, ax, 'WORLD', length=0.2)
-    elif i == robot.get_numJoints() + 1:
+    elif i == ring.get_numJoints() + 1:
         plot_frame(T, ax, 'EE', length=0.2)
     else:
         plot_frame(T, ax, f'J_{i}', length=0.15)

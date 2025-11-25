@@ -45,65 +45,18 @@ DummyNode::DummyNode()
 	  q_r = Eigen::VectorXd::Zero(4);
 	  dq_r = Eigen::VectorXd::Zero(4);
 	  ddq_r = Eigen::VectorXd::Zero(4);
+
     // init kalman
     for (int i = 0; i < 16; ++i){
-        //kf[i] = kalman_filter_joint::KalmanFilterJoint(1e-1, 1e-7);
-        //kf[i] = kalman_filter_joint::KalmanFilterJoint(10, 1e-7); // ok
-        kf[i] = kalman_filter_joint::KalmanFilterJoint(1, 1e-7);
+        //kf[i] = kalman_filter_joint::KalmanFilterJoint(1e-2, 1e-7);
+        kf[i] = kalman_filter_joint::KalmanFilterJoint(10, 1e-7); // ok
+        //kf[i] = kalman_filter_joint::KalmanFilterJoint(1, 1e-7);
     }
     // init robot
     std::string pkg_path = ament_index_cpp::get_package_share_directory("allegro_utils");
     std::string conf_path = pkg_path + "/config/thunder/ahand_finger_conf.yaml";
     ahand_index.load_conf(conf_path); // or load_par_REG()
     hat_pi = Eigen::VectorXd::Zero(48);
-    hat_pi <<    1.76000000e-02,           // Link 0
-                -4.78442140e-015,
-                -1.14320735e-014,
-                 4.22186813e-014,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                 9.45998017e-02,           // Link 1
-                -4.72628915e-13,
-                 1.86825081e-14,
-                -2.32345724e-26,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                 1.83500246e-02,           // Link 2
-                -1.75809683e-14,
-                 9.00482220e-14,
-                 2.58468134e-28,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                 5.13002363e-03,           // Link 3
-                 2.24959839e-40,
-                 1.23210083e-40,
-                -6.37137432e-32,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,                       // Damping coeff.
-                0.0,
-                0.0,
-                0.0,
-                0.012162262038573382,      // Static coeff.
-                0.01329252796383162,
-                0.015131083167055543,
-                0.01815215048950412;
 
   // Base Inertial Parameters
   load_beta(beta);
@@ -153,7 +106,8 @@ void DummyNode::timer_callback(){
     // Y << Y_G, Y_d, Y_s;
 
     // Dynamics (BASE INERTIAL PARAMETERS)
-    Eigen::MatrixXd Yr = ahand_index.get_Yr();
+    //Eigen::MatrixXd Yr = ahand_index.get_Yr();
+    Eigen::MatrixXd Yr = ahand_index.get_reg_G();
     Eigen::MatrixXd Y_Ir = 0*ddq.segment(4, 4).asDiagonal();
     Eigen::MatrixXd Y_rIr(Yr.rows(), Yr.cols() + Y_Ir.cols());
     Y_rIr << Yr, Y_Ir;
@@ -163,10 +117,9 @@ void DummyNode::timer_callback(){
     //Eigen::MatrixXd Y_G = ahand_index.get_reg_G()*beta_pinv;
     //std::cout << "Yr: " << Yr << std::endl;
     //std::cout << "tau: " << Y_G * hat_pi_reduced.segment(0,24) << std::endl;
+    Eigen::MatrixXd Y_d = 0.0*dq.segment(4, 4).asDiagonal();
 
-    Eigen::MatrixXd Y_d = 0*dq.segment(4, 4).asDiagonal();
-
-    Eigen::VectorXd tmp_fs = 0*(2.0 / (1.0 + (-20.0 * dq.segment(4, 4).array()).exp()) - 1.0);
+    Eigen::VectorXd tmp_fs = 0.0*(2.0 / (1.0 + (-200.0 * dq.segment(4, 4).array()).exp()) - 1.0);
     Eigen::MatrixXd Y_s = tmp_fs.matrix().asDiagonal();
 
     Eigen::MatrixXd Y(Y_r.rows(), Y_r.cols() + Y_d.cols() + Y_s.cols());
@@ -198,15 +151,15 @@ void DummyNode::timer_callback(){
     GC:
       Kd = [0.004*sqrt(80), 0.008*sqrt(90), 0.008*sqrt(90), 0.004*sqrt(80)];
     */
-    kp.diagonal()  << 1, 1, 1, 1;
-    kd.diagonal()  << 0.04, 0.15, 0.04, 0.04;
+    kp.diagonal()  << 1*1, 1, 1, 1;
+    kd.diagonal()  << 2*0.04, 0.15, 0.04, 0.04;
 
     // computed Torque law
     Eigen::MatrixXd tau_CT = M*(ddq_r + kp*e + kd*de) + C*dq.segment(4, 4) + G;
 
     Eigen::MatrixXd tau_PD = G + D*dq.segment(4, 4) + fs;//kp*e + kd*de; // to do: compensazione di gravità e attriti
     Eigen::MatrixXd tau_GC = G; // to do: compensazione di gravità e attriti
-    Eigen::MatrixXd tau_ff = Y*hat_pi_reduced; // to do: compensazione di gravità e attriti
+    Eigen::MatrixXd tau_ff = Y*hat_pi_reduced;// + .5*kp*e + .5*kd*de;
 
     // create msg
     joint_cmd.header.stamp = get_clock()->now();
@@ -250,7 +203,11 @@ void DummyNode::setJointDesCallback(const sensor_msgs::msg::JointState::SharedPt
     //joint_des[i] = msg->position[i];
     if (i>3 && i <=7){
       q_r(i-4) = msg->position[i];
-      dq_r(i-4) = msg->velocity[i];
+      try{
+          dq_r(i-4) = msg->velocity.at(i);
+      }catch(const std::out_of_range&) {
+          dq_r(i-4) = 0.0;
+      }
     }
   }
 }

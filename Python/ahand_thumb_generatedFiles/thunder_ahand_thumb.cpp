@@ -1,13 +1,17 @@
-#include "allegro_utils/thunder_ahand_finger.h"
-#include "allegro_utils/ahand_finger_gen.h"
+#include "thunder_ahand_thumb.h"
+#include "ahand_thumb_gen.h"
+
+
+#include <pybind11/pybind11.h>
+#include <pybind11/eigen.h>
 
 
 
-thunder_ahand_finger::thunder_ahand_finger(){
+thunder_ahand_thumb::thunder_ahand_thumb(){
 	resizeVariables();
 }
 
-void thunder_ahand_finger::resizeVariables(){
+void thunder_ahand_thumb::resizeVariables(){
 	q = Eigen::VectorXd::Zero(n_joints);
 	dq = Eigen::VectorXd::Zero(n_joints);
 	ddq = Eigen::VectorXd::Zero(n_joints);
@@ -43,13 +47,13 @@ void thunder_ahand_finger::resizeVariables(){
 	}
 }
 
-int thunder_ahand_finger::get_numJoints() {return n_joints;};
-// int thunder_ahand_finger::get_numParLink() {return n_joints;};
-int thunder_ahand_finger::get_numParDYN() {return STD_PAR_LINK*n_joints;};
-int thunder_ahand_finger::get_numParREG() {return STD_PAR_LINK*n_joints;};
-// int thunder_ahand_finger::get_numParELA() {return numParELA;};
+int thunder_ahand_thumb::get_numJoints() {return n_joints;};
+// int thunder_ahand_thumb::get_numParLink() {return n_joints;};
+int thunder_ahand_thumb::get_numParDYN() {return STD_PAR_LINK*n_joints;};
+int thunder_ahand_thumb::get_numParREG() {return STD_PAR_LINK*n_joints;};
+// int thunder_ahand_thumb::get_numParELA() {return numParELA;};
 
-void thunder_ahand_finger::setArguments(const Eigen::VectorXd& q_, const Eigen::VectorXd& dq_, const Eigen::VectorXd& dqr_, const Eigen::VectorXd& ddqr_){
+void thunder_ahand_thumb::setArguments(const Eigen::VectorXd& q_, const Eigen::VectorXd& dq_, const Eigen::VectorXd& dqr_, const Eigen::VectorXd& ddqr_){
 	if(q_.size() == n_joints && dq_.size()== n_joints && dqr_.size()==n_joints && ddqr_.size()==n_joints){
 		q = q_;
 		dq = dq_;
@@ -60,7 +64,7 @@ void thunder_ahand_finger::setArguments(const Eigen::VectorXd& q_, const Eigen::
 	}
 }
 
-void thunder_ahand_finger::set_q(const Eigen::VectorXd& q_){
+void thunder_ahand_thumb::set_q(const Eigen::VectorXd& q_){
 	if(q_.size() == n_joints){
 		q = q_;
 	} else{
@@ -68,7 +72,7 @@ void thunder_ahand_finger::set_q(const Eigen::VectorXd& q_){
 	}
 }
 
-void thunder_ahand_finger::set_dq(const Eigen::VectorXd& dq_){
+void thunder_ahand_thumb::set_dq(const Eigen::VectorXd& dq_){
 	if(dq_.size() == n_joints){
 		dq = dq_;
 	} else{
@@ -76,7 +80,7 @@ void thunder_ahand_finger::set_dq(const Eigen::VectorXd& dq_){
 	}
 }
 
-void thunder_ahand_finger::set_ddq(const Eigen::VectorXd& ddq_){
+void thunder_ahand_thumb::set_ddq(const Eigen::VectorXd& ddq_){
 	if(ddq_.size() == n_joints){
 		ddq = ddq_;
 	} else{
@@ -84,7 +88,7 @@ void thunder_ahand_finger::set_ddq(const Eigen::VectorXd& ddq_){
 	}
 }
 
-void thunder_ahand_finger::set_d3q(const Eigen::VectorXd& d3q_){
+void thunder_ahand_thumb::set_d3q(const Eigen::VectorXd& d3q_){
 	if(d3q_.size() == n_joints){
 		d3q = d3q_;
 	} else{
@@ -92,7 +96,7 @@ void thunder_ahand_finger::set_d3q(const Eigen::VectorXd& d3q_){
 	}
 }
 
-void thunder_ahand_finger::set_d4q(const Eigen::VectorXd& d4q_){
+void thunder_ahand_thumb::set_d4q(const Eigen::VectorXd& d4q_){
 	if(d4q_.size() == n_joints){
 		d4q = d4q_;
 	} else{
@@ -100,7 +104,7 @@ void thunder_ahand_finger::set_d4q(const Eigen::VectorXd& d4q_){
 	}
 }
 
-void thunder_ahand_finger::set_dqr(const Eigen::VectorXd& dqr_){
+void thunder_ahand_thumb::set_dqr(const Eigen::VectorXd& dqr_){
 	if(dqr_.size() == n_joints){
 		dqr = dqr_;
 	} else{
@@ -108,7 +112,7 @@ void thunder_ahand_finger::set_dqr(const Eigen::VectorXd& dqr_){
 	}
 }
 
-void thunder_ahand_finger::set_ddqr(const Eigen::VectorXd& ddqr_){
+void thunder_ahand_thumb::set_ddqr(const Eigen::VectorXd& ddqr_){
 	if(ddqr_.size() == n_joints){
 		ddqr = ddqr_;
 	} else{
@@ -116,7 +120,7 @@ void thunder_ahand_finger::set_ddqr(const Eigen::VectorXd& ddqr_){
 	}
 }
 
-void thunder_ahand_finger::set_x(const Eigen::VectorXd& x_){
+void thunder_ahand_thumb::set_x(const Eigen::VectorXd& x_){
 	if(x_.size() == numElasticJoints){
 		x = x_;
 	} else{
@@ -124,7 +128,7 @@ void thunder_ahand_finger::set_x(const Eigen::VectorXd& x_){
 	}
 }
 
-void thunder_ahand_finger::set_dx(const Eigen::VectorXd& dx_){
+void thunder_ahand_thumb::set_dx(const Eigen::VectorXd& dx_){
 	if(dx_.size() == numElasticJoints){
 		dx = dx_;
 	} else{
@@ -132,7 +136,7 @@ void thunder_ahand_finger::set_dx(const Eigen::VectorXd& dx_){
 	}
 }
 
-void thunder_ahand_finger::set_ddx(const Eigen::VectorXd& ddx_){
+void thunder_ahand_thumb::set_ddx(const Eigen::VectorXd& ddx_){
 	if(ddx_.size() == numElasticJoints){
 		ddx = ddx_;
 	} else{
@@ -140,7 +144,7 @@ void thunder_ahand_finger::set_ddx(const Eigen::VectorXd& ddx_){
 	}
 }
 
-void thunder_ahand_finger::set_ddxr(const Eigen::VectorXd& ddxr_){
+void thunder_ahand_thumb::set_ddxr(const Eigen::VectorXd& ddxr_){
 	if(ddxr_.size() == numElasticJoints){
 		ddxr = ddxr_;
 	} else{
@@ -148,7 +152,7 @@ void thunder_ahand_finger::set_ddxr(const Eigen::VectorXd& ddxr_){
 	}
 }
 
-void thunder_ahand_finger::set_w(const Eigen::VectorXd& w_){
+void thunder_ahand_thumb::set_w(const Eigen::VectorXd& w_){
 	if(w_.size() == 6){
 		w = w_;
 	} else{
@@ -156,7 +160,7 @@ void thunder_ahand_finger::set_w(const Eigen::VectorXd& w_){
 	}
 }
 
-void thunder_ahand_finger::update_inertial_DYN(){
+void thunder_ahand_thumb::update_inertial_DYN(){
 	for (int i=0; i<n_joints; i++){
 		Eigen::VectorXd p_reg = par_REG.segment(STD_PAR_LINK*i, STD_PAR_LINK);
 		double mass = p_reg(0);
@@ -170,7 +174,7 @@ void thunder_ahand_finger::update_inertial_DYN(){
 	}
 }
 
-void thunder_ahand_finger::update_inertial_REG(){
+void thunder_ahand_thumb::update_inertial_REG(){
 	for (int i=0; i<n_joints; i++){
 		Eigen::VectorXd p_dyn = par_DYN.segment(STD_PAR_LINK*i, STD_PAR_LINK);
 		double mass = p_dyn(0);
@@ -185,7 +189,7 @@ void thunder_ahand_finger::update_inertial_REG(){
 	}
 }
 
-void thunder_ahand_finger::set_par_DYN(const Eigen::VectorXd& par_, bool update_REG){
+void thunder_ahand_thumb::set_par_DYN(const Eigen::VectorXd& par_, bool update_REG){
 	if(par_.size() == par_DYN.size()){
 		par_DYN = par_;
 	} else{
@@ -195,7 +199,7 @@ void thunder_ahand_finger::set_par_DYN(const Eigen::VectorXd& par_, bool update_
 	if (update_REG)	update_inertial_REG();
 }
 
-void thunder_ahand_finger::set_par_REG(const Eigen::VectorXd& par_, bool update_DYN){
+void thunder_ahand_thumb::set_par_REG(const Eigen::VectorXd& par_, bool update_DYN){
 	if(par_.size() == par_REG.size()){
 		par_REG = par_;
 	} else{
@@ -205,7 +209,7 @@ void thunder_ahand_finger::set_par_REG(const Eigen::VectorXd& par_, bool update_
 	if (update_DYN)	update_inertial_DYN();
 }
 
-void thunder_ahand_finger::set_par_K(const Eigen::VectorXd& par_){
+void thunder_ahand_thumb::set_par_K(const Eigen::VectorXd& par_){
 	if(par_.size() == par_K.size()){
 		par_K = par_;
 	} else{
@@ -213,7 +217,7 @@ void thunder_ahand_finger::set_par_K(const Eigen::VectorXd& par_){
 	}
 }
 
-void thunder_ahand_finger::set_par_D(const Eigen::VectorXd& par_){
+void thunder_ahand_thumb::set_par_D(const Eigen::VectorXd& par_){
 	if(par_.size() == par_D.size()){
 		par_D = par_;
 	} else{
@@ -221,7 +225,7 @@ void thunder_ahand_finger::set_par_D(const Eigen::VectorXd& par_){
 	}
 }
 
-void thunder_ahand_finger::set_par_Dm(const Eigen::VectorXd& par_){
+void thunder_ahand_thumb::set_par_Dm(const Eigen::VectorXd& par_){
 	if(par_.size() == par_Dm.size()){
 		par_Dm = par_;
 	} else{
@@ -229,7 +233,7 @@ void thunder_ahand_finger::set_par_Dm(const Eigen::VectorXd& par_){
 	}
 }
 
-void thunder_ahand_finger::set_par_Mm(const Eigen::VectorXd& par_){
+void thunder_ahand_thumb::set_par_Mm(const Eigen::VectorXd& par_){
 	if(par_.size() == par_Mm.size()){
 		par_Mm = par_;
 	} else{
@@ -237,7 +241,7 @@ void thunder_ahand_finger::set_par_Mm(const Eigen::VectorXd& par_){
 	}
 }
 
-void thunder_ahand_finger::set_par_Dl(const Eigen::VectorXd& par_){
+void thunder_ahand_thumb::set_par_Dl(const Eigen::VectorXd& par_){
 	if(par_.size() == par_Dl.size()){
 		par_Dl = par_;
 	} else{
@@ -245,7 +249,7 @@ void thunder_ahand_finger::set_par_Dl(const Eigen::VectorXd& par_){
 	}
 }
 
-void thunder_ahand_finger::set_DHtable(const Eigen::MatrixXd& par_){
+void thunder_ahand_thumb::set_DHtable(const Eigen::MatrixXd& par_){
 	if(par_.size() == DHtable.size()){
 		DHtable = par_;
 	} else{
@@ -253,7 +257,7 @@ void thunder_ahand_finger::set_DHtable(const Eigen::MatrixXd& par_){
 	}
 }
 
-void thunder_ahand_finger::set_gravity(const Eigen::VectorXd& par_){
+void thunder_ahand_thumb::set_gravity(const Eigen::VectorXd& par_){
 	if(par_.size() == gravity.size()){
 		gravity = par_;
 	} else{
@@ -261,7 +265,7 @@ void thunder_ahand_finger::set_gravity(const Eigen::VectorXd& par_){
 	}
 }
 
-void thunder_ahand_finger::set_world2L0(const Eigen::VectorXd& par_){
+void thunder_ahand_thumb::set_world2L0(const Eigen::VectorXd& par_){
 	if(par_.size() == world2L0.size()){
 		world2L0 = par_;
 	} else{
@@ -269,7 +273,7 @@ void thunder_ahand_finger::set_world2L0(const Eigen::VectorXd& par_){
 	}
 }
 
-void thunder_ahand_finger::set_Ln2EE(const Eigen::VectorXd& par_){
+void thunder_ahand_thumb::set_Ln2EE(const Eigen::VectorXd& par_){
 	if(par_.size() == Ln2EE.size()){
 		Ln2EE = par_;
 	} else{
@@ -277,51 +281,51 @@ void thunder_ahand_finger::set_Ln2EE(const Eigen::VectorXd& par_){
 	}
 }
 
-Eigen::VectorXd thunder_ahand_finger::get_par_DYN(){
+Eigen::VectorXd thunder_ahand_thumb::get_par_DYN(){
 	return par_DYN;
 }
 
-Eigen::VectorXd thunder_ahand_finger::get_par_REG(){
+Eigen::VectorXd thunder_ahand_thumb::get_par_REG(){
 	return par_REG;
 }
 
-Eigen::VectorXd thunder_ahand_finger::get_par_K(){
+Eigen::VectorXd thunder_ahand_thumb::get_par_K(){
 	return par_K;
 }
 
-Eigen::VectorXd thunder_ahand_finger::get_par_D(){
+Eigen::VectorXd thunder_ahand_thumb::get_par_D(){
 	return par_D;
 }
 
-Eigen::VectorXd thunder_ahand_finger::get_par_Dm(){
+Eigen::VectorXd thunder_ahand_thumb::get_par_Dm(){
 	return par_Dm;
 }
 
-Eigen::VectorXd thunder_ahand_finger::get_par_Mm(){
+Eigen::VectorXd thunder_ahand_thumb::get_par_Mm(){
 	return par_Mm;
 }
 
-Eigen::VectorXd thunder_ahand_finger::get_par_Dl(){
+Eigen::VectorXd thunder_ahand_thumb::get_par_Dl(){
 	return par_Dl;
 }
 
-Eigen::MatrixXd thunder_ahand_finger::get_DHtable(){
+Eigen::MatrixXd thunder_ahand_thumb::get_DHtable(){
 	return DHtable;
 }
 
-Eigen::VectorXd thunder_ahand_finger::get_gravity(){
+Eigen::VectorXd thunder_ahand_thumb::get_gravity(){
 	return gravity;
 }
 
-Eigen::VectorXd thunder_ahand_finger::get_world2L0(){
+Eigen::VectorXd thunder_ahand_thumb::get_world2L0(){
 	return world2L0;
 }
 
-Eigen::VectorXd thunder_ahand_finger::get_Ln2EE(){
+Eigen::VectorXd thunder_ahand_thumb::get_Ln2EE(){
 	return Ln2EE;
 }
 
-Eigen::VectorXd thunder_ahand_finger::load_par_REG(std::string file_path, bool update_DYN){
+Eigen::VectorXd thunder_ahand_thumb::load_par_REG(std::string file_path, bool update_DYN){
 	try {
 		YAML::Node config = YAML::LoadFile(file_path);
 		int i;
@@ -357,7 +361,7 @@ Eigen::VectorXd thunder_ahand_finger::load_par_REG(std::string file_path, bool u
 	return par_REG;
 }
 
-void thunder_ahand_finger::load_conf(std::string file_path, bool update_REG){
+void thunder_ahand_thumb::load_conf(std::string file_path, bool update_REG){
 	try {
 		YAML::Node config = YAML::LoadFile(file_path);
 		int index;
@@ -546,7 +550,7 @@ void thunder_ahand_finger::load_conf(std::string file_path, bool update_REG){
 	}
 }
 
-// void thunder_ahand_finger::load_par_elastic(std::string file_path){
+// void thunder_ahand_thumb::load_par_elastic(std::string file_path){
 // 	// ----- parsing yaml elastic ----- //
 // 	try {
 // 		// load yaml
@@ -585,7 +589,7 @@ void thunder_ahand_finger::load_conf(std::string file_path, bool update_REG){
 // 	}
 // }
 
-void thunder_ahand_finger::save_par_REG(std::string path_yaml_DH_REG){
+void thunder_ahand_thumb::save_par_REG(std::string path_yaml_DH_REG){
 	std::vector<std::string> keys_reg;
 	keys_reg.resize(5);
 	keys_reg[0] = "mass"; keys_reg[1] = "m_CoM_"; keys_reg[2] = "I"; keys_reg[3] = "REG"; keys_reg[4] = "regressor";
@@ -622,7 +626,7 @@ void thunder_ahand_finger::save_par_REG(std::string path_yaml_DH_REG){
 	}
 }
 
-void thunder_ahand_finger::save_par_DYN(std::string path_yaml_DH_DYN){
+void thunder_ahand_thumb::save_par_DYN(std::string path_yaml_DH_DYN){
 	std::vector<std::string> keys_reg;
 	keys_reg.resize(5);
 	keys_reg[0] = "mass"; keys_reg[1] = "CoM_"; keys_reg[2] = "I"; keys_reg[3] = "DYN"; keys_reg[4] = "dynamics";
@@ -659,7 +663,7 @@ void thunder_ahand_finger::save_par_DYN(std::string path_yaml_DH_DYN){
 	}
 }
 
-int thunder_ahand_finger::save_par(std::string par_file){
+int thunder_ahand_thumb::save_par(std::string par_file){
 	try {
 		YAML::Emitter emitter;
 		emitter.SetIndent(2);
@@ -724,7 +728,7 @@ int thunder_ahand_finger::save_par(std::string par_file){
 }
 
 // Other functions
-void thunder_ahand_finger::fillInertialYaml(int n_joints, YAML::Emitter &emitter_, std::vector<LinkProp> &links_prop_, std::vector<std::string> keys_){
+void thunder_ahand_thumb::fillInertialYaml(int n_joints, YAML::Emitter &emitter_, std::vector<LinkProp> &links_prop_, std::vector<std::string> keys_){
 	YAML::Node yamlFile;
 	YAML::Node dynamicsNode;
 
@@ -764,7 +768,7 @@ void thunder_ahand_finger::fillInertialYaml(int n_joints, YAML::Emitter &emitter
 	emitter_ << yamlFile << YAML::Newline;
 }
 
-Eigen::Matrix3d thunder_ahand_finger::hat(const Eigen::Vector3d v){
+Eigen::Matrix3d thunder_ahand_thumb::hat(const Eigen::Vector3d v){
 	Eigen::Matrix3d vhat;
 			
 	// chech
@@ -785,7 +789,7 @@ Eigen::Matrix3d thunder_ahand_finger::hat(const Eigen::Vector3d v){
 	return vhat;
 }
 
-Eigen::Matrix3d thunder_ahand_finger::rpyRot(const std::vector<double> rpy){
+Eigen::Matrix3d thunder_ahand_thumb::rpyRot(const std::vector<double> rpy){
 	Eigen::Matrix3d rotTr;
 	
 	double cy = cos(rpy[2]);
@@ -809,7 +813,7 @@ Eigen::Matrix3d thunder_ahand_finger::rpyRot(const std::vector<double> rpy){
 	return rotTr;
 }
 
-Eigen::Matrix3d thunder_ahand_finger::createI(const std::vector<double> parI){
+Eigen::Matrix3d thunder_ahand_thumb::createI(const std::vector<double> parI){
 	Eigen::Matrix3d I;
 	I(0, 0) = parI[0];
 	I(0, 1) = parI[1];
@@ -827,493 +831,566 @@ Eigen::Matrix3d thunder_ahand_finger::createI(const std::vector<double> parI){
 // ----- generated functions ----- //
 
 // - Manipulator Coriolis matrix - //
-Eigen::MatrixXd thunder_ahand_finger::get_C(){
+Eigen::MatrixXd thunder_ahand_thumb::get_C(){
 	Eigen::MatrixXd out;
 	out.resize(4,4);
-	long long p3[ahand_finger_C_fun_SZ_IW];
-	double p4[ahand_finger_C_fun_SZ_W];
+	long long p3[ahand_thumb_C_fun_SZ_IW];
+	double p4[ahand_thumb_C_fun_SZ_W];
 	const double* input_[] = {q.data(), dq.data(), world2L0.data(), par_DYN.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_C_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_C_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - Second time derivative of the Coriolis matrix - //
-Eigen::MatrixXd thunder_ahand_finger::get_C_ddot(){
+Eigen::MatrixXd thunder_ahand_thumb::get_C_ddot(){
 	Eigen::MatrixXd out;
 	out.resize(4,4);
-	long long p3[ahand_finger_C_ddot_fun_SZ_IW];
-	double p4[ahand_finger_C_ddot_fun_SZ_W];
+	long long p3[ahand_thumb_C_ddot_fun_SZ_IW];
+	double p4[ahand_thumb_C_ddot_fun_SZ_W];
 	const double* input_[] = {q.data(), dq.data(), ddq.data(), d3q.data(), world2L0.data(), par_DYN.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_C_ddot_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_C_ddot_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - Time derivative of the Coriolis matrix - //
-Eigen::MatrixXd thunder_ahand_finger::get_C_dot(){
+Eigen::MatrixXd thunder_ahand_thumb::get_C_dot(){
 	Eigen::MatrixXd out;
 	out.resize(4,4);
-	long long p3[ahand_finger_C_dot_fun_SZ_IW];
-	double p4[ahand_finger_C_dot_fun_SZ_W];
+	long long p3[ahand_thumb_C_dot_fun_SZ_IW];
+	double p4[ahand_thumb_C_dot_fun_SZ_W];
 	const double* input_[] = {q.data(), dq.data(), ddq.data(), world2L0.data(), par_DYN.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_C_dot_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_C_dot_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - Classic formulation of the manipulator Coriolis matrix - //
-Eigen::MatrixXd thunder_ahand_finger::get_C_std(){
+Eigen::MatrixXd thunder_ahand_thumb::get_C_std(){
 	Eigen::MatrixXd out;
 	out.resize(4,4);
-	long long p3[ahand_finger_C_std_fun_SZ_IW];
-	double p4[ahand_finger_C_std_fun_SZ_W];
+	long long p3[ahand_thumb_C_std_fun_SZ_IW];
+	double p4[ahand_thumb_C_std_fun_SZ_W];
 	const double* input_[] = {q.data(), dq.data(), world2L0.data(), par_DYN.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_C_std_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_C_std_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - Manipulator gravity terms - //
-Eigen::MatrixXd thunder_ahand_finger::get_G(){
+Eigen::MatrixXd thunder_ahand_thumb::get_G(){
 	Eigen::MatrixXd out;
 	out.resize(4,1);
-	long long p3[ahand_finger_G_fun_SZ_IW];
-	double p4[ahand_finger_G_fun_SZ_W];
+	long long p3[ahand_thumb_G_fun_SZ_IW];
+	double p4[ahand_thumb_G_fun_SZ_W];
 	const double* input_[] = {q.data(), world2L0.data(), gravity.data(), par_DYN.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_G_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_G_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - Second time derivative of the gravity vector - //
-Eigen::MatrixXd thunder_ahand_finger::get_G_ddot(){
+Eigen::MatrixXd thunder_ahand_thumb::get_G_ddot(){
 	Eigen::MatrixXd out;
 	out.resize(4,1);
-	long long p3[ahand_finger_G_ddot_fun_SZ_IW];
-	double p4[ahand_finger_G_ddot_fun_SZ_W];
+	long long p3[ahand_thumb_G_ddot_fun_SZ_IW];
+	double p4[ahand_thumb_G_ddot_fun_SZ_W];
 	const double* input_[] = {q.data(), dq.data(), ddq.data(), world2L0.data(), gravity.data(), par_DYN.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_G_ddot_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_G_ddot_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - Time derivative of the gravity vector - //
-Eigen::MatrixXd thunder_ahand_finger::get_G_dot(){
+Eigen::MatrixXd thunder_ahand_thumb::get_G_dot(){
 	Eigen::MatrixXd out;
 	out.resize(4,1);
-	long long p3[ahand_finger_G_dot_fun_SZ_IW];
-	double p4[ahand_finger_G_dot_fun_SZ_W];
+	long long p3[ahand_thumb_G_dot_fun_SZ_IW];
+	double p4[ahand_thumb_G_dot_fun_SZ_W];
 	const double* input_[] = {q.data(), dq.data(), world2L0.data(), gravity.data(), par_DYN.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_G_dot_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_G_dot_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - Jacobian of frame 1 - //
-Eigen::MatrixXd thunder_ahand_finger::get_J_1(){
+Eigen::MatrixXd thunder_ahand_thumb::get_J_1(){
 	Eigen::MatrixXd out;
 	out.resize(6,4);
-	long long p3[ahand_finger_J_1_fun_SZ_IW];
-	double p4[ahand_finger_J_1_fun_SZ_W];
+	long long p3[ahand_thumb_J_1_fun_SZ_IW];
+	double p4[ahand_thumb_J_1_fun_SZ_W];
 	const double* input_[] = {q.data(), world2L0.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_J_1_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_J_1_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - Jacobian of frame 2 - //
-Eigen::MatrixXd thunder_ahand_finger::get_J_2(){
+Eigen::MatrixXd thunder_ahand_thumb::get_J_2(){
 	Eigen::MatrixXd out;
 	out.resize(6,4);
-	long long p3[ahand_finger_J_2_fun_SZ_IW];
-	double p4[ahand_finger_J_2_fun_SZ_W];
+	long long p3[ahand_thumb_J_2_fun_SZ_IW];
+	double p4[ahand_thumb_J_2_fun_SZ_W];
 	const double* input_[] = {q.data(), world2L0.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_J_2_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_J_2_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - Jacobian of frame 3 - //
-Eigen::MatrixXd thunder_ahand_finger::get_J_3(){
+Eigen::MatrixXd thunder_ahand_thumb::get_J_3(){
 	Eigen::MatrixXd out;
 	out.resize(6,4);
-	long long p3[ahand_finger_J_3_fun_SZ_IW];
-	double p4[ahand_finger_J_3_fun_SZ_W];
+	long long p3[ahand_thumb_J_3_fun_SZ_IW];
+	double p4[ahand_thumb_J_3_fun_SZ_W];
 	const double* input_[] = {q.data(), world2L0.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_J_3_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_J_3_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - Jacobian of frame 4 - //
-Eigen::MatrixXd thunder_ahand_finger::get_J_4(){
+Eigen::MatrixXd thunder_ahand_thumb::get_J_4(){
 	Eigen::MatrixXd out;
 	out.resize(6,4);
-	long long p3[ahand_finger_J_4_fun_SZ_IW];
-	double p4[ahand_finger_J_4_fun_SZ_W];
+	long long p3[ahand_thumb_J_4_fun_SZ_IW];
+	double p4[ahand_thumb_J_4_fun_SZ_W];
 	const double* input_[] = {q.data(), world2L0.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_J_4_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_J_4_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - Jacobian of frame 5 - //
-Eigen::MatrixXd thunder_ahand_finger::get_J_5(){
+Eigen::MatrixXd thunder_ahand_thumb::get_J_5(){
 	Eigen::MatrixXd out;
 	out.resize(6,4);
-	long long p3[ahand_finger_J_5_fun_SZ_IW];
-	double p4[ahand_finger_J_5_fun_SZ_W];
+	long long p3[ahand_thumb_J_5_fun_SZ_IW];
+	double p4[ahand_thumb_J_5_fun_SZ_W];
 	const double* input_[] = {q.data(), world2L0.data(), Ln2EE.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_J_5_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_J_5_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - Jacobian of center of mass of link 1 - //
-Eigen::MatrixXd thunder_ahand_finger::get_J_cm_1(){
+Eigen::MatrixXd thunder_ahand_thumb::get_J_cm_1(){
 	Eigen::MatrixXd out;
 	out.resize(6,4);
-	long long p3[ahand_finger_J_cm_1_fun_SZ_IW];
-	double p4[ahand_finger_J_cm_1_fun_SZ_W];
+	long long p3[ahand_thumb_J_cm_1_fun_SZ_IW];
+	double p4[ahand_thumb_J_cm_1_fun_SZ_W];
 	const double* input_[] = {q.data(), world2L0.data(), par_DYN.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_J_cm_1_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_J_cm_1_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - Jacobian of center of mass of link 2 - //
-Eigen::MatrixXd thunder_ahand_finger::get_J_cm_2(){
+Eigen::MatrixXd thunder_ahand_thumb::get_J_cm_2(){
 	Eigen::MatrixXd out;
 	out.resize(6,4);
-	long long p3[ahand_finger_J_cm_2_fun_SZ_IW];
-	double p4[ahand_finger_J_cm_2_fun_SZ_W];
+	long long p3[ahand_thumb_J_cm_2_fun_SZ_IW];
+	double p4[ahand_thumb_J_cm_2_fun_SZ_W];
 	const double* input_[] = {q.data(), world2L0.data(), par_DYN.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_J_cm_2_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_J_cm_2_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - Jacobian of center of mass of link 3 - //
-Eigen::MatrixXd thunder_ahand_finger::get_J_cm_3(){
+Eigen::MatrixXd thunder_ahand_thumb::get_J_cm_3(){
 	Eigen::MatrixXd out;
 	out.resize(6,4);
-	long long p3[ahand_finger_J_cm_3_fun_SZ_IW];
-	double p4[ahand_finger_J_cm_3_fun_SZ_W];
+	long long p3[ahand_thumb_J_cm_3_fun_SZ_IW];
+	double p4[ahand_thumb_J_cm_3_fun_SZ_W];
 	const double* input_[] = {q.data(), world2L0.data(), par_DYN.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_J_cm_3_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_J_cm_3_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - Jacobian of center of mass of link 4 - //
-Eigen::MatrixXd thunder_ahand_finger::get_J_cm_4(){
+Eigen::MatrixXd thunder_ahand_thumb::get_J_cm_4(){
 	Eigen::MatrixXd out;
 	out.resize(6,4);
-	long long p3[ahand_finger_J_cm_4_fun_SZ_IW];
-	double p4[ahand_finger_J_cm_4_fun_SZ_W];
+	long long p3[ahand_thumb_J_cm_4_fun_SZ_IW];
+	double p4[ahand_thumb_J_cm_4_fun_SZ_W];
 	const double* input_[] = {q.data(), world2L0.data(), par_DYN.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_J_cm_4_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_J_cm_4_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - Jacobian of the end-effector - //
-Eigen::MatrixXd thunder_ahand_finger::get_J_ee(){
+Eigen::MatrixXd thunder_ahand_thumb::get_J_ee(){
 	Eigen::MatrixXd out;
 	out.resize(6,4);
-	long long p3[ahand_finger_J_ee_fun_SZ_IW];
-	double p4[ahand_finger_J_ee_fun_SZ_W];
+	long long p3[ahand_thumb_J_ee_fun_SZ_IW];
+	double p4[ahand_thumb_J_ee_fun_SZ_W];
 	const double* input_[] = {q.data(), world2L0.data(), Ln2EE.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_J_ee_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_J_ee_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - Time second derivative of jacobian matrix - //
-Eigen::MatrixXd thunder_ahand_finger::get_J_ee_ddot(){
+Eigen::MatrixXd thunder_ahand_thumb::get_J_ee_ddot(){
 	Eigen::MatrixXd out;
 	out.resize(6,4);
-	long long p3[ahand_finger_J_ee_ddot_fun_SZ_IW];
-	double p4[ahand_finger_J_ee_ddot_fun_SZ_W];
+	long long p3[ahand_thumb_J_ee_ddot_fun_SZ_IW];
+	double p4[ahand_thumb_J_ee_ddot_fun_SZ_W];
 	const double* input_[] = {q.data(), dq.data(), ddq.data(), world2L0.data(), Ln2EE.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_J_ee_ddot_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_J_ee_ddot_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - Time derivative of jacobian matrix - //
-Eigen::MatrixXd thunder_ahand_finger::get_J_ee_dot(){
+Eigen::MatrixXd thunder_ahand_thumb::get_J_ee_dot(){
 	Eigen::MatrixXd out;
 	out.resize(6,4);
-	long long p3[ahand_finger_J_ee_dot_fun_SZ_IW];
-	double p4[ahand_finger_J_ee_dot_fun_SZ_W];
+	long long p3[ahand_thumb_J_ee_dot_fun_SZ_IW];
+	double p4[ahand_thumb_J_ee_dot_fun_SZ_W];
 	const double* input_[] = {q.data(), dq.data(), world2L0.data(), Ln2EE.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_J_ee_dot_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_J_ee_dot_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - Pseudo-Inverse of jacobian matrix - //
-Eigen::MatrixXd thunder_ahand_finger::get_J_ee_pinv(){
+Eigen::MatrixXd thunder_ahand_thumb::get_J_ee_pinv(){
 	Eigen::MatrixXd out;
 	out.resize(4,6);
-	long long p3[ahand_finger_J_ee_pinv_fun_SZ_IW];
-	double p4[ahand_finger_J_ee_pinv_fun_SZ_W];
+	long long p3[ahand_thumb_J_ee_pinv_fun_SZ_IW];
+	double p4[ahand_thumb_J_ee_pinv_fun_SZ_W];
 	const double* input_[] = {q.data(), world2L0.data(), Ln2EE.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_J_ee_pinv_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_J_ee_pinv_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - Manipulator mass matrix - //
-Eigen::MatrixXd thunder_ahand_finger::get_M(){
+Eigen::MatrixXd thunder_ahand_thumb::get_M(){
 	Eigen::MatrixXd out;
 	out.resize(4,4);
-	long long p3[ahand_finger_M_fun_SZ_IW];
-	double p4[ahand_finger_M_fun_SZ_W];
+	long long p3[ahand_thumb_M_fun_SZ_IW];
+	double p4[ahand_thumb_M_fun_SZ_W];
 	const double* input_[] = {q.data(), world2L0.data(), par_DYN.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_M_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_M_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - Second time derivative of the mass matrix - //
-Eigen::MatrixXd thunder_ahand_finger::get_M_ddot(){
+Eigen::MatrixXd thunder_ahand_thumb::get_M_ddot(){
 	Eigen::MatrixXd out;
 	out.resize(4,4);
-	long long p3[ahand_finger_M_ddot_fun_SZ_IW];
-	double p4[ahand_finger_M_ddot_fun_SZ_W];
+	long long p3[ahand_thumb_M_ddot_fun_SZ_IW];
+	double p4[ahand_thumb_M_ddot_fun_SZ_W];
 	const double* input_[] = {q.data(), dq.data(), ddq.data(), world2L0.data(), par_DYN.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_M_ddot_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_M_ddot_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - Time derivative of the mass matrix - //
-Eigen::MatrixXd thunder_ahand_finger::get_M_dot(){
+Eigen::MatrixXd thunder_ahand_thumb::get_M_dot(){
 	Eigen::MatrixXd out;
 	out.resize(4,4);
-	long long p3[ahand_finger_M_dot_fun_SZ_IW];
-	double p4[ahand_finger_M_dot_fun_SZ_W];
+	long long p3[ahand_thumb_M_dot_fun_SZ_IW];
+	double p4[ahand_thumb_M_dot_fun_SZ_W];
 	const double* input_[] = {q.data(), dq.data(), world2L0.data(), par_DYN.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_M_dot_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_M_dot_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - relative transformation from frame base to frame 1 - //
-Eigen::MatrixXd thunder_ahand_finger::get_T_0(){
+Eigen::MatrixXd thunder_ahand_thumb::get_T_0(){
 	Eigen::MatrixXd out;
 	out.resize(4,4);
-	long long p3[ahand_finger_T_0_fun_SZ_IW];
-	double p4[ahand_finger_T_0_fun_SZ_W];
+	long long p3[ahand_thumb_T_0_fun_SZ_IW];
+	double p4[ahand_thumb_T_0_fun_SZ_W];
 	const double* input_[] = {world2L0.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_T_0_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_T_0_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - absolute transformation from frame base to frame 1 - //
-Eigen::MatrixXd thunder_ahand_finger::get_T_0_0(){
+Eigen::MatrixXd thunder_ahand_thumb::get_T_0_0(){
 	Eigen::MatrixXd out;
 	out.resize(4,4);
-	long long p3[ahand_finger_T_0_0_fun_SZ_IW];
-	double p4[ahand_finger_T_0_0_fun_SZ_W];
+	long long p3[ahand_thumb_T_0_0_fun_SZ_IW];
+	double p4[ahand_thumb_T_0_0_fun_SZ_W];
 	const double* input_[] = {world2L0.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_T_0_0_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_T_0_0_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - absolute transformation from frame base to frame 1 - //
-Eigen::MatrixXd thunder_ahand_finger::get_T_0_1(){
+Eigen::MatrixXd thunder_ahand_thumb::get_T_0_1(){
 	Eigen::MatrixXd out;
 	out.resize(4,4);
-	long long p3[ahand_finger_T_0_1_fun_SZ_IW];
-	double p4[ahand_finger_T_0_1_fun_SZ_W];
+	long long p3[ahand_thumb_T_0_1_fun_SZ_IW];
+	double p4[ahand_thumb_T_0_1_fun_SZ_W];
 	const double* input_[] = {q.data(), world2L0.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_T_0_1_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_T_0_1_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - absolute transformation from frame base to frame 2 - //
-Eigen::MatrixXd thunder_ahand_finger::get_T_0_2(){
+Eigen::MatrixXd thunder_ahand_thumb::get_T_0_2(){
 	Eigen::MatrixXd out;
 	out.resize(4,4);
-	long long p3[ahand_finger_T_0_2_fun_SZ_IW];
-	double p4[ahand_finger_T_0_2_fun_SZ_W];
+	long long p3[ahand_thumb_T_0_2_fun_SZ_IW];
+	double p4[ahand_thumb_T_0_2_fun_SZ_W];
 	const double* input_[] = {q.data(), world2L0.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_T_0_2_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_T_0_2_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - absolute transformation from frame base to frame 3 - //
-Eigen::MatrixXd thunder_ahand_finger::get_T_0_3(){
+Eigen::MatrixXd thunder_ahand_thumb::get_T_0_3(){
 	Eigen::MatrixXd out;
 	out.resize(4,4);
-	long long p3[ahand_finger_T_0_3_fun_SZ_IW];
-	double p4[ahand_finger_T_0_3_fun_SZ_W];
+	long long p3[ahand_thumb_T_0_3_fun_SZ_IW];
+	double p4[ahand_thumb_T_0_3_fun_SZ_W];
 	const double* input_[] = {q.data(), world2L0.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_T_0_3_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_T_0_3_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - absolute transformation from frame base to frame 4 - //
-Eigen::MatrixXd thunder_ahand_finger::get_T_0_4(){
+Eigen::MatrixXd thunder_ahand_thumb::get_T_0_4(){
 	Eigen::MatrixXd out;
 	out.resize(4,4);
-	long long p3[ahand_finger_T_0_4_fun_SZ_IW];
-	double p4[ahand_finger_T_0_4_fun_SZ_W];
+	long long p3[ahand_thumb_T_0_4_fun_SZ_IW];
+	double p4[ahand_thumb_T_0_4_fun_SZ_W];
 	const double* input_[] = {q.data(), world2L0.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_T_0_4_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_T_0_4_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - absolute transformation from frame base to end_effector - //
-Eigen::MatrixXd thunder_ahand_finger::get_T_0_5(){
+Eigen::MatrixXd thunder_ahand_thumb::get_T_0_5(){
 	Eigen::MatrixXd out;
 	out.resize(4,4);
-	long long p3[ahand_finger_T_0_5_fun_SZ_IW];
-	double p4[ahand_finger_T_0_5_fun_SZ_W];
+	long long p3[ahand_thumb_T_0_5_fun_SZ_IW];
+	double p4[ahand_thumb_T_0_5_fun_SZ_W];
 	const double* input_[] = {q.data(), world2L0.data(), Ln2EE.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_T_0_5_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_T_0_5_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - absolute transformation from frame 0 to end_effector - //
-Eigen::MatrixXd thunder_ahand_finger::get_T_0_ee(){
+Eigen::MatrixXd thunder_ahand_thumb::get_T_0_ee(){
 	Eigen::MatrixXd out;
 	out.resize(4,4);
-	long long p3[ahand_finger_T_0_ee_fun_SZ_IW];
-	double p4[ahand_finger_T_0_ee_fun_SZ_W];
+	long long p3[ahand_thumb_T_0_ee_fun_SZ_IW];
+	double p4[ahand_thumb_T_0_ee_fun_SZ_W];
 	const double* input_[] = {q.data(), world2L0.data(), Ln2EE.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_T_0_ee_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_T_0_ee_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - relative transformation from frame0to frame 1 - //
-Eigen::MatrixXd thunder_ahand_finger::get_T_1(){
+Eigen::MatrixXd thunder_ahand_thumb::get_T_1(){
 	Eigen::MatrixXd out;
 	out.resize(4,4);
-	long long p3[ahand_finger_T_1_fun_SZ_IW];
-	double p4[ahand_finger_T_1_fun_SZ_W];
+	long long p3[ahand_thumb_T_1_fun_SZ_IW];
+	double p4[ahand_thumb_T_1_fun_SZ_W];
 	const double* input_[] = {q.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_T_1_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_T_1_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - relative transformation from frame1to frame 2 - //
-Eigen::MatrixXd thunder_ahand_finger::get_T_2(){
+Eigen::MatrixXd thunder_ahand_thumb::get_T_2(){
 	Eigen::MatrixXd out;
 	out.resize(4,4);
-	long long p3[ahand_finger_T_2_fun_SZ_IW];
-	double p4[ahand_finger_T_2_fun_SZ_W];
+	long long p3[ahand_thumb_T_2_fun_SZ_IW];
+	double p4[ahand_thumb_T_2_fun_SZ_W];
 	const double* input_[] = {q.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_T_2_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_T_2_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - relative transformation from frame2to frame 3 - //
-Eigen::MatrixXd thunder_ahand_finger::get_T_3(){
+Eigen::MatrixXd thunder_ahand_thumb::get_T_3(){
 	Eigen::MatrixXd out;
 	out.resize(4,4);
-	long long p3[ahand_finger_T_3_fun_SZ_IW];
-	double p4[ahand_finger_T_3_fun_SZ_W];
+	long long p3[ahand_thumb_T_3_fun_SZ_IW];
+	double p4[ahand_thumb_T_3_fun_SZ_W];
 	const double* input_[] = {q.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_T_3_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_T_3_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - relative transformation from frame3to frame 4 - //
-Eigen::MatrixXd thunder_ahand_finger::get_T_4(){
+Eigen::MatrixXd thunder_ahand_thumb::get_T_4(){
 	Eigen::MatrixXd out;
 	out.resize(4,4);
-	long long p3[ahand_finger_T_4_fun_SZ_IW];
-	double p4[ahand_finger_T_4_fun_SZ_W];
+	long long p3[ahand_thumb_T_4_fun_SZ_IW];
+	double p4[ahand_thumb_T_4_fun_SZ_W];
 	const double* input_[] = {q.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_T_4_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_T_4_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - Manipulator regressor matrix - //
-Eigen::MatrixXd thunder_ahand_finger::get_Yr(){
+Eigen::MatrixXd thunder_ahand_thumb::get_Yr(){
 	Eigen::MatrixXd out;
 	out.resize(4,40);
-	long long p3[ahand_finger_Yr_fun_SZ_IW];
-	double p4[ahand_finger_Yr_fun_SZ_W];
+	long long p3[ahand_thumb_Yr_fun_SZ_IW];
+	double p4[ahand_thumb_Yr_fun_SZ_W];
 	const double* input_[] = {q.data(), dq.data(), dqr.data(), ddqr.data(), world2L0.data(), gravity.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_Yr_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_Yr_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - Regressor matrix of term C*dqr - //
-Eigen::MatrixXd thunder_ahand_finger::get_reg_C(){
+Eigen::MatrixXd thunder_ahand_thumb::get_reg_C(){
 	Eigen::MatrixXd out;
 	out.resize(4,40);
-	long long p3[ahand_finger_reg_C_fun_SZ_IW];
-	double p4[ahand_finger_reg_C_fun_SZ_W];
+	long long p3[ahand_thumb_reg_C_fun_SZ_IW];
+	double p4[ahand_thumb_reg_C_fun_SZ_W];
 	const double* input_[] = {q.data(), dq.data(), dqr.data(), world2L0.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_reg_C_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_reg_C_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - Regressor matrix of term G - //
-Eigen::MatrixXd thunder_ahand_finger::get_reg_G(){
+Eigen::MatrixXd thunder_ahand_thumb::get_reg_G(){
 	Eigen::MatrixXd out;
 	out.resize(4,40);
-	long long p3[ahand_finger_reg_G_fun_SZ_IW];
-	double p4[ahand_finger_reg_G_fun_SZ_W];
+	long long p3[ahand_thumb_reg_G_fun_SZ_IW];
+	double p4[ahand_thumb_reg_G_fun_SZ_W];
 	const double* input_[] = {q.data(), world2L0.data(), gravity.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_reg_G_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_reg_G_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - Regressor matrix of the quantity J^T*w - //
-Eigen::MatrixXd thunder_ahand_finger::get_reg_JTw(){
+Eigen::MatrixXd thunder_ahand_thumb::get_reg_JTw(){
 	Eigen::MatrixXd out;
 	out.resize(4,12);
-	long long p3[ahand_finger_reg_JTw_fun_SZ_IW];
-	double p4[ahand_finger_reg_JTw_fun_SZ_W];
+	long long p3[ahand_thumb_reg_JTw_fun_SZ_IW];
+	double p4[ahand_thumb_reg_JTw_fun_SZ_W];
 	const double* input_[] = {q.data(), w.data(), world2L0.data(), Ln2EE.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_reg_JTw_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_reg_JTw_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - Regressor matrix of the quantity J*dq - //
-Eigen::MatrixXd thunder_ahand_finger::get_reg_Jdq(){
+Eigen::MatrixXd thunder_ahand_thumb::get_reg_Jdq(){
 	Eigen::MatrixXd out;
 	out.resize(6,12);
-	long long p3[ahand_finger_reg_Jdq_fun_SZ_IW];
-	double p4[ahand_finger_reg_Jdq_fun_SZ_W];
+	long long p3[ahand_thumb_reg_Jdq_fun_SZ_IW];
+	double p4[ahand_thumb_reg_Jdq_fun_SZ_W];
 	const double* input_[] = {q.data(), dq.data(), world2L0.data(), Ln2EE.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_reg_Jdq_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_reg_Jdq_fun(input_, output_, p3, p4, 0);
 	return out;
 }
 
 // - Regressor matrix of term M*ddqr - //
-Eigen::MatrixXd thunder_ahand_finger::get_reg_M(){
+Eigen::MatrixXd thunder_ahand_thumb::get_reg_M(){
 	Eigen::MatrixXd out;
 	out.resize(4,40);
-	long long p3[ahand_finger_reg_M_fun_SZ_IW];
-	double p4[ahand_finger_reg_M_fun_SZ_W];
+	long long p3[ahand_thumb_reg_M_fun_SZ_IW];
+	double p4[ahand_thumb_reg_M_fun_SZ_W];
 	const double* input_[] = {q.data(), ddqr.data(), world2L0.data()};
 	double* output_[] = {out.data()};
-	int check = ahand_finger_reg_M_fun(input_, output_, p3, p4, 0);
+	int check = ahand_thumb_reg_M_fun(input_, output_, p3, p4, 0);
 	return out;
 }
+
+
+
+
+
+// ----- Python bindings ----- //
+namespace py = pybind11;
+
+PYBIND11_MODULE(thunder_ahand_thumb_py, m) {
+	py::class_<thunder_ahand_thumb>(m, "thunder_ahand_thumb")
+		.def(py::init<>())
+		.def("resizeVariables", &thunder_ahand_thumb::resizeVariables)
+		.def("setArguments", &thunder_ahand_thumb::setArguments, "Set q, dq, dqr, ddqr", py::arg("q"), py::arg("dq"), py::arg("dqr"), py::arg("ddqr"))
+		.def("set_q", &thunder_ahand_thumb::set_q, "Set q", py::arg("q"))
+		.def("set_dq", &thunder_ahand_thumb::set_dq, "Set dq", py::arg("dq"))
+		.def("set_dqr", &thunder_ahand_thumb::set_dqr, "Set dqr", py::arg("dqr"))
+		.def("set_ddqr", &thunder_ahand_thumb::set_ddqr, "Set ddqr", py::arg("ddqr"))
+		.def("set_par_REG", &thunder_ahand_thumb::set_par_REG, "Set inertial parameters REG", py::arg("par"), py::arg("update_DYN") = true)
+		.def("set_par_DYN", &thunder_ahand_thumb::set_par_DYN, "Set inertial parameters DYN", py::arg("par"), py::arg("update_REG") = true)
+		.def("get_par_REG", &thunder_ahand_thumb::get_par_REG, "Get par parameters REG")
+		.def("get_par_DYN", &thunder_ahand_thumb::get_par_DYN, "Get inertial parameters DYN")
+		.def("load_par_REG", &thunder_ahand_thumb::load_par_REG, "Load par parameters REG from YAML file", py::arg("file_path"), py::arg("update_DYN") = true)
+		.def("load_conf", &thunder_ahand_thumb::load_conf, "Load configuration from YAML file", py::arg("file_path"), py::arg("update_REG") = true)
+		.def("save_par_REG", &thunder_ahand_thumb::save_par_REG, "Save par parameters REG to YAML file", py::arg("file_path"))
+		.def("save_par_DYN", &thunder_ahand_thumb::save_par_DYN, "Save inertial parameters DYN to YAML file", py::arg("file_path"))
+		.def("get_numJoints", &thunder_ahand_thumb::get_numJoints, "Get number of joints")
+		.def("get_numParDYN", &thunder_ahand_thumb::get_numParDYN, "Get number of parameters per link")
+		.def("get_numParREG", &thunder_ahand_thumb::get_numParREG, "Get number of parameters")
+		.def("get_C", &thunder_ahand_thumb::get_C, "Manipulator Coriolis matrix")
+		.def("get_C_ddot", &thunder_ahand_thumb::get_C_ddot, "Second time derivative of the Coriolis matrix")
+		.def("get_C_dot", &thunder_ahand_thumb::get_C_dot, "Time derivative of the Coriolis matrix")
+		.def("get_C_std", &thunder_ahand_thumb::get_C_std, "Classic formulation of the manipulator Coriolis matrix")
+		.def("get_G", &thunder_ahand_thumb::get_G, "Manipulator gravity terms")
+		.def("get_G_ddot", &thunder_ahand_thumb::get_G_ddot, "Second time derivative of the gravity vector")
+		.def("get_G_dot", &thunder_ahand_thumb::get_G_dot, "Time derivative of the gravity vector")
+		.def("get_J_1", &thunder_ahand_thumb::get_J_1, "Jacobian of frame 1")
+		.def("get_J_2", &thunder_ahand_thumb::get_J_2, "Jacobian of frame 2")
+		.def("get_J_3", &thunder_ahand_thumb::get_J_3, "Jacobian of frame 3")
+		.def("get_J_4", &thunder_ahand_thumb::get_J_4, "Jacobian of frame 4")
+		.def("get_J_5", &thunder_ahand_thumb::get_J_5, "Jacobian of frame 5")
+		.def("get_J_cm_1", &thunder_ahand_thumb::get_J_cm_1, "Jacobian of center of mass of link 1")
+		.def("get_J_cm_2", &thunder_ahand_thumb::get_J_cm_2, "Jacobian of center of mass of link 2")
+		.def("get_J_cm_3", &thunder_ahand_thumb::get_J_cm_3, "Jacobian of center of mass of link 3")
+		.def("get_J_cm_4", &thunder_ahand_thumb::get_J_cm_4, "Jacobian of center of mass of link 4")
+		.def("get_J_ee", &thunder_ahand_thumb::get_J_ee, "Jacobian of the end-effector")
+		.def("get_J_ee_ddot", &thunder_ahand_thumb::get_J_ee_ddot, "Time second derivative of jacobian matrix")
+		.def("get_J_ee_dot", &thunder_ahand_thumb::get_J_ee_dot, "Time derivative of jacobian matrix")
+		.def("get_J_ee_pinv", &thunder_ahand_thumb::get_J_ee_pinv, "Pseudo-Inverse of jacobian matrix")
+		.def("get_M", &thunder_ahand_thumb::get_M, "Manipulator mass matrix")
+		.def("get_M_ddot", &thunder_ahand_thumb::get_M_ddot, "Second time derivative of the mass matrix")
+		.def("get_M_dot", &thunder_ahand_thumb::get_M_dot, "Time derivative of the mass matrix")
+		.def("get_T_0", &thunder_ahand_thumb::get_T_0, "relative transformation from frame base to frame 1")
+		.def("get_T_0_0", &thunder_ahand_thumb::get_T_0_0, "absolute transformation from frame base to frame 1")
+		.def("get_T_0_1", &thunder_ahand_thumb::get_T_0_1, "absolute transformation from frame base to frame 1")
+		.def("get_T_0_2", &thunder_ahand_thumb::get_T_0_2, "absolute transformation from frame base to frame 2")
+		.def("get_T_0_3", &thunder_ahand_thumb::get_T_0_3, "absolute transformation from frame base to frame 3")
+		.def("get_T_0_4", &thunder_ahand_thumb::get_T_0_4, "absolute transformation from frame base to frame 4")
+		.def("get_T_0_5", &thunder_ahand_thumb::get_T_0_5, "absolute transformation from frame base to end_effector")
+		.def("get_T_0_ee", &thunder_ahand_thumb::get_T_0_ee, "absolute transformation from frame 0 to end_effector")
+		.def("get_T_1", &thunder_ahand_thumb::get_T_1, "relative transformation from frame0to frame 1")
+		.def("get_T_2", &thunder_ahand_thumb::get_T_2, "relative transformation from frame1to frame 2")
+		.def("get_T_3", &thunder_ahand_thumb::get_T_3, "relative transformation from frame2to frame 3")
+		.def("get_T_4", &thunder_ahand_thumb::get_T_4, "relative transformation from frame3to frame 4")
+		.def("get_Yr", &thunder_ahand_thumb::get_Yr, "Manipulator regressor matrix")
+		.def("get_reg_C", &thunder_ahand_thumb::get_reg_C, "Regressor matrix of term C*dqr")
+		.def("get_reg_G", &thunder_ahand_thumb::get_reg_G, "Regressor matrix of term G")
+		.def("get_reg_JTw", &thunder_ahand_thumb::get_reg_JTw, "Regressor matrix of the quantity J^T*w")
+		.def("get_reg_Jdq", &thunder_ahand_thumb::get_reg_Jdq, "Regressor matrix of the quantity J*dq")
+		.def("get_reg_M", &thunder_ahand_thumb::get_reg_M, "Regressor matrix of term M*ddqr");
+
+}
+
+

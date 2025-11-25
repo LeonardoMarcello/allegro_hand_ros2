@@ -20,11 +20,13 @@ JOINT_LIMITS = np.array([
     [-0.21, 1.79],  # Ring 1
     [-0.12, 1.86],  # Ring 2
     [-0.21, 1.85],  # Ring 3
-    [0.00, 1.78],   # Thumb 0
+    [0.40, 1.78],   # Thumb 0
     [-0.26, 1.65],  # Thumb 1
     [-0.05, 1.85],  # Thumb 2
     [-0.09, 1.80],  # Thumb 3
 ])
+
+# - MIDDLE FINGER -
 # limit config
 # 1: [0.26, 1.790, 1.368, 0]
 # 2: [0.26, 1.628, 1.432, 0.269]
@@ -35,17 +37,25 @@ TRAJECT_JOINT_LIMITS = [[[-0.26,0.26], [0,1.790], [0,1.368], [0,0.000]],
                         [[-0.26,0.26], [0,1.628], [0,1.432], [0,0.269]],
                         [[-0.26,0.26], [0,0.644], [0,1.528], [0,1.449]],
                         [[-0.26,0.26], [0,0.331], [0,1.507], [0,1.850]]]
+# - THUMB FINGER -
+# limit config
+# 1: [1.78, 1.65, 1.85, 0.0]
+# 2: [1.78, 1.65, 0.922, 1.50]
+# TRAJECT_JOINT_LIMITS[i][j][k] -> ith traject, j-th joint, k = 0:1 lower:upper bound
+#TRAJECT_JOINT_LIMITS = [[[0.40, 1.78], [-0.26, 1.65], [-0.05, 1.85], [-0.09,0.00]],
+#                        [[0.40, 1.78], [-0.26, 1.65], [-0.05, 0.922], [-0.09,1.50]]]
 
-TRAJECT_TIME_PERIOD_S = 20  #uration of a single selected traject
+TRAJECT_TIME_PERIOD_S = 30  # Duration of a single selected traject
 
 # Test Traject search grid
 #FREQUENCY = np.array([0, 0.2, 0.4, 0.6, 0.8])#, 1, 1.2])
 #PHASE = np.array([0, np.pi/3, np.pi/4, np.pi/2, 3*np.pi/4, np.pi])
 
 # Test Traject Slow  search grid
-FREQUENCY = np.array([0, 0.01, 0.05])
+FREQUENCY = np.array([0, 0.01, 0.05, 0.1])
 PHASE = np.array([0, np.pi/3, np.pi/4, np.pi/2, 3*np.pi/4, np.pi])
 
+FINGER = 'thumb'
 
 # Test Traject Very Slow  search grid
 #FREQUENCY = np.array([0.01])#, 1, 1.2])
@@ -109,13 +119,20 @@ class JointRelay(Node):
                         "f": np.zeros_like(self.q_bar),
                         "phi": np.zeros_like(self.q_bar),
                         "idx": 0}
-        # init traject
+
+        # init traject - middle finger -
         self.traject["idx"] = np.random.choice([0,1,2,3])
         self.traject["q_bar"][[4,5,6,7]] = np.array([(TRAJECT_JOINT_LIMITS[self.traject["idx"]][i][1] + TRAJECT_JOINT_LIMITS[self.traject["idx"]][i][0])/2 for i in [0,1,2,3]])
         self.traject["A"][[4,5,6,7]] = np.array([0.9 * (TRAJECT_JOINT_LIMITS[self.traject["idx"]][i][1] - TRAJECT_JOINT_LIMITS[self.traject["idx"]][i][0])/2 for i in [0,1,2,3]])
         self.traject["f"][[4,5,6,7]] = np.array([np.random.choice(FREQUENCY) for _ in [0,1,2,3]])
         self.traject["phi"][[4,5,6,7]] = np.array([np.random.choice(PHASE) for _ in [0,1,2,3]])
-        
+
+        # init traject - thumb finger -
+        #self.traject["idx"] = np.random.choice([0,1])
+        #self.traject["q_bar"][[12,13,14,15]] = np.array([(TRAJECT_JOINT_LIMITS[self.traject["idx"]][i][1] + TRAJECT_JOINT_LIMITS[self.traject["idx"]][i][0])/2 for i in [0,1,2,3]])
+        #self.traject["A"][[12,13,14,15]] = np.array([0.9 * (TRAJECT_JOINT_LIMITS[self.traject["idx"]][i][1] - TRAJECT_JOINT_LIMITS[self.traject["idx"]][i][0])/2 for i in [0,1,2,3]])
+        #self.traject["f"][[12,13,14,15]] = np.array([np.random.choice(FREQUENCY) for _ in [0,1,2,3]])
+        #self.traject["phi"][[12,13,14,15]] = np.array([np.random.choice(PHASE) for _ in [0,1,2,3]])
 
         # Variable to switch across traject
         self.traject_2 = copy.deepcopy(self.traject)
@@ -141,6 +158,7 @@ class JointRelay(Node):
         # =============== Define here target trajectory =========================================
         # get traject
         for i in [4,5,6,7]:
+        #for i in [12,13,14,15]:
             q_bar = self.traject["q_bar"][i]
             amplitude = self.traject["A"][i]
             frequency = self.traject["f"][i]
@@ -154,16 +172,26 @@ class JointRelay(Node):
         if delta_t > TRAJECT_TIME_PERIOD_S - 6 and delta_t < TRAJECT_TIME_PERIOD_S + 6:
             # if init transition
             if (self.enable_switch_traject):
+                #  - middle finger - 
                 self.traject_2["idx"] = np.random.choice([0,1,2,3])
                 self.traject_2["q_bar"][[4,5,6,7]] = np.array([(TRAJECT_JOINT_LIMITS[self.traject_2["idx"]][i][1] + TRAJECT_JOINT_LIMITS[self.traject_2["idx"]][i][0])/2 for i in [0,1,2,3]])
                 self.traject_2["A"][[4,5,6,7]]= np.array([0.9 * (TRAJECT_JOINT_LIMITS[self.traject_2["idx"]][i][1] - TRAJECT_JOINT_LIMITS[self.traject_2["idx"]][i][0])/2 for i in [0,1,2,3]])
                 self.traject_2["f"][[4,5,6,7]]= np.array([np.random.choice(FREQUENCY) for _ in [0,1,2,3]])
                 self.traject_2["phi"][[4,5,6,7]] = np.array([np.random.choice(PHASE) for _ in [0,1,2,3]])
+
+                #  - thumb finger - 
+                #self.traject_2["idx"] = np.random.choice([0,1])
+                #self.traject_2["q_bar"][[12,13,14,15]] = np.array([(TRAJECT_JOINT_LIMITS[self.traject_2["idx"]][i][1] + TRAJECT_JOINT_LIMITS[self.traject_2["idx"]][i][0])/2 for i in [0,1,2,3]])
+                #self.traject_2["A"][[12,13,14,15]]= np.array([0.9 * (TRAJECT_JOINT_LIMITS[self.traject_2["idx"]][i][1] - TRAJECT_JOINT_LIMITS[self.traject_2["idx"]][i][0])/2 for i in [0,1,2,3]])
+                #self.traject_2["f"][[12,13,14,15]]= np.array([np.random.choice(FREQUENCY) for _ in [0,1,2,3]])
+                #self.traject_2["phi"][[12,13,14,15]] = np.array([np.random.choice(PHASE) for _ in [0,1,2,3]])
+
                 self.enable_switch_traject = False
                 self.switch_t0 = t.nanoseconds*1e-9 + 6
 
 
             for i in [4,5,6,7]:
+            #for i in [12,13,14,15]:
                 q_bar = self.traject_2["q_bar"][i]
                 amplitude = self.traject_2["A"][i]
                 frequency = self.traject_2["f"][i]
@@ -179,6 +207,7 @@ class JointRelay(Node):
         # if transition complete
         elif delta_t > TRAJECT_TIME_PERIOD_S + 6:
             for i in [4,5,6,7]:
+            #for i in [12,13,14,15]:
                 q_bar = self.traject_2["q_bar"][i]
                 amplitude = self.traject_2["A"][i]
                 frequency = self.traject_2["f"][i]
@@ -195,6 +224,7 @@ class JointRelay(Node):
         # Publish Trajectory
         self.msg.header.stamp = self.get_clock().now().to_msg()
         self.msg.position = [0.0]*16
+        self.msg.position[13] = np.pi/2 # thumb
         self.msg.velocity = [0.0]*16
         self.msg.effort   = [0.0]*16
         for i in range(len(self.msg.position)):
