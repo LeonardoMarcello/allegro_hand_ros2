@@ -1,0 +1,27 @@
+computed_torque_controller:
+    type: ahand_controllers/ComputedTorque_Controller
+    joints:
+      - joint_0_0
+      - joint_1_0
+      - joint_2_0
+      - joint_3_0
+      - joint_4_0
+      - joint_5_0
+      - joint_6_0
+      - joint_7_0
+      - joint_8_0
+      - joint_9_0
+      - joint_10_0
+      - joint_11_0
+      - joint_12_0
+      - joint_13_0
+      - joint_14_0
+      - joint_15_0
+    # --- Controller parameters --- #
+    kp1: 300.0   #default: 120.0
+    kp2: 150.0   #default: 70.0
+    kp3: 30.0    #default: 50.0
+    kv1: 30.0
+    kv2: 15.0
+    kv3: 3.0
+    dt: 2       # in [ms]

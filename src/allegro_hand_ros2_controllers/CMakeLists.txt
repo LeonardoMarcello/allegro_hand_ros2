@@ -7,10 +7,87 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+
+find_package(rclcpp REQUIRED)
+find_package(rclcpp_lifecycle REQUIRED)
+find_package(controller_interface REQUIRED)
+find_package(hardware_interface REQUIRED)
+find_package(realtime_tools REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(Eigen3 REQUIRED)
+find_package(yaml-cpp REQUIRED)
+find_package(bhand REQUIRED)
+find_package(pluginlib REQUIRED)
+
+
+message(STATUS "bhand include dirs: ${bhand_INCLUDE_DIRS}")
+message(STATUS "bhand libraries: ${bhand_LIBRARIES}")
+
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 
+# === Cpp ===
+# Include Cpp "include" directory
+include_directories(
+  include
+  ${EIGEN3_INCLUDE_DIRS}
+	${YAML_CPP_INCLUDE_DIRS}
+  ${bhand_INCLUDE_DIRS}
+  ${CMAKE_CURRENT_SOURCE_DIR}/../bhand/include
+)
+
+# Create Cpp Libraries
+add_library(${PROJECT_NAME} SHARED
+	src/thunder_ahand_finger.cpp
+	src/ahand_finger_gen.cpp
+
+	src/thunder_ahand_thumb.cpp
+	src/ahand_thumb_gen.cpp
+
+  src/allegro_hand_computed_torque.cpp
+)
+
+
+ament_target_dependencies(${PROJECT_NAME} 
+  rclcpp 
+  yaml-cpp 
+  controller_interface 
+  hardware_interface
+  realtime_tools
+  std_msgs
+  sensor_msgs)
+
+pluginlib_export_plugin_description_file(controller_interface ahand_controllers_plugin.xml)
+
+target_include_directories(${PROJECT_NAME} PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+
+
+
+
+# Install Cpp executables
+install(
+  DIRECTORY include/${PROJECT_NAME}
+  DESTINATION include
+)
+# install additional directories
+install(DIRECTORY config
+	DESTINATION share/${PROJECT_NAME}
+)
+
+install(
+  TARGETS
+  ${PROJECT_NAME}
+  EXPORT export_${PROJECT_NAME}
+  RUNTIME DESTINATION bin
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+)
+
+# ====== BUILD ======
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights

@@ -12,17 +12,18 @@
 #include "rclcpp/subscription.hpp"
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
 #include "rclcpp_lifecycle/state.hpp"
+#include "realtime_tools/realtime_buffer.hpp"
 
 #include "sensor_msgs/msg/joint_state.hpp"
 
-#include <allegro_hand_driver/AllegroHandDrv.h>
-using namespace allegro;
+#include "allegro_hand_ros2_controllers/thunder_ahand_finger.h"
+#include "allegro_hand_ros2_controllers/thunder_ahand_thumb.h"
 
-#include "thunder_ahand_finger.h"
-//#include "thunder_ahand_thumb.h" // to do
-
+# define DOF_JOINTS 16
 namespace allegro_hand_computed_torque
 {
+using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
+using CmdMsg = sensor_msgs::msg::JointState;
 
 class ComputedTorque_Controller : public controller_interface::ControllerInterface
 {
@@ -43,9 +44,9 @@ class ComputedTorque_Controller : public controller_interface::ControllerInterfa
         ) override;
 
     private:
-        void cmd_callback(const std::shared_ptr<CmdMsg> msg){
-            // set desired trajectory
-        }
+        realtime_tools::RealtimeBuffer<std::shared_ptr<CmdMsg>> rt_command_ptr_;
+        rclcpp::Subscription<CmdMsg>::SharedPtr joints_cmd_sub_;
+        std::string logger_name_;
 
         std::string jointNames[DOF_JOINTS] =
             {
@@ -54,17 +55,24 @@ class ComputedTorque_Controller : public controller_interface::ControllerInterfa
                 "joint_8_0", "joint_9_0", "joint_10_0", "joint_11_0",   // ring
                 "joint_12_0", "joint_13_0", "joint_14_0", "joint_15_0"  // thumb
             };
+ 
+        // control gains
         double Kp[DOF_JOINTS] = {};
         double Kd[DOF_JOINTS] = {};
 
+
+        // desired trajectory
         double q_des[DOF_JOINTS] = {};
         double qd_des[DOF_JOINTS] = {};
         double qdd_des[DOF_JOINTS] = {};
         double torque_des[DOF_JOINTS] = {};
+        sensor_msgs::msg::JointState joint_cmd_;
 
-        thunder_ahand_finger thunder_index;
+        thunder_ahand_finger thunder_index_handle_;
+        thunder_ahand_finger thunder_middle_handle_;
+        thunder_ahand_finger thunder_ring_handle_;
+        thunder_ahand_thumb thunder_thumb_handle_;
 
-        rclcpp::Subscription<JointState>::SharedPtr joints_cmd_sub_;
 };
 
 }  // namespace allegro_hand_computed_torque

@@ -11,6 +11,8 @@
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 
 #include <cmath>
+#include <ament_index_cpp/get_package_share_directory.hpp>
+
 
 using namespace std::chrono;
 using namespace std::chrono_literals;
@@ -18,85 +20,71 @@ namespace allegro_hand_computed_torque
 {
     CallbackReturn ComputedTorque_Controller::on_init()
     {
+        // declaring parameters
         try
         {
-            auto_declare<int>("input_frequency",100);   
-            auto_declare<double>("driveshaft_y",0.188);
-            auto_declare<double>("driveshaft_x",0.235);
-            auto_declare<double>("mecanum_angle",45.0);
-        	auto_declare<double>("wheel_rad",0.05);
-            auto_declare<bool>("BestEffort_QOS",true);
-            auto_declare<bool>("DeadMiss_event",false);
-            auto_declare<bool>("call_dm",false);
-            auto_declare<bool>("pub_odom",false);
+            //kp,kd,staturation,rate
+            //declare_parameters();
         }
          catch(const std::exception & e)
         {
             RCLCPP_ERROR(rclcpp::get_logger(logger_name_),"Exception thrown during declaration of joints name with message: %s", e.what());
             return CallbackReturn::ERROR;
         }
-        // add physics omni_wheel physics parameter autodeclare
         RCLCPP_INFO(get_node()->get_logger(),"initialize succesfully");
         return CallbackReturn::SUCCESS;
     };
+
+
     CallbackReturn ComputedTorque_Controller::on_configure(const rclcpp_lifecycle::State & )
     {
-        
-        double ds_y,ds_x,ma,wr;
-        rclcpp::QoS out_qos(10),in_qos(10);
+
         // get parameters
-        ds_y = get_node()->get_parameter("driveshaft_y").as_double();
-        ds_x = get_node()->get_parameter("driveshaft_x").as_double();
-        ma = get_node()->get_parameter("mecanum_angle").as_double() *(M_PI/180.0);
-        wr = get_node()->get_parameter("wheel_rad").as_double();
-        odom_flag_ = get_node()->get_parameter("pub_odom").as_bool();
+        if (!(get_node()->has_parameter("kp1") &&
+            get_node()->has_parameter("kp2") &&
+            get_node()->has_parameter("kp3") &&
+            get_node()->has_parameter("kd1") &&
+            get_node()->has_parameter("kd2") &&
+            get_node()->has_parameter("kd3"))){
+                RCLCPP_ERROR(get_node()->get_logger(),"Could not load controller gains.");
+                return CallbackReturn::ERROR;
+        }
+        double kp1 = get_node()->get_parameter("kp1").as_double();
+        double kp2 = get_node()->get_parameter("kp2").as_double();
+        double kp3 = get_node()->get_parameter("kp3").as_double();
+        Kp[0] = kp1;  Kp[1] = kp2;  Kp[2] = kp2;  Kp[3] = kp3;  // index
+        Kp[4] = kp1;  Kp[5] = kp2;  Kp[6] = kp2;  Kp[7] = kp3;  // middle
+        Kp[8] = kp1;  Kp[9] = kp2;  Kp[10] = kp2; Kp[11] = kp3; // ring
+        Kp[12] = kp1; Kp[13] = kp2; Kp[14] = kp2; Kp[15] = kp3; // thumb
 
-        milliseconds dur{get_node()->get_parameter("input_frequency").as_int() + 5};
-        deadmis_to_ = dur;
+        double kd1 = get_node()->get_parameter("kd1").as_double();
+        double kd2 = get_node()->get_parameter("kd2").as_double();
+        double kd3 = get_node()->get_parameter("kd3").as_double();
+        Kd[0] = kd1;  Kd[1] = kd2;  Kd[2] = kd2;  Kd[3] = kd3;  // index
+        Kd[4] = kd1;  Kd[5] = kd2;  Kd[6] = kd2;  Kd[7] = kd3;  // middle
+        Kd[8] = kd1;  Kd[9] = kd2;  Kd[10] = kd2; Kd[11] = kd3; // ring
+        Kd[12] = kd1; Kd[13] = kd2; Kd[14] = kd2; Kd[15] = kd3; // thumb
 
-        // fill base to wheel kin matrix
+        if (!(get_node()->has_parameter("dt"))){
+            RCLCPP_ERROR(get_node()->get_logger(),"Could not load controller dt.");
+            return CallbackReturn::ERROR;
+        }
+        auto dt = get_node()->get_parameter("dt").as_int(); // in [ms]
 
-        base2Wheel_matrix_[0][0] = 1.0/wr;
-        base2Wheel_matrix_[0][1] = 1.0/wr;
-        base2Wheel_matrix_[0][2] = -(ds_x - ds_y*(1/std::tan(ma)))/wr;
-        
+        milliseconds dur{dt + 5};
 
-        base2Wheel_matrix_[1][0] = -1.0/wr;
-        base2Wheel_matrix_[1][1] = 1.0/wr;
-        base2Wheel_matrix_[1][2] = -(ds_x - ds_y*(1/std::tan(ma)))/wr;
 
-        base2Wheel_matrix_[2][0] = -1.0/wr;
-        base2Wheel_matrix_[2][1] = -1.0/wr;
-        base2Wheel_matrix_[2][2] = -(ds_x - ds_y*(1/std::tan(ma)))/wr;
-
-        base2Wheel_matrix_[3][0] = 1.0/wr;
-        base2Wheel_matrix_[3][1] = -1.0/wr;
-        base2Wheel_matrix_[3][2] = -(ds_x - ds_y*(1/std::tan(ma)))/wr;
-
-        odom_matrix_[0][0] = (wr /4);
-        odom_matrix_[0][1] = -(wr /4);
-        odom_matrix_[0][2] = -(wr /4);
-        odom_matrix_[0][3] = (wr /4);
-
-        odom_matrix_[1][0] =  (wr /4);
-        odom_matrix_[1][1] = (wr /4);
-        odom_matrix_[1][2] = -(wr /4);
-        odom_matrix_[1][3] = -(wr /4);
-
-        odom_matrix_[2][0] = -(wr /(4*(ds_x - ds_y*(1/std::tan(ma)))));
-        odom_matrix_[2][1] = -(wr /(4*(ds_x - ds_y*(1/std::tan(ma)))));
-        odom_matrix_[2][2] = -(wr /(4*(ds_x - ds_y*(1/std::tan(ma)))));
-        odom_matrix_[2][3] = -(wr /(4*(ds_x - ds_y*(1/std::tan(ma)))));
-
-        joint_cmd_.name.resize(WHEELS);
-        joint_cmd_.set__name(wheels_name_);
-        joint_cmd_.position.resize(WHEELS);
-        joint_cmd_.velocity.resize(WHEELS);
-        joint_cmd_.effort.resize(WHEELS);
-        joint_cmd_.kp_scale.resize(WHEELS);
-        joint_cmd_.kd_scale.resize(WHEELS);
+        // load hand models
+        std::string pkg_path = ament_index_cpp::get_package_share_directory("allegro_hand_ros2_controllers");
+        std::string conf_path = pkg_path + "/config/thunder/";
+        thunder_index_handle_.load_conf(conf_path + "ahand_index_conf.yaml"); // or load_par_REG()
+        thunder_middle_handle_.load_conf(conf_path + "ahand_middle_conf.yaml"); // or load_par_REG()
+        thunder_ring_handle_.load_conf(conf_path + "ahand_ring_conf.yaml"); // or load_par_REG()
+        thunder_thumb_handle_.load_conf(conf_path + "ahand_thumb_conf.yaml"); // or load_par_REG()
+    
 
         //set qos protocol
+        rclcpp::QoS out_qos(10),in_qos(10);
         if(get_node()->get_parameter("BestEffort_QOS").as_bool())
         {
             out_qos.reliability(rclcpp::ReliabilityPolicy::BestEffort);
@@ -108,45 +96,29 @@ namespace allegro_hand_computed_torque
             in_qos.reliability(rclcpp::ReliabilityPolicy::Reliable);
         }
         //set the in qos for deadline miss
+        // duration<double,std::milli>  deadmis_to_ = dur;
 
-        in_qos.deadline(deadmis_to_);
-        rclcpp::SubscriptionOptions sub_opt;
-        sub_opt.event_callbacks.deadline_callback = 
-        [this](rclcpp::QOSDeadlineRequestedInfo & event) 
-        {
-            this->dl_miss_count_ ++;
-            if(dl_miss_count_ > 10)
-            {
-                std::lock_guard<std::mutex> l_g(var_mutex_);
-                c_stt_ = Controller_State::INACTIVE;
-            }
-            RCLCPP_WARN(this->get_node()->get_logger(),"Passed deadline");
-        };
-        //create subscriber and publisher
-        cmd_sub_ = get_node()->create_subscription<CmdMsg>(
+        // in_qos.deadline(deadmis_to_);
+        // rclcpp::SubscriptionOptions sub_opt;
+        // sub_opt.event_callbacks.deadline_callback = 
+        // [this](rclcpp::QOSDeadlineRequestedInfo & event) 
+        // {
+        //     this->dl_miss_count_ ++;
+        //     if(dl_miss_count_ > 10)
+        //     {
+        //         std::lock_guard<std::mutex> l_g(var_mutex_);
+        //         c_stt_ = Controller_State::INACTIVE;
+        //     }
+        //     RCLCPP_WARN(this->get_node()->get_logger(),"Passed deadline");
+        // };
+
+        //create subscriber to traject
+        joints_cmd_sub_ = get_node()->create_subscription<CmdMsg>(
             "~/command",
             in_qos,
-            std::bind(
-                &Omni_Vel_Controller::cmd_callback,this,std::placeholders::_1),sub_opt);
-
-        joints_cmd_pub_ = get_node()->create_publisher<SttMsg>("~/joints_reference",out_qos);
-        if(odom_flag_)
-            odom_pub_ = get_node()->create_publisher<geometry_msgs::msg::TwistStamped>("~/wheel_odom",10);
-
-        // create servicies 
-
-        rclcpp::ServicesQoS srvs_qos;
+            [this](const CmdMsg::SharedPtr msg) { rt_command_ptr_.writeFromNonRT(msg); });
 
 
-        homing_serv_ = get_node()->create_service<TransactionService>("~/homing_srv",
-        std::bind(&Omni_Vel_Controller::homing_start_srv,this,std::placeholders::_1,std::placeholders::_2),
-        srvs_qos.get_rmw_qos_profile()
-        );
-
-        emergency_serv_ = get_node()->create_service<TransactionService>("~/emergency_srv",
-        std::bind(&Omni_Vel_Controller::emergency_srv,this,std::placeholders::_1,std::placeholders::_2),
-        srvs_qos.get_rmw_qos_profile()
-        );
         RCLCPP_INFO(get_node()->get_logger(),"configure succesfully");
         return CallbackReturn::SUCCESS;
     }
@@ -154,12 +126,12 @@ namespace allegro_hand_computed_torque
 
     CallbackReturn ComputedTorque_Controller::on_activate(const rclcpp_lifecycle::State & )
     {
-       
         return CallbackReturn::SUCCESS;
     }
 
     CallbackReturn ComputedTorque_Controller::on_deactivate(const rclcpp_lifecycle::State & )
     {
+        rt_command_ptr_ = realtime_tools::RealtimeBuffer<std::shared_ptr<CmdMsg>>(nullptr);
         return CallbackReturn::SUCCESS;
     }
 
@@ -172,9 +144,11 @@ namespace allegro_hand_computed_torque
     {
         controller_interface::InterfaceConfiguration stt_int_cnf;
         stt_int_cnf.type = controller_interface::interface_configuration_type::INDIVIDUAL;
-        for( auto & w_name : wheels_name_)
+        for( auto & it : jointNames)
         {
-            stt_int_cnf.names.push_back(w_name + "/" + hardware_interface::HW_IF_VELOCITY);
+            stt_int_cnf.names.push_back(it + "/" + hardware_interface::HW_IF_POSITION);
+            stt_int_cnf.names.push_back(it + "/" + hardware_interface::HW_IF_VELOCITY);
+            stt_int_cnf.names.push_back(it + "/" + hardware_interface::HW_IF_EFFORT);
         }
         return stt_int_cnf;
     }
@@ -183,13 +157,9 @@ namespace allegro_hand_computed_torque
     {
         controller_interface::InterfaceConfiguration cmd_int_cnf;
         cmd_int_cnf.type = controller_interface::interface_configuration_type::INDIVIDUAL;
-        for(auto &it : wheels_name_)
+        for(auto &it : jointNames)
         {
-            cmd_int_cnf.names.push_back(it + "/" + hardware_interface::HW_IF_POSITION);
-            cmd_int_cnf.names.push_back(it + "/" + hardware_interface::HW_IF_VELOCITY);
             cmd_int_cnf.names.push_back(it + "/" + hardware_interface::HW_IF_EFFORT);
-            cmd_int_cnf.names.push_back(it + "/" + "kp_scale_value");
-            cmd_int_cnf.names.push_back(it + "/" + "kd_scale_value");
         }
         return cmd_int_cnf;
     }
@@ -198,54 +168,68 @@ namespace allegro_hand_computed_torque
                 const rclcpp::Time & time, const rclcpp::Duration & 
             )
     {
-        //get wheel velocity and compute the mecanum wheel FK in base frame if requested
-        if(odom_flag_)
-        {
-            for(size_t i = 0; i < wheels_name_.size(); i++)
-                wheel_vel_[i] = state_interfaces_[i].get_value();
-            omni_fk();
-            odom_msg_.header.set__stamp(time);
-            odom_msg_.twist.linear.set__x(odom_vel_[0]);
-            odom_msg_.twist.linear.set__y(odom_vel_[1]);
-            odom_msg_.twist.linear.set__z(0.0);
-            odom_msg_.twist.angular.set__x(0.0);
-            odom_msg_.twist.angular.set__y(0.0);
-            odom_msg_.twist.angular.set__z(odom_vel_[2]);
-            odom_pub_->publish(odom_msg_);
-            
+        // position command
+        auto joint_cmd_ptr = rt_command_ptr_.readFromRT();
+
+        // no position command received yet
+        if (!joint_cmd_ptr || !(*joint_cmd_ptr)) {
+            return controller_interface::return_type::OK;
         }
-        // comute the joint wheel velocity reference
-        std::lock_guard<std::mutex> lg(var_mutex_);
-        switch (c_stt_)
-        {
-        case Controller_State::INACTIVE:
-            
-            for(int i = 0;i < WHEELS; i++)
-            {
-                joint_cmd_.position[i] = 0.0;
-                joint_cmd_.velocity[i] = 0.0;
-                joint_cmd_.effort[i] = 0.0;
-                joint_cmd_.kp_scale[i] = 0.0;
-                joint_cmd_.kd_scale[i] = 0.0;
-            }
-
-            break;
-        case Controller_State::ACTIVE:
-
-            set_cmd(base_vel_);
-           
-            break;
-        default:
-        return controller_interface::return_type::ERROR;
-            break;
+        // bad position command received
+        if ((*joint_cmd_ptr)->name.size() != DOF_JOINTS) {
+            RCLCPP_ERROR_THROTTLE(get_node()->get_logger(), *(get_node()->get_clock()), 1000,
+                                "command size (%zu) does not match number of joints (%u)", 
+                                (*joint_cmd_ptr)->name.size(), DOF_JOINTS);
+            return controller_interface::return_type::ERROR;
+        }else{
+            joint_cmd_ = *(*joint_cmd_ptr);
+        }
+        // read state_interfaces_ : [pos_joint0, vel_joint0, eff_joint0, pos_joint1, ...]
+        Eigen::VectorXd q = Eigen::VectorXd::Zero(DOF_JOINTS);
+        Eigen::VectorXd dq = Eigen::VectorXd::Zero(DOF_JOINTS);
+        Eigen::VectorXd q_r = Eigen::VectorXd::Zero(DOF_JOINTS);
+        Eigen::VectorXd dq_r = Eigen::VectorXd::Zero(DOF_JOINTS);
+        Eigen::VectorXd ddq_r = Eigen::VectorXd::Zero(DOF_JOINTS);
+        for (size_t i = 0; i < DOF_JOINTS; i++) {
+            q(i) = state_interfaces_[i * 3].get_value();
+            dq(i) = state_interfaces_[i * 3 + 1].get_value();
+            q_r(i) = joint_cmd_.position.at(i);
+            dq_r(i) = joint_cmd_.velocity.at(i);
         }
 
-        set_cmd2jnt();
+        Eigen::VectorXd tau(DOF_JOINTS);
+        thunder_index_handle_.setArguments(q.segment(0, 4),dq.segment(0, 4),dq_r.segment(0, 4), ddq_r.segment(0, 4));
+        thunder_middle_handle_.setArguments(q.segment(4, 4), dq.segment(4, 4), dq_r.segment(4, 4), ddq_r.segment(4, 4));
+        thunder_ring_handle_.setArguments(q.segment(8, 4), dq.segment(8, 4), dq_r.segment(8, 4), ddq_r.segment(8, 4));
+        thunder_thumb_handle_.setArguments(q.segment(12, 4), dq.segment(12, 4), dq_r.segment(12, 4), ddq_r.segment(12, 4));
+
+        // compute joint errors
+        Eigen::VectorXd e = q_r - q;
+        Eigen::VectorXd de = dq_r - dq;
+
+        // ----------------------------------
+        // CONTROL LAW IMPLEMENTATION
+        //
+        // Add here the desired contro Law
+        // ----------------------------------
+        // ...
+        tau.segment(0, 4) =  thunder_index_handle_.get_reg_G() *thunder_index_handle_.get_par_DYN();
+        tau.segment(4, 4) =  thunder_middle_handle_.get_reg_G()*thunder_middle_handle_.get_par_DYN();
+        tau.segment(8, 4) =  thunder_ring_handle_.get_reg_G()  *thunder_ring_handle_.get_par_DYN();
+        tau.segment(12, 4) = thunder_thumb_handle_.get_reg_G() *thunder_thumb_handle_.get_par_DYN();
+        // ...
+
+        // write on command_interfaces_ : [eff_joint0, eff_joint1, ...]
+        for (size_t i = 0; i < DOF_JOINTS; i++) {
+            double effort_command = tau(i);
+            command_interfaces_[i * 2].set_value(effort_command);
+        }
+
         return controller_interface::return_type::OK;
     }
 
 
 }; // namespace allegro_hand_computed_torque
 PLUGINLIB_EXPORT_CLASS(
-    allegro_hand_computed_torque::ComputedTorque_Controller, allegro_hand_computed_torque::ControllerInterface
+    allegro_hand_computed_torque::ComputedTorque_Controller, controller_interface::ControllerInterface
 );
