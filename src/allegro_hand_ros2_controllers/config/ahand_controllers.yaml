@@ -21,7 +21,6 @@ computed_torque_controller:
     kp1: 300.0   #default: 120.0
     kp2: 150.0   #default: 70.0
     kp3: 30.0    #default: 50.0
-    kv1: 30.0
-    kv2: 15.0
-    kv3: 3.0
-    dt: 2       # in [ms]
+    kd1: 30.0
+    kd2: 15.0
+    kd3: 3.0

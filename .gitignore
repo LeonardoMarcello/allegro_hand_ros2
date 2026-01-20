@@ -1,5 +1,12 @@
-/.vscode/
-/build/
-/install/
-/log/
-/workdir/
+.vscode/
+build/
+install/
+log/
+workdir/
+
+# rosbag
+*.bag
+*.db3
+*.db3-wal
+*.db3-shm
+*_bag/

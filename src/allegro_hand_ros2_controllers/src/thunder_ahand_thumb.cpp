@@ -3,7 +3,6 @@
 
 
 
-
 thunder_ahand_thumb::thunder_ahand_thumb(){
 	resizeVariables();
 }
@@ -28,10 +27,10 @@ void thunder_ahand_thumb::resizeVariables(){
 	par_D = Eigen::VectorXd::Zero(D_order*numElasticJoints);
 	par_Dm = Eigen::VectorXd::Zero(Dm_order*numElasticJoints);
 	par_Mm = Eigen::VectorXd::Zero(numElasticJoints);
-	DHtable = Eigen::VectorXd::Zero(n_joints*4);
-	world2L0 = Eigen::VectorXd::Zero(6);
-	Ln2EE = Eigen::VectorXd::Zero(6);
-	gravity = Eigen::VectorXd::Zero(3);
+	par_DHtable = Eigen::VectorXd::Zero(n_joints*4);
+	par_world2L0 = Eigen::VectorXd::Zero(6);
+	par_Ln2EE = Eigen::VectorXd::Zero(6);
+	par_gravity = Eigen::VectorXd::Zero(3);
 	DHtable_symb.resize(n_joints*4);
 	for (int i=0; i<n_joints*4; i++) DHtable_symb[i] = 0;
 	gravity_symb.resize(3);
@@ -246,33 +245,33 @@ void thunder_ahand_thumb::set_par_Dl(const Eigen::VectorXd& par_){
 	}
 }
 
-void thunder_ahand_thumb::set_DHtable(const Eigen::MatrixXd& par_){
-	if(par_.size() == DHtable.size()){
-		DHtable = par_;
+void thunder_ahand_thumb::set_par_DHtable(const Eigen::MatrixXd& par_){
+	if(par_.size() == par_DHtable.size()){
+		par_DHtable = par_;
 	} else{
 		std::cout<<"in setArguments: invalid dimensions of arguments\n";
 	}
 }
 
-void thunder_ahand_thumb::set_gravity(const Eigen::VectorXd& par_){
-	if(par_.size() == gravity.size()){
-		gravity = par_;
+void thunder_ahand_thumb::set_par_gravity(const Eigen::VectorXd& par_){
+	if(par_.size() == par_gravity.size()){
+		par_gravity = par_;
 	} else{
 		std::cout<<"in setArguments: invalid dimensions of arguments\n";
 	}
 }
 
-void thunder_ahand_thumb::set_world2L0(const Eigen::VectorXd& par_){
-	if(par_.size() == world2L0.size()){
-		world2L0 = par_;
+void thunder_ahand_thumb::set_par_world2L0(const Eigen::VectorXd& par_){
+	if(par_.size() == par_world2L0.size()){
+		par_world2L0 = par_;
 	} else{
 		std::cout<<"in setArguments: invalid dimensions of arguments\n";
 	}
 }
 
-void thunder_ahand_thumb::set_Ln2EE(const Eigen::VectorXd& par_){
-	if(par_.size() == Ln2EE.size()){
-		Ln2EE = par_;
+void thunder_ahand_thumb::set_par_Ln2EE(const Eigen::VectorXd& par_){
+	if(par_.size() == par_Ln2EE.size()){
+		par_Ln2EE = par_;
 	} else{
 		std::cout<<"in setArguments: invalid dimensions of arguments\n";
 	}
@@ -306,20 +305,20 @@ Eigen::VectorXd thunder_ahand_thumb::get_par_Dl(){
 	return par_Dl;
 }
 
-Eigen::MatrixXd thunder_ahand_thumb::get_DHtable(){
-	return DHtable;
+Eigen::MatrixXd thunder_ahand_thumb::get_par_DHtable(){
+	return par_DHtable;
 }
 
-Eigen::VectorXd thunder_ahand_thumb::get_gravity(){
-	return gravity;
+Eigen::VectorXd thunder_ahand_thumb::get_par_gravity(){
+	return par_gravity;
 }
 
-Eigen::VectorXd thunder_ahand_thumb::get_world2L0(){
-	return world2L0;
+Eigen::VectorXd thunder_ahand_thumb::get_par_world2L0(){
+	return par_world2L0;
 }
 
-Eigen::VectorXd thunder_ahand_thumb::get_Ln2EE(){
-	return Ln2EE;
+Eigen::VectorXd thunder_ahand_thumb::get_par_Ln2EE(){
+	return par_Ln2EE;
 }
 
 Eigen::VectorXd thunder_ahand_thumb::load_par_REG(std::string file_path, bool update_DYN){
@@ -364,35 +363,35 @@ void thunder_ahand_thumb::load_conf(std::string file_path, bool update_REG){
 		int index;
 		// --- Parse kinematics --- //
 		if (config["kinematics"]){
-			DHtable.resize(n_joints*4);
+			par_DHtable.resize(n_joints*4);
 			// Denavit-Hartenberg
 			YAML::Node kinematics = config["kinematics"];
 			std::vector<double> dh_vect = kinematics["DH"].as<std::vector<double>>();
-			// DHtable = Eigen::Map<Eigen::VectorXd>(&dh_vect[0], nj*4).reshaped<Eigen::RowMajor>(nj, 4);
+			// par_DHtable = Eigen::Map<Eigen::VectorXd>(&dh_vect[0], nj*4).reshaped<Eigen::RowMajor>(nj, 4);
 			if (kinematics["symb"]){
 				DHtable_symb = kinematics["symb"].as<std::vector<int>>();
 			} else {
 				// no parameters here
 			}
 			int sz = dh_vect.size();
-			// DHtable.resize(sz);
+			// par_DHtable.resize(sz);
 			// for (int i=0; i<sz; i++){
-			// 		DHtable(i) = dh_vect[i];
+			// 		par_DHtable(i) = dh_vect[i];
 			// 	}
 			// }
 			// Eigen::VectorXd gravity_new(sz);
 			int sz1 = 0;
 			for (int i=0; i<sz; i++){
 				if (DHtable_symb[i]){
-					DHtable(sz1) = dh_vect[i];
+					par_DHtable(sz1) = dh_vect[i];
 					sz1++;
 				}
 			}
-			DHtable.conservativeResize(sz1);
+			par_DHtable.conservativeResize(sz1);
 		}
 		// - Frame Offsets - //
 		if (config["Base_to_L0"]){
-			world2L0.resize(6);
+			par_world2L0.resize(6);
 			YAML::Node frame_base = config["Base_to_L0"];
 			if (frame_base["symb"]){
 				world2L0_symb = frame_base["symb"].as<std::vector<int>>();
@@ -408,22 +407,22 @@ void thunder_ahand_thumb::load_conf(std::string file_path, bool update_REG){
 			int sz1=0, sz2=0;
 			for (int i=0; i<3; i++){
 				if (world2L0_symb[i]){
-					world2L0(sz1) = tr[i];
+					par_world2L0(sz1) = tr[i];
 					sz1++;
 				}
 			}
 			for (int i=0; i<3; i++){
 				if (world2L0_symb[i+3]){
-					world2L0(sz1+sz2) = ypr[i];
+					par_world2L0(sz1+sz2) = ypr[i];
 					sz2++;
 				}
 			}
-			world2L0.conservativeResize(sz1+sz2);
+			par_world2L0.conservativeResize(sz1+sz2);
 			// world2L0 = world2L0_new;
 		}
 
 		if (config["Ln_to_EE"]){
-			Ln2EE.resize(6);
+			par_Ln2EE.resize(6);
 			YAML::Node frame_ee = config["Ln_to_EE"];
 			if (frame_ee["symb"]){
 				Ln2EE_symb = frame_ee["symb"].as<std::vector<int>>();
@@ -439,18 +438,18 @@ void thunder_ahand_thumb::load_conf(std::string file_path, bool update_REG){
 			int sz1=0, sz2=0;
 			for (int i=0; i<3; i++){
 				if (Ln2EE_symb[i]){
-					Ln2EE(sz1) = tr[i];
+					par_Ln2EE(sz1) = tr[i];
 					sz1++;
 				}
 			}
 			for (int i=0; i<3; i++){
 				if (Ln2EE_symb[i+3]){
-					Ln2EE(sz1+sz2) = ypr[i];
+					par_Ln2EE(sz1+sz2) = ypr[i];
 					sz2++;
 				}
 			}
-			Ln2EE.conservativeResize(sz1+sz2);
-			// Ln2EE = Ln2EE_new;
+			par_Ln2EE.conservativeResize(sz1+sz2);
+			// par_Ln2EE = Ln2EE_new;
 		}
 		
 		// --- Parse dynamics --- //
@@ -489,7 +488,7 @@ void thunder_ahand_thumb::load_conf(std::string file_path, bool update_REG){
 		}
 		// - Gravity - //
 		if (config["gravity"]){
-			gravity.resize(3);
+			par_gravity.resize(3);
 			YAML::Node gravity_node = config["gravity"];
 			if (gravity_node["symb"]){
 				gravity_symb = gravity_node["symb"].as<std::vector<int>>();
@@ -503,12 +502,12 @@ void thunder_ahand_thumb::load_conf(std::string file_path, bool update_REG){
 			int sz1 = 0;
 			for (int i=0; i<3; i++){
 				if (gravity_symb[i]){
-					gravity(sz1) = grav[i];
+					par_gravity(sz1) = grav[i];
 					sz1++;
 				}
 			}
-			gravity.conservativeResize(sz1);
-			// gravity = gravity_new;
+			par_gravity.conservativeResize(sz1);
+			// par_gravity = gravity_new;
 		}
 
 		// --- Parse elastic --- //
@@ -669,19 +668,19 @@ int thunder_ahand_thumb::save_par(std::string par_file){
 		YAML::Node yamlFile;
 
 		// - save DHtable - //
-		std::vector<double> DHtable_vect(DHtable.data(), DHtable.data() + DHtable.rows() * DHtable.cols());
+		std::vector<double> DHtable_vect(par_DHtable.data(), par_DHtable.data() + par_DHtable.rows() * par_DHtable.cols());
 		yamlFile["DHtable"] = DHtable_vect;
 
 		// - save world2L0 - //
-		std::vector<double> world2L0_vect(world2L0.data(), world2L0.data() + world2L0.rows() * world2L0.cols());
+		std::vector<double> world2L0_vect(par_world2L0.data(), par_world2L0.data() + par_world2L0.rows() * par_world2L0.cols());
 		yamlFile["world2L0"] = world2L0_vect;
 
 		// - save Ln2EE - //
-		std::vector<double> Ln2EE_vect(Ln2EE.data(), Ln2EE.data() + Ln2EE.rows() * Ln2EE.cols());
+		std::vector<double> Ln2EE_vect(par_Ln2EE.data(), par_Ln2EE.data() + par_Ln2EE.rows() * par_Ln2EE.cols());
 		yamlFile["Ln2EE"] = Ln2EE_vect;
 
 		// - save gravity - //
-		std::vector<double> gravity_vect(gravity.data(), gravity.data() + gravity.rows() * gravity.cols());
+		std::vector<double> gravity_vect(par_gravity.data(), par_gravity.data() + par_gravity.rows() * par_gravity.cols());
 		yamlFile["gravity"] = gravity_vect;
 
 		// - save par_DYN - //
@@ -828,493 +827,452 @@ Eigen::Matrix3d thunder_ahand_thumb::createI(const std::vector<double> parI){
 // ----- generated functions ----- //
 
 // - Manipulator Coriolis matrix - //
-Eigen::MatrixXd thunder_ahand_thumb::get_C(){
-	Eigen::MatrixXd out;
-	out.resize(4,4);
-	long long p3[ahand_thumb_C_fun_SZ_IW];
-	double p4[ahand_thumb_C_fun_SZ_W];
-	const double* input_[] = {q.data(), dq.data(), world2L0.data(), par_DYN.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,4,4> thunder_ahand_thumb::get_C(){
+	thread_local double buffer[16];
+	thread_local long long p3[ahand_thumb_C_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_C_fun_SZ_W];
+	const double* input_[] = {q.data(), dq.data(), par_world2L0.data(), par_DYN.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_C_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,4,4>>(buffer);
 }
 
 // - Second time derivative of the Coriolis matrix - //
-Eigen::MatrixXd thunder_ahand_thumb::get_C_ddot(){
-	Eigen::MatrixXd out;
-	out.resize(4,4);
-	long long p3[ahand_thumb_C_ddot_fun_SZ_IW];
-	double p4[ahand_thumb_C_ddot_fun_SZ_W];
-	const double* input_[] = {q.data(), dq.data(), ddq.data(), d3q.data(), world2L0.data(), par_DYN.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,4,4> thunder_ahand_thumb::get_C_ddot(){
+	thread_local double buffer[16];
+	thread_local long long p3[ahand_thumb_C_ddot_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_C_ddot_fun_SZ_W];
+	const double* input_[] = {q.data(), dq.data(), ddq.data(), d3q.data(), par_world2L0.data(), par_DYN.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_C_ddot_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,4,4>>(buffer);
 }
 
 // - Time derivative of the Coriolis matrix - //
-Eigen::MatrixXd thunder_ahand_thumb::get_C_dot(){
-	Eigen::MatrixXd out;
-	out.resize(4,4);
-	long long p3[ahand_thumb_C_dot_fun_SZ_IW];
-	double p4[ahand_thumb_C_dot_fun_SZ_W];
-	const double* input_[] = {q.data(), dq.data(), ddq.data(), world2L0.data(), par_DYN.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,4,4> thunder_ahand_thumb::get_C_dot(){
+	thread_local double buffer[16];
+	thread_local long long p3[ahand_thumb_C_dot_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_C_dot_fun_SZ_W];
+	const double* input_[] = {q.data(), dq.data(), ddq.data(), par_world2L0.data(), par_DYN.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_C_dot_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,4,4>>(buffer);
 }
 
 // - Classic formulation of the manipulator Coriolis matrix - //
-Eigen::MatrixXd thunder_ahand_thumb::get_C_std(){
-	Eigen::MatrixXd out;
-	out.resize(4,4);
-	long long p3[ahand_thumb_C_std_fun_SZ_IW];
-	double p4[ahand_thumb_C_std_fun_SZ_W];
-	const double* input_[] = {q.data(), dq.data(), world2L0.data(), par_DYN.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,4,4> thunder_ahand_thumb::get_C_std(){
+	thread_local double buffer[16];
+	thread_local long long p3[ahand_thumb_C_std_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_C_std_fun_SZ_W];
+	const double* input_[] = {q.data(), dq.data(), par_world2L0.data(), par_DYN.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_C_std_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,4,4>>(buffer);
 }
 
 // - Manipulator gravity terms - //
-Eigen::MatrixXd thunder_ahand_thumb::get_G(){
-	Eigen::MatrixXd out;
-	out.resize(4,1);
-	long long p3[ahand_thumb_G_fun_SZ_IW];
-	double p4[ahand_thumb_G_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data(), gravity.data(), par_DYN.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,4,1> thunder_ahand_thumb::get_G(){
+	thread_local double buffer[4];
+	thread_local long long p3[ahand_thumb_G_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_G_fun_SZ_W];
+	const double* input_[] = {q.data(), par_world2L0.data(), par_gravity.data(), par_DYN.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_G_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,4,1>>(buffer);
 }
 
 // - Second time derivative of the gravity vector - //
-Eigen::MatrixXd thunder_ahand_thumb::get_G_ddot(){
-	Eigen::MatrixXd out;
-	out.resize(4,1);
-	long long p3[ahand_thumb_G_ddot_fun_SZ_IW];
-	double p4[ahand_thumb_G_ddot_fun_SZ_W];
-	const double* input_[] = {q.data(), dq.data(), ddq.data(), world2L0.data(), gravity.data(), par_DYN.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,4,1> thunder_ahand_thumb::get_G_ddot(){
+	thread_local double buffer[4];
+	thread_local long long p3[ahand_thumb_G_ddot_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_G_ddot_fun_SZ_W];
+	const double* input_[] = {q.data(), dq.data(), ddq.data(), par_world2L0.data(), par_gravity.data(), par_DYN.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_G_ddot_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,4,1>>(buffer);
 }
 
 // - Time derivative of the gravity vector - //
-Eigen::MatrixXd thunder_ahand_thumb::get_G_dot(){
-	Eigen::MatrixXd out;
-	out.resize(4,1);
-	long long p3[ahand_thumb_G_dot_fun_SZ_IW];
-	double p4[ahand_thumb_G_dot_fun_SZ_W];
-	const double* input_[] = {q.data(), dq.data(), world2L0.data(), gravity.data(), par_DYN.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,4,1> thunder_ahand_thumb::get_G_dot(){
+	thread_local double buffer[4];
+	thread_local long long p3[ahand_thumb_G_dot_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_G_dot_fun_SZ_W];
+	const double* input_[] = {q.data(), dq.data(), par_world2L0.data(), par_gravity.data(), par_DYN.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_G_dot_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,4,1>>(buffer);
 }
 
 // - Jacobian of frame 1 - //
-Eigen::MatrixXd thunder_ahand_thumb::get_J_1(){
-	Eigen::MatrixXd out;
-	out.resize(6,4);
-	long long p3[ahand_thumb_J_1_fun_SZ_IW];
-	double p4[ahand_thumb_J_1_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,6,4> thunder_ahand_thumb::get_J_1(){
+	thread_local double buffer[24];
+	thread_local long long p3[ahand_thumb_J_1_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_J_1_fun_SZ_W];
+	const double* input_[] = {q.data(), par_world2L0.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_J_1_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,6,4>>(buffer);
 }
 
 // - Jacobian of frame 2 - //
-Eigen::MatrixXd thunder_ahand_thumb::get_J_2(){
-	Eigen::MatrixXd out;
-	out.resize(6,4);
-	long long p3[ahand_thumb_J_2_fun_SZ_IW];
-	double p4[ahand_thumb_J_2_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,6,4> thunder_ahand_thumb::get_J_2(){
+	thread_local double buffer[24];
+	thread_local long long p3[ahand_thumb_J_2_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_J_2_fun_SZ_W];
+	const double* input_[] = {q.data(), par_world2L0.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_J_2_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,6,4>>(buffer);
 }
 
 // - Jacobian of frame 3 - //
-Eigen::MatrixXd thunder_ahand_thumb::get_J_3(){
-	Eigen::MatrixXd out;
-	out.resize(6,4);
-	long long p3[ahand_thumb_J_3_fun_SZ_IW];
-	double p4[ahand_thumb_J_3_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,6,4> thunder_ahand_thumb::get_J_3(){
+	thread_local double buffer[24];
+	thread_local long long p3[ahand_thumb_J_3_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_J_3_fun_SZ_W];
+	const double* input_[] = {q.data(), par_world2L0.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_J_3_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,6,4>>(buffer);
 }
 
 // - Jacobian of frame 4 - //
-Eigen::MatrixXd thunder_ahand_thumb::get_J_4(){
-	Eigen::MatrixXd out;
-	out.resize(6,4);
-	long long p3[ahand_thumb_J_4_fun_SZ_IW];
-	double p4[ahand_thumb_J_4_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,6,4> thunder_ahand_thumb::get_J_4(){
+	thread_local double buffer[24];
+	thread_local long long p3[ahand_thumb_J_4_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_J_4_fun_SZ_W];
+	const double* input_[] = {q.data(), par_world2L0.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_J_4_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,6,4>>(buffer);
 }
 
 // - Jacobian of frame 5 - //
-Eigen::MatrixXd thunder_ahand_thumb::get_J_5(){
-	Eigen::MatrixXd out;
-	out.resize(6,4);
-	long long p3[ahand_thumb_J_5_fun_SZ_IW];
-	double p4[ahand_thumb_J_5_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data(), Ln2EE.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,6,4> thunder_ahand_thumb::get_J_5(){
+	thread_local double buffer[24];
+	thread_local long long p3[ahand_thumb_J_5_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_J_5_fun_SZ_W];
+	const double* input_[] = {q.data(), par_world2L0.data(), par_Ln2EE.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_J_5_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,6,4>>(buffer);
 }
 
 // - Jacobian of center of mass of link 1 - //
-Eigen::MatrixXd thunder_ahand_thumb::get_J_cm_1(){
-	Eigen::MatrixXd out;
-	out.resize(6,4);
-	long long p3[ahand_thumb_J_cm_1_fun_SZ_IW];
-	double p4[ahand_thumb_J_cm_1_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data(), par_DYN.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,6,4> thunder_ahand_thumb::get_J_cm_1(){
+	thread_local double buffer[24];
+	thread_local long long p3[ahand_thumb_J_cm_1_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_J_cm_1_fun_SZ_W];
+	const double* input_[] = {q.data(), par_world2L0.data(), par_DYN.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_J_cm_1_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,6,4>>(buffer);
 }
 
 // - Jacobian of center of mass of link 2 - //
-Eigen::MatrixXd thunder_ahand_thumb::get_J_cm_2(){
-	Eigen::MatrixXd out;
-	out.resize(6,4);
-	long long p3[ahand_thumb_J_cm_2_fun_SZ_IW];
-	double p4[ahand_thumb_J_cm_2_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data(), par_DYN.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,6,4> thunder_ahand_thumb::get_J_cm_2(){
+	thread_local double buffer[24];
+	thread_local long long p3[ahand_thumb_J_cm_2_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_J_cm_2_fun_SZ_W];
+	const double* input_[] = {q.data(), par_world2L0.data(), par_DYN.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_J_cm_2_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,6,4>>(buffer);
 }
 
 // - Jacobian of center of mass of link 3 - //
-Eigen::MatrixXd thunder_ahand_thumb::get_J_cm_3(){
-	Eigen::MatrixXd out;
-	out.resize(6,4);
-	long long p3[ahand_thumb_J_cm_3_fun_SZ_IW];
-	double p4[ahand_thumb_J_cm_3_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data(), par_DYN.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,6,4> thunder_ahand_thumb::get_J_cm_3(){
+	thread_local double buffer[24];
+	thread_local long long p3[ahand_thumb_J_cm_3_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_J_cm_3_fun_SZ_W];
+	const double* input_[] = {q.data(), par_world2L0.data(), par_DYN.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_J_cm_3_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,6,4>>(buffer);
 }
 
 // - Jacobian of center of mass of link 4 - //
-Eigen::MatrixXd thunder_ahand_thumb::get_J_cm_4(){
-	Eigen::MatrixXd out;
-	out.resize(6,4);
-	long long p3[ahand_thumb_J_cm_4_fun_SZ_IW];
-	double p4[ahand_thumb_J_cm_4_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data(), par_DYN.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,6,4> thunder_ahand_thumb::get_J_cm_4(){
+	thread_local double buffer[24];
+	thread_local long long p3[ahand_thumb_J_cm_4_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_J_cm_4_fun_SZ_W];
+	const double* input_[] = {q.data(), par_world2L0.data(), par_DYN.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_J_cm_4_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,6,4>>(buffer);
 }
 
 // - Jacobian of the end-effector - //
-Eigen::MatrixXd thunder_ahand_thumb::get_J_ee(){
-	Eigen::MatrixXd out;
-	out.resize(6,4);
-	long long p3[ahand_thumb_J_ee_fun_SZ_IW];
-	double p4[ahand_thumb_J_ee_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data(), Ln2EE.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,6,4> thunder_ahand_thumb::get_J_ee(){
+	thread_local double buffer[24];
+	thread_local long long p3[ahand_thumb_J_ee_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_J_ee_fun_SZ_W];
+	const double* input_[] = {q.data(), par_world2L0.data(), par_Ln2EE.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_J_ee_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,6,4>>(buffer);
 }
 
 // - Time second derivative of jacobian matrix - //
-Eigen::MatrixXd thunder_ahand_thumb::get_J_ee_ddot(){
-	Eigen::MatrixXd out;
-	out.resize(6,4);
-	long long p3[ahand_thumb_J_ee_ddot_fun_SZ_IW];
-	double p4[ahand_thumb_J_ee_ddot_fun_SZ_W];
-	const double* input_[] = {q.data(), dq.data(), ddq.data(), world2L0.data(), Ln2EE.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,6,4> thunder_ahand_thumb::get_J_ee_ddot(){
+	thread_local double buffer[24];
+	thread_local long long p3[ahand_thumb_J_ee_ddot_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_J_ee_ddot_fun_SZ_W];
+	const double* input_[] = {q.data(), dq.data(), ddq.data(), par_world2L0.data(), par_Ln2EE.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_J_ee_ddot_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,6,4>>(buffer);
 }
 
 // - Time derivative of jacobian matrix - //
-Eigen::MatrixXd thunder_ahand_thumb::get_J_ee_dot(){
-	Eigen::MatrixXd out;
-	out.resize(6,4);
-	long long p3[ahand_thumb_J_ee_dot_fun_SZ_IW];
-	double p4[ahand_thumb_J_ee_dot_fun_SZ_W];
-	const double* input_[] = {q.data(), dq.data(), world2L0.data(), Ln2EE.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,6,4> thunder_ahand_thumb::get_J_ee_dot(){
+	thread_local double buffer[24];
+	thread_local long long p3[ahand_thumb_J_ee_dot_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_J_ee_dot_fun_SZ_W];
+	const double* input_[] = {q.data(), dq.data(), par_world2L0.data(), par_Ln2EE.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_J_ee_dot_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,6,4>>(buffer);
 }
 
 // - Pseudo-Inverse of jacobian matrix - //
-Eigen::MatrixXd thunder_ahand_thumb::get_J_ee_pinv(){
-	Eigen::MatrixXd out;
-	out.resize(4,6);
-	long long p3[ahand_thumb_J_ee_pinv_fun_SZ_IW];
-	double p4[ahand_thumb_J_ee_pinv_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data(), Ln2EE.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,4,6> thunder_ahand_thumb::get_J_ee_pinv(){
+	thread_local double buffer[24];
+	thread_local long long p3[ahand_thumb_J_ee_pinv_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_J_ee_pinv_fun_SZ_W];
+	const double* input_[] = {q.data(), par_world2L0.data(), par_Ln2EE.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_J_ee_pinv_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,4,6>>(buffer);
 }
 
 // - Manipulator mass matrix - //
-Eigen::MatrixXd thunder_ahand_thumb::get_M(){
-	Eigen::MatrixXd out;
-	out.resize(4,4);
-	long long p3[ahand_thumb_M_fun_SZ_IW];
-	double p4[ahand_thumb_M_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data(), par_DYN.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,4,4> thunder_ahand_thumb::get_M(){
+	thread_local double buffer[16];
+	thread_local long long p3[ahand_thumb_M_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_M_fun_SZ_W];
+	const double* input_[] = {q.data(), par_world2L0.data(), par_DYN.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_M_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,4,4>>(buffer);
 }
 
 // - Second time derivative of the mass matrix - //
-Eigen::MatrixXd thunder_ahand_thumb::get_M_ddot(){
-	Eigen::MatrixXd out;
-	out.resize(4,4);
-	long long p3[ahand_thumb_M_ddot_fun_SZ_IW];
-	double p4[ahand_thumb_M_ddot_fun_SZ_W];
-	const double* input_[] = {q.data(), dq.data(), ddq.data(), world2L0.data(), par_DYN.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,4,4> thunder_ahand_thumb::get_M_ddot(){
+	thread_local double buffer[16];
+	thread_local long long p3[ahand_thumb_M_ddot_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_M_ddot_fun_SZ_W];
+	const double* input_[] = {q.data(), dq.data(), ddq.data(), par_world2L0.data(), par_DYN.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_M_ddot_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,4,4>>(buffer);
 }
 
 // - Time derivative of the mass matrix - //
-Eigen::MatrixXd thunder_ahand_thumb::get_M_dot(){
-	Eigen::MatrixXd out;
-	out.resize(4,4);
-	long long p3[ahand_thumb_M_dot_fun_SZ_IW];
-	double p4[ahand_thumb_M_dot_fun_SZ_W];
-	const double* input_[] = {q.data(), dq.data(), world2L0.data(), par_DYN.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,4,4> thunder_ahand_thumb::get_M_dot(){
+	thread_local double buffer[16];
+	thread_local long long p3[ahand_thumb_M_dot_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_M_dot_fun_SZ_W];
+	const double* input_[] = {q.data(), dq.data(), par_world2L0.data(), par_DYN.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_M_dot_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,4,4>>(buffer);
 }
 
 // - relative transformation from frame base to frame 1 - //
-Eigen::MatrixXd thunder_ahand_thumb::get_T_0(){
-	Eigen::MatrixXd out;
-	out.resize(4,4);
-	long long p3[ahand_thumb_T_0_fun_SZ_IW];
-	double p4[ahand_thumb_T_0_fun_SZ_W];
-	const double* input_[] = {world2L0.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,4,4> thunder_ahand_thumb::get_T_0(){
+	thread_local double buffer[16];
+	thread_local long long p3[ahand_thumb_T_0_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_T_0_fun_SZ_W];
+	const double* input_[] = {par_world2L0.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_T_0_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,4,4>>(buffer);
 }
 
 // - absolute transformation from frame base to frame 1 - //
-Eigen::MatrixXd thunder_ahand_thumb::get_T_0_0(){
-	Eigen::MatrixXd out;
-	out.resize(4,4);
-	long long p3[ahand_thumb_T_0_0_fun_SZ_IW];
-	double p4[ahand_thumb_T_0_0_fun_SZ_W];
-	const double* input_[] = {world2L0.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,4,4> thunder_ahand_thumb::get_T_0_0(){
+	thread_local double buffer[16];
+	thread_local long long p3[ahand_thumb_T_0_0_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_T_0_0_fun_SZ_W];
+	const double* input_[] = {par_world2L0.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_T_0_0_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,4,4>>(buffer);
 }
 
 // - absolute transformation from frame base to frame 1 - //
-Eigen::MatrixXd thunder_ahand_thumb::get_T_0_1(){
-	Eigen::MatrixXd out;
-	out.resize(4,4);
-	long long p3[ahand_thumb_T_0_1_fun_SZ_IW];
-	double p4[ahand_thumb_T_0_1_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,4,4> thunder_ahand_thumb::get_T_0_1(){
+	thread_local double buffer[16];
+	thread_local long long p3[ahand_thumb_T_0_1_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_T_0_1_fun_SZ_W];
+	const double* input_[] = {q.data(), par_world2L0.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_T_0_1_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,4,4>>(buffer);
 }
 
 // - absolute transformation from frame base to frame 2 - //
-Eigen::MatrixXd thunder_ahand_thumb::get_T_0_2(){
-	Eigen::MatrixXd out;
-	out.resize(4,4);
-	long long p3[ahand_thumb_T_0_2_fun_SZ_IW];
-	double p4[ahand_thumb_T_0_2_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,4,4> thunder_ahand_thumb::get_T_0_2(){
+	thread_local double buffer[16];
+	thread_local long long p3[ahand_thumb_T_0_2_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_T_0_2_fun_SZ_W];
+	const double* input_[] = {q.data(), par_world2L0.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_T_0_2_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,4,4>>(buffer);
 }
 
 // - absolute transformation from frame base to frame 3 - //
-Eigen::MatrixXd thunder_ahand_thumb::get_T_0_3(){
-	Eigen::MatrixXd out;
-	out.resize(4,4);
-	long long p3[ahand_thumb_T_0_3_fun_SZ_IW];
-	double p4[ahand_thumb_T_0_3_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,4,4> thunder_ahand_thumb::get_T_0_3(){
+	thread_local double buffer[16];
+	thread_local long long p3[ahand_thumb_T_0_3_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_T_0_3_fun_SZ_W];
+	const double* input_[] = {q.data(), par_world2L0.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_T_0_3_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,4,4>>(buffer);
 }
 
 // - absolute transformation from frame base to frame 4 - //
-Eigen::MatrixXd thunder_ahand_thumb::get_T_0_4(){
-	Eigen::MatrixXd out;
-	out.resize(4,4);
-	long long p3[ahand_thumb_T_0_4_fun_SZ_IW];
-	double p4[ahand_thumb_T_0_4_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,4,4> thunder_ahand_thumb::get_T_0_4(){
+	thread_local double buffer[16];
+	thread_local long long p3[ahand_thumb_T_0_4_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_T_0_4_fun_SZ_W];
+	const double* input_[] = {q.data(), par_world2L0.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_T_0_4_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,4,4>>(buffer);
 }
 
 // - absolute transformation from frame base to end_effector - //
-Eigen::MatrixXd thunder_ahand_thumb::get_T_0_5(){
-	Eigen::MatrixXd out;
-	out.resize(4,4);
-	long long p3[ahand_thumb_T_0_5_fun_SZ_IW];
-	double p4[ahand_thumb_T_0_5_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data(), Ln2EE.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,4,4> thunder_ahand_thumb::get_T_0_5(){
+	thread_local double buffer[16];
+	thread_local long long p3[ahand_thumb_T_0_5_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_T_0_5_fun_SZ_W];
+	const double* input_[] = {q.data(), par_world2L0.data(), par_Ln2EE.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_T_0_5_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,4,4>>(buffer);
 }
 
 // - absolute transformation from frame 0 to end_effector - //
-Eigen::MatrixXd thunder_ahand_thumb::get_T_0_ee(){
-	Eigen::MatrixXd out;
-	out.resize(4,4);
-	long long p3[ahand_thumb_T_0_ee_fun_SZ_IW];
-	double p4[ahand_thumb_T_0_ee_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data(), Ln2EE.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,4,4> thunder_ahand_thumb::get_T_0_ee(){
+	thread_local double buffer[16];
+	thread_local long long p3[ahand_thumb_T_0_ee_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_T_0_ee_fun_SZ_W];
+	const double* input_[] = {q.data(), par_world2L0.data(), par_Ln2EE.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_T_0_ee_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,4,4>>(buffer);
 }
 
 // - relative transformation from frame0to frame 1 - //
-Eigen::MatrixXd thunder_ahand_thumb::get_T_1(){
-	Eigen::MatrixXd out;
-	out.resize(4,4);
-	long long p3[ahand_thumb_T_1_fun_SZ_IW];
-	double p4[ahand_thumb_T_1_fun_SZ_W];
+Eigen::Matrix<double,4,4> thunder_ahand_thumb::get_T_1(){
+	thread_local double buffer[16];
+	thread_local long long p3[ahand_thumb_T_1_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_T_1_fun_SZ_W];
 	const double* input_[] = {q.data()};
-	double* output_[] = {out.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_T_1_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,4,4>>(buffer);
 }
 
 // - relative transformation from frame1to frame 2 - //
-Eigen::MatrixXd thunder_ahand_thumb::get_T_2(){
-	Eigen::MatrixXd out;
-	out.resize(4,4);
-	long long p3[ahand_thumb_T_2_fun_SZ_IW];
-	double p4[ahand_thumb_T_2_fun_SZ_W];
+Eigen::Matrix<double,4,4> thunder_ahand_thumb::get_T_2(){
+	thread_local double buffer[16];
+	thread_local long long p3[ahand_thumb_T_2_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_T_2_fun_SZ_W];
 	const double* input_[] = {q.data()};
-	double* output_[] = {out.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_T_2_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,4,4>>(buffer);
 }
 
 // - relative transformation from frame2to frame 3 - //
-Eigen::MatrixXd thunder_ahand_thumb::get_T_3(){
-	Eigen::MatrixXd out;
-	out.resize(4,4);
-	long long p3[ahand_thumb_T_3_fun_SZ_IW];
-	double p4[ahand_thumb_T_3_fun_SZ_W];
+Eigen::Matrix<double,4,4> thunder_ahand_thumb::get_T_3(){
+	thread_local double buffer[16];
+	thread_local long long p3[ahand_thumb_T_3_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_T_3_fun_SZ_W];
 	const double* input_[] = {q.data()};
-	double* output_[] = {out.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_T_3_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,4,4>>(buffer);
 }
 
 // - relative transformation from frame3to frame 4 - //
-Eigen::MatrixXd thunder_ahand_thumb::get_T_4(){
-	Eigen::MatrixXd out;
-	out.resize(4,4);
-	long long p3[ahand_thumb_T_4_fun_SZ_IW];
-	double p4[ahand_thumb_T_4_fun_SZ_W];
+Eigen::Matrix<double,4,4> thunder_ahand_thumb::get_T_4(){
+	thread_local double buffer[16];
+	thread_local long long p3[ahand_thumb_T_4_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_T_4_fun_SZ_W];
 	const double* input_[] = {q.data()};
-	double* output_[] = {out.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_T_4_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,4,4>>(buffer);
 }
 
 // - Manipulator regressor matrix - //
-Eigen::MatrixXd thunder_ahand_thumb::get_Yr(){
-	Eigen::MatrixXd out;
-	out.resize(4,40);
-	long long p3[ahand_thumb_Yr_fun_SZ_IW];
-	double p4[ahand_thumb_Yr_fun_SZ_W];
-	const double* input_[] = {q.data(), dq.data(), dqr.data(), ddqr.data(), world2L0.data(), gravity.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,4,40> thunder_ahand_thumb::get_Yr(){
+	thread_local double buffer[160];
+	thread_local long long p3[ahand_thumb_Yr_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_Yr_fun_SZ_W];
+	const double* input_[] = {q.data(), dq.data(), dqr.data(), ddqr.data(), par_world2L0.data(), par_gravity.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_Yr_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,4,40>>(buffer);
 }
 
 // - Regressor matrix of term C*dqr - //
-Eigen::MatrixXd thunder_ahand_thumb::get_reg_C(){
-	Eigen::MatrixXd out;
-	out.resize(4,40);
-	long long p3[ahand_thumb_reg_C_fun_SZ_IW];
-	double p4[ahand_thumb_reg_C_fun_SZ_W];
-	const double* input_[] = {q.data(), dq.data(), dqr.data(), world2L0.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,4,40> thunder_ahand_thumb::get_reg_C(){
+	thread_local double buffer[160];
+	thread_local long long p3[ahand_thumb_reg_C_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_reg_C_fun_SZ_W];
+	const double* input_[] = {q.data(), dq.data(), dqr.data(), par_world2L0.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_reg_C_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,4,40>>(buffer);
 }
 
 // - Regressor matrix of term G - //
-Eigen::MatrixXd thunder_ahand_thumb::get_reg_G(){
-	Eigen::MatrixXd out;
-	out.resize(4,40);
-	long long p3[ahand_thumb_reg_G_fun_SZ_IW];
-	double p4[ahand_thumb_reg_G_fun_SZ_W];
-	const double* input_[] = {q.data(), world2L0.data(), gravity.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,4,40> thunder_ahand_thumb::get_reg_G(){
+	thread_local double buffer[160];
+	thread_local long long p3[ahand_thumb_reg_G_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_reg_G_fun_SZ_W];
+	const double* input_[] = {q.data(), par_world2L0.data(), par_gravity.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_reg_G_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,4,40>>(buffer);
 }
 
 // - Regressor matrix of the quantity J^T*w - //
-Eigen::MatrixXd thunder_ahand_thumb::get_reg_JTw(){
-	Eigen::MatrixXd out;
-	out.resize(4,12);
-	long long p3[ahand_thumb_reg_JTw_fun_SZ_IW];
-	double p4[ahand_thumb_reg_JTw_fun_SZ_W];
-	const double* input_[] = {q.data(), w.data(), world2L0.data(), Ln2EE.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,4,12> thunder_ahand_thumb::get_reg_JTw(){
+	thread_local double buffer[48];
+	thread_local long long p3[ahand_thumb_reg_JTw_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_reg_JTw_fun_SZ_W];
+	const double* input_[] = {q.data(), w.data(), par_world2L0.data(), par_Ln2EE.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_reg_JTw_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,4,12>>(buffer);
 }
 
 // - Regressor matrix of the quantity J*dq - //
-Eigen::MatrixXd thunder_ahand_thumb::get_reg_Jdq(){
-	Eigen::MatrixXd out;
-	out.resize(6,12);
-	long long p3[ahand_thumb_reg_Jdq_fun_SZ_IW];
-	double p4[ahand_thumb_reg_Jdq_fun_SZ_W];
-	const double* input_[] = {q.data(), dq.data(), world2L0.data(), Ln2EE.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,6,12> thunder_ahand_thumb::get_reg_Jdq(){
+	thread_local double buffer[72];
+	thread_local long long p3[ahand_thumb_reg_Jdq_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_reg_Jdq_fun_SZ_W];
+	const double* input_[] = {q.data(), dq.data(), par_world2L0.data(), par_Ln2EE.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_reg_Jdq_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,6,12>>(buffer);
 }
 
 // - Regressor matrix of term M*ddqr - //
-Eigen::MatrixXd thunder_ahand_thumb::get_reg_M(){
-	Eigen::MatrixXd out;
-	out.resize(4,40);
-	long long p3[ahand_thumb_reg_M_fun_SZ_IW];
-	double p4[ahand_thumb_reg_M_fun_SZ_W];
-	const double* input_[] = {q.data(), ddqr.data(), world2L0.data()};
-	double* output_[] = {out.data()};
+Eigen::Matrix<double,4,40> thunder_ahand_thumb::get_reg_M(){
+	thread_local double buffer[160];
+	thread_local long long p3[ahand_thumb_reg_M_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_reg_M_fun_SZ_W];
+	const double* input_[] = {q.data(), ddqr.data(), par_world2L0.data()};
+	double* output_[] = {buffer};
 	int check = ahand_thumb_reg_M_fun(input_, output_, p3, p4, 0);
-	return out;
+	return Eigen::Map<Eigen::Matrix<double,4,40>>(buffer);
 }

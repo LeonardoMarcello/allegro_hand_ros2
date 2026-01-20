@@ -21,7 +21,7 @@ class thunder_ahand_thumb{
 		Eigen::VectorXd q, dq, ddq, d3q, d4q, dqr, ddqr, par_DYN, par_REG, par_Dl;
 		Eigen::VectorXd x, dx, ddx, ddxr, par_K, par_D, par_Dm, par_Mm;
 		Eigen::VectorXd w;
-		Eigen::VectorXd DHtable, gravity, world2L0, Ln2EE;
+		Eigen::VectorXd par_DHtable, par_gravity, par_world2L0, par_Ln2EE;
 		std::vector<int> DHtable_symb, gravity_symb, world2L0_symb, Ln2EE_symb;
 
 		void update_inertial_DYN();
@@ -95,10 +95,10 @@ class thunder_ahand_thumb{
 		void set_par_Dm(const Eigen::VectorXd& par_);
 		void set_par_Mm(const Eigen::VectorXd& par_);
 		void set_par_Dl(const Eigen::VectorXd& par_);
-		void set_DHtable(const Eigen::MatrixXd& par_);
-		void set_gravity(const Eigen::VectorXd& par_);
-		void set_world2L0(const Eigen::VectorXd& par_);
-		void set_Ln2EE(const Eigen::VectorXd& par_);
+		void set_par_DHtable(const Eigen::MatrixXd& par_);
+		void set_par_gravity(const Eigen::VectorXd& par_);
+		void set_par_world2L0(const Eigen::VectorXd& par_);
+		void set_par_Ln2EE(const Eigen::VectorXd& par_);
 		// void set_par_ELA(const Eigen::VectorXd& par_);
 		Eigen::VectorXd get_par_REG();
 		Eigen::VectorXd get_par_DYN();
@@ -107,10 +107,10 @@ class thunder_ahand_thumb{
 		Eigen::VectorXd get_par_Dm();
 		Eigen::VectorXd get_par_Mm();
 		Eigen::VectorXd get_par_Dl();
-		Eigen::MatrixXd get_DHtable();
-		Eigen::VectorXd get_gravity();
-		Eigen::VectorXd get_world2L0();
-		Eigen::VectorXd get_Ln2EE();
+		Eigen::MatrixXd get_par_DHtable();
+		Eigen::VectorXd get_par_gravity();
+		Eigen::VectorXd get_par_world2L0();
+		Eigen::VectorXd get_par_Ln2EE();
 		// Eigen::VectorXd get_par_ELA();
 
 		Eigen::VectorXd load_par_REG(std::string, bool update_DYN = true);
@@ -133,127 +133,127 @@ class thunder_ahand_thumb{
 		// ----- generated functions ----- //
 		
 		// - Manipulator Coriolis matrix - //
-		Eigen::MatrixXd get_C();
+		Eigen::Matrix<double,4,4> get_C();
 
 		// - Second time derivative of the Coriolis matrix - //
-		Eigen::MatrixXd get_C_ddot();
+		Eigen::Matrix<double,4,4> get_C_ddot();
 
 		// - Time derivative of the Coriolis matrix - //
-		Eigen::MatrixXd get_C_dot();
+		Eigen::Matrix<double,4,4> get_C_dot();
 
 		// - Classic formulation of the manipulator Coriolis matrix - //
-		Eigen::MatrixXd get_C_std();
+		Eigen::Matrix<double,4,4> get_C_std();
 
 		// - Manipulator gravity terms - //
-		Eigen::MatrixXd get_G();
+		Eigen::Matrix<double,4,1> get_G();
 
 		// - Second time derivative of the gravity vector - //
-		Eigen::MatrixXd get_G_ddot();
+		Eigen::Matrix<double,4,1> get_G_ddot();
 
 		// - Time derivative of the gravity vector - //
-		Eigen::MatrixXd get_G_dot();
+		Eigen::Matrix<double,4,1> get_G_dot();
 
 		// - Jacobian of frame 1 - //
-		Eigen::MatrixXd get_J_1();
+		Eigen::Matrix<double,6,4> get_J_1();
 
 		// - Jacobian of frame 2 - //
-		Eigen::MatrixXd get_J_2();
+		Eigen::Matrix<double,6,4> get_J_2();
 
 		// - Jacobian of frame 3 - //
-		Eigen::MatrixXd get_J_3();
+		Eigen::Matrix<double,6,4> get_J_3();
 
 		// - Jacobian of frame 4 - //
-		Eigen::MatrixXd get_J_4();
+		Eigen::Matrix<double,6,4> get_J_4();
 
 		// - Jacobian of frame 5 - //
-		Eigen::MatrixXd get_J_5();
+		Eigen::Matrix<double,6,4> get_J_5();
 
 		// - Jacobian of center of mass of link 1 - //
-		Eigen::MatrixXd get_J_cm_1();
+		Eigen::Matrix<double,6,4> get_J_cm_1();
 
 		// - Jacobian of center of mass of link 2 - //
-		Eigen::MatrixXd get_J_cm_2();
+		Eigen::Matrix<double,6,4> get_J_cm_2();
 
 		// - Jacobian of center of mass of link 3 - //
-		Eigen::MatrixXd get_J_cm_3();
+		Eigen::Matrix<double,6,4> get_J_cm_3();
 
 		// - Jacobian of center of mass of link 4 - //
-		Eigen::MatrixXd get_J_cm_4();
+		Eigen::Matrix<double,6,4> get_J_cm_4();
 
 		// - Jacobian of the end-effector - //
-		Eigen::MatrixXd get_J_ee();
+		Eigen::Matrix<double,6,4> get_J_ee();
 
 		// - Time second derivative of jacobian matrix - //
-		Eigen::MatrixXd get_J_ee_ddot();
+		Eigen::Matrix<double,6,4> get_J_ee_ddot();
 
 		// - Time derivative of jacobian matrix - //
-		Eigen::MatrixXd get_J_ee_dot();
+		Eigen::Matrix<double,6,4> get_J_ee_dot();
 
 		// - Pseudo-Inverse of jacobian matrix - //
-		Eigen::MatrixXd get_J_ee_pinv();
+		Eigen::Matrix<double,4,6> get_J_ee_pinv();
 
 		// - Manipulator mass matrix - //
-		Eigen::MatrixXd get_M();
+		Eigen::Matrix<double,4,4> get_M();
 
 		// - Second time derivative of the mass matrix - //
-		Eigen::MatrixXd get_M_ddot();
+		Eigen::Matrix<double,4,4> get_M_ddot();
 
 		// - Time derivative of the mass matrix - //
-		Eigen::MatrixXd get_M_dot();
+		Eigen::Matrix<double,4,4> get_M_dot();
 
 		// - relative transformation from frame base to frame 1 - //
-		Eigen::MatrixXd get_T_0();
+		Eigen::Matrix<double,4,4> get_T_0();
 
 		// - absolute transformation from frame base to frame 1 - //
-		Eigen::MatrixXd get_T_0_0();
+		Eigen::Matrix<double,4,4> get_T_0_0();
 
 		// - absolute transformation from frame base to frame 1 - //
-		Eigen::MatrixXd get_T_0_1();
+		Eigen::Matrix<double,4,4> get_T_0_1();
 
 		// - absolute transformation from frame base to frame 2 - //
-		Eigen::MatrixXd get_T_0_2();
+		Eigen::Matrix<double,4,4> get_T_0_2();
 
 		// - absolute transformation from frame base to frame 3 - //
-		Eigen::MatrixXd get_T_0_3();
+		Eigen::Matrix<double,4,4> get_T_0_3();
 
 		// - absolute transformation from frame base to frame 4 - //
-		Eigen::MatrixXd get_T_0_4();
+		Eigen::Matrix<double,4,4> get_T_0_4();
 
 		// - absolute transformation from frame base to end_effector - //
-		Eigen::MatrixXd get_T_0_5();
+		Eigen::Matrix<double,4,4> get_T_0_5();
 
 		// - absolute transformation from frame 0 to end_effector - //
-		Eigen::MatrixXd get_T_0_ee();
+		Eigen::Matrix<double,4,4> get_T_0_ee();
 
 		// - relative transformation from frame0to frame 1 - //
-		Eigen::MatrixXd get_T_1();
+		Eigen::Matrix<double,4,4> get_T_1();
 
 		// - relative transformation from frame1to frame 2 - //
-		Eigen::MatrixXd get_T_2();
+		Eigen::Matrix<double,4,4> get_T_2();
 
 		// - relative transformation from frame2to frame 3 - //
-		Eigen::MatrixXd get_T_3();
+		Eigen::Matrix<double,4,4> get_T_3();
 
 		// - relative transformation from frame3to frame 4 - //
-		Eigen::MatrixXd get_T_4();
+		Eigen::Matrix<double,4,4> get_T_4();
 
 		// - Manipulator regressor matrix - //
-		Eigen::MatrixXd get_Yr();
+		Eigen::Matrix<double,4,40> get_Yr();
 
 		// - Regressor matrix of term C*dqr - //
-		Eigen::MatrixXd get_reg_C();
+		Eigen::Matrix<double,4,40> get_reg_C();
 
 		// - Regressor matrix of term G - //
-		Eigen::MatrixXd get_reg_G();
+		Eigen::Matrix<double,4,40> get_reg_G();
 
 		// - Regressor matrix of the quantity J^T*w - //
-		Eigen::MatrixXd get_reg_JTw();
+		Eigen::Matrix<double,4,12> get_reg_JTw();
 
 		// - Regressor matrix of the quantity J*dq - //
-		Eigen::MatrixXd get_reg_Jdq();
+		Eigen::Matrix<double,6,12> get_reg_Jdq();
 
 		// - Regressor matrix of term M*ddqr - //
-		Eigen::MatrixXd get_reg_M();
+		Eigen::Matrix<double,4,40> get_reg_M();
 
 
 };

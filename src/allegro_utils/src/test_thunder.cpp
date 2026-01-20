@@ -59,9 +59,9 @@ DummyNode::DummyNode()
     hat_pi = Eigen::VectorXd::Zero(48);
 
   // Base Inertial Parameters
-  load_beta(beta);
-  load_beta_pinv(beta_pinv);
-  hat_pi_reduced = load_pi_hat();
+  finger_beta::load_beta(beta);
+  finger_beta::load_beta_pinv(beta_pinv);
+  hat_pi_reduced = finger_beta::load_pi_hat();
   //std::cout << "beta shape: " << beta.rows() << " x " << beta.cols() << std::endl;
   //std::cout << "beta_pinv shape: " << beta_pinv.rows() << " x " << beta_pinv.cols() << std::endl;
   //std::cout << "hat_pi_reduced shape: " << hat_pi_reduced.rows() << " x " << hat_pi_reduced.cols() << std::endl;

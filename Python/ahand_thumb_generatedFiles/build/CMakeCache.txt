@@ -292,7 +292,7 @@ CTEST_SUBMIT_RETRY_DELAY:STRING=5
 DART_TESTING_TIMEOUT:STRING=1500
 
 //The directory containing a CMake configuration file for Eigen3.
-Eigen3_DIR:PATH=/home/leo/miniconda3/envs/ahand_ros2/share/eigen3/cmake
+Eigen3_DIR:PATH=/home/leo/miniconda3/share/eigen3/cmake
 
 //Directory under which to collect all populated content
 FETCHCONTENT_BASE_DIR:PATH=/home/leo/Desktop/allegro_hand_ros2_ws/Python/ahand_thumb_generatedFiles/build/_deps
@@ -384,7 +384,7 @@ thunder_ahand_thumb_py_LIB_DEPENDS:STATIC=general;yaml-cpp::yaml-cpp;
 thunder_ahand_thumb_py_SOURCE_DIR:STATIC=/home/leo/Desktop/allegro_hand_ros2_ws/Python/ahand_thumb_generatedFiles
 
 //The directory containing a CMake configuration file for yaml-cpp.
-yaml-cpp_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/yaml-cpp
+yaml-cpp_DIR:PATH=/home/leo/miniconda3/lib/cmake/yaml-cpp
 
 
 ########################
@@ -579,7 +579,7 @@ CTEST_SUBMIT_RETRY_DELAY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: DART_TESTING_TIMEOUT
 DART_TESTING_TIMEOUT-ADVANCED:INTERNAL=1
 //Details about finding Python
-FIND_PACKAGE_MESSAGE_DETAILS_Python:INTERNAL=[/home/leo/miniconda3/envs/ahand_ros2/bin/python3.10][/home/leo/miniconda3/envs/ahand_ros2/include/python3.10][/home/leo/miniconda3/envs/ahand_ros2/lib/libpython3.10.so][cfound components: Interpreter Development Development.Module Development.Embed ][v3.10.19(3.7)]
+FIND_PACKAGE_MESSAGE_DETAILS_Python:INTERNAL=[/usr/bin/python3.10][/usr/include/python3.10][/usr/lib/x86_64-linux-gnu/libpython3.10.so][cfound components: Interpreter Development Development.Module Development.Embed ][v3.10.12(3.7)]
 //ADVANCED property for variable: GITCOMMAND
 GITCOMMAND-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: GIT_EXECUTABLE
@@ -593,7 +593,7 @@ MEMORYCHECK_COMMAND-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: MEMORYCHECK_SUPPRESSIONS_FILE
 MEMORYCHECK_SUPPRESSIONS_FILE-ADVANCED:INTERNAL=1
 //Python executable during the last CMake run
-PYBIND11_PYTHON_EXECUTABLE_LAST:INTERNAL=/home/leo/miniconda3/envs/ahand_ros2/bin/python3.10
+PYBIND11_PYTHON_EXECUTABLE_LAST:INTERNAL=/usr/bin/python3.10
 //Python debug status
 PYTHON_IS_DEBUG:INTERNAL=0
 PYTHON_MODULE_EXTENSION:INTERNAL=.cpython-310-x86_64-linux-gnu.so
@@ -602,17 +602,17 @@ SITE-ADVANCED:INTERNAL=1
 //CMAKE_INSTALL_PREFIX during last run
 _GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX:INTERNAL=/usr/local
 _Python:INTERNAL=Python
-_Python_DEVELOPMENT_EMBED_SIGNATURE:INTERNAL=1ac5d6b361e92df532774a8d8a77a36c
-_Python_DEVELOPMENT_MODULE_SIGNATURE:INTERNAL=b695eee0e1e7d4fff8f3624cf8ffd9ae
+_Python_DEVELOPMENT_EMBED_SIGNATURE:INTERNAL=625d9e0f7a1af1ddb80bfa11fbea90e0
+_Python_DEVELOPMENT_MODULE_SIGNATURE:INTERNAL=4bc14a0ea6a21ea267e38aa660e9b54b
 //Path to a program.
-_Python_EXECUTABLE:INTERNAL=/home/leo/miniconda3/envs/ahand_ros2/bin/python3.10
+_Python_EXECUTABLE:INTERNAL=/usr/bin/python3.10
 //Path to a file.
-_Python_INCLUDE_DIR:INTERNAL=/home/leo/miniconda3/envs/ahand_ros2/include/python3.10
+_Python_INCLUDE_DIR:INTERNAL=/usr/include/python3.10
 //Python Properties
-_Python_INTERPRETER_PROPERTIES:INTERNAL=Python;3;10;19;64;;cpython-310-x86_64-linux-gnu;/home/leo/miniconda3/envs/ahand_ros2/lib/python3.10;/home/leo/miniconda3/envs/ahand_ros2/lib/python3.10;/home/leo/miniconda3/envs/ahand_ros2/lib/python3.10/site-packages;/home/leo/miniconda3/envs/ahand_ros2/lib/python3.10/site-packages
-_Python_INTERPRETER_SIGNATURE:INTERNAL=dc2ead22ec40fa46a9c3294cbffa8944
+_Python_INTERPRETER_PROPERTIES:INTERNAL=Python;3;10;12;64;;cpython-310-x86_64-linux-gnu;/usr/lib/python3.10;/usr/lib/python3.10;/usr/lib/python3/dist-packages;/usr/lib/python3/dist-packages
+_Python_INTERPRETER_SIGNATURE:INTERNAL=b91b4035ecb3bb3f5760d35922531bcd
 //Path to a library.
-_Python_LIBRARY_RELEASE:INTERNAL=/home/leo/miniconda3/envs/ahand_ros2/lib/libpython3.10.so
+_Python_LIBRARY_RELEASE:INTERNAL=/usr/lib/x86_64-linux-gnu/libpython3.10.so
 //Directories where pybind11 and possibly Python headers are located
-pybind11_INCLUDE_DIRS:INTERNAL=/usr/include;/home/leo/miniconda3/envs/ahand_ros2/include/python3.10
+pybind11_INCLUDE_DIRS:INTERNAL=/usr/include;/usr/include/python3.10
 

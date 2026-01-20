@@ -1,27 +1,37 @@
 <?xml version="1.0" ?>
 <robot name="allegro_hand"  xmlns:xacro="http://ros.org/wiki/xacro">
+    
+    <!-- Arguments -->
+    <!--  <xacro:arg name="ros2_control_hardware_type" default="mock_components" />  -->
+    <xacro:arg name="ros2_control_hardware_type" default="physical_device" />
 
     <!-- Include Allegro hand URDF -->
     <xacro:include filename="$(find allegro_hand_description)/urdf/allegro_hand_description_right_B.urdf"/>
 
 
-    <!-- ROS2 control -->
+    <!-- ROS2 control -->    
     <ros2_control name="AllegroHand_Interface" type="system">
         <hardware>
-            <plugin>allegro_hand_hw_interface/AllegroHand_Interface</plugin>
+            <xacro:if value="$(eval ros2_control_hardware_type == 'mock_components')">
+                    <plugin>mock_components/GenericSystem</plugin>
+            </xacro:if>
+            
+            <xacro:if value="$(eval ros2_control_hardware_type == 'physical_device')">
+                <plugin>allegro_hand_hw_interface/AllegroHand_Interface</plugin>
 
-            <param name="device">can0</param>
-            <param name="handness">right</param>
-            <param name="type">B</param>
-            <param name="pressure">false</param>
+                <param name="device">can0</param>
+                <param name="handness">right</param>
+                <param name="type">B</param>
+                <param name="pressure">false</param>
 
-            <param name="kalman_filter_process_noise">1</param>
-            <param name="kalman_filter_measurement_noise">1e-7</param>
+                <param name="kalman_filter_process_noise">1</param>
+                <param name="kalman_filter_measurement_noise">1e-7</param>
+            </xacro:if>
 
         </hardware>
 
         <!-- index -->
-        <joint name="joint_0_0"> 
+        <joint name="joint_0_0">
             <command_interface name="effort">
                 <param name="min">-10</param>
                 <param name="max">10</param>

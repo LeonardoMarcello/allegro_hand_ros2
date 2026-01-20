@@ -12,12 +12,10 @@ namespace allegro_hand_hw_interface{
 
         // Initialize values: joint names should match URDF, desired torque and
         // velocity are both zero.
-        for (int i = 0; i < DOF_JOINTS; i++) {
-            desired_torque[i] = 0.0;
-            current_velocity[i] = 0.0;
-            current_position_filtered[i] = 0.0;
-            current_velocity_filtered[i] = 0.0;
-        }
+        std::memset(desired_torque, 0.0, sizeof(desired_torque));
+        std::memset(current_velocity, 0.0, sizeof(current_velocity));
+        std::memset(current_position_filtered, 0.0, sizeof(current_position_filtered));
+        std::memset(current_velocity_filtered, 0.0, sizeof(current_velocity_filtered));
     }
     AllegroHand_Interface::~AllegroHand_Interface()
     {
@@ -36,11 +34,11 @@ namespace allegro_hand_hw_interface{
         whichType = info.hardware_parameters.at("type");
 
         // iniitialize Joint Kalman Filter
+        std::memset(desired_torque, 0.0, sizeof(desired_torque));
+        std::memset(current_velocity, 0.0, sizeof(current_velocity));
+        std::memset(current_position_filtered, 0.0, sizeof(current_position_filtered));
+        std::memset(current_velocity_filtered, 0.0, sizeof(current_velocity_filtered));
         for (int i = 0; i < DOF_JOINTS; i++) {
-            desired_torque[i] = 0.0;
-            current_velocity[i] = 0.0;
-            current_position_filtered[i] = 0.0;
-            current_velocity_filtered[i] = 0.0;
             kf[i] = kalman_filter_joint::KalmanFilterJoint(std::stod(info.hardware_parameters.at("kalman_filter_process_noise")),
                                                             std::stod(info.hardware_parameters.at("kalman_filter_measurement_noise")));
         }
@@ -76,19 +74,19 @@ namespace allegro_hand_hw_interface{
 
 
         // Create ROS2 activate/deactivate service
-        auto node = rclcpp::Node::make_shared("allegro_hand_activation_server");
-        activate_service_ = node->create_service<std_srvs::srv::SetBool>(
+        activate_node_ = std::make_shared<rclcpp::Node>("allegro_hand_activation_server");
+        activate_service_ = activate_node_->create_service<std_srvs::srv::SetBool>(
             "activate",
-            [this](const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
-                std::shared_ptr<std_srvs::srv::SetBool::Response> response) {
+            [this](std::shared_ptr<std_srvs::srv::SetBool::Request> request,
+                std::shared_ptr<std_srvs::srv::SetBool::Response> response) 
+            {
                 active_ = request->data;
                 response->success = true;
-                response->message = std::string("Security flag set to ") +
-                                    (active_ ? "true" : "false");
-                RCLCPP_INFO(rclcpp::get_logger(LOGGER_NAME),
-                            "Security flag toggled: %s",
-                            active_ ? "ENABLED" : "DISABLED");
+                response->message = std::string("Security flag set to ") + (active_ ? "true" : "false");
+                RCLCPP_INFO(activate_node_->get_logger(), "Security flag toggled: %s", active_ ? "ENABLED" : "DISABLED");
             });
+        executor_.add_node(activate_node_);
+        executor_thread_ = std::thread([this]() { executor_.spin(); });
 
 
         return CallbackReturn::SUCCESS;
@@ -110,7 +108,23 @@ namespace allegro_hand_hw_interface{
 
     CallbackReturn AllegroHand_Interface::on_deactivate(const rclcpp_lifecycle::State&)
     {
+        //write zero torque to the hand
+        std::memset(desired_torque, 0.0, sizeof(desired_torque));
+        canDevice->setTorque(desired_torque);
+        lEmergencyStop = canDevice->writeJointTorque();
+
         active_ = false;
+
+        // Stop the executor thread
+        executor_.cancel();
+        if (executor_thread_.joinable()) {
+            executor_thread_.join();
+        }
+        executor_.remove_node(activate_node_);
+        activate_node_.reset();
+
+
+
         RCLCPP_INFO(rclcpp::get_logger(LOGGER_NAME),"Pass Deactvate");
         return CallbackReturn::SUCCESS;
     };
@@ -159,7 +173,7 @@ namespace allegro_hand_hw_interface{
         if(pressure_req_){
             for(int i=0; i<4; i++){
                 try{
-                    state_interfaces.emplace_back(pressureSensorNames[i] ,HW_IF_PRESSURE, &tactile_sensor[i]);
+                    state_interfaces.emplace_back(pressureSensorNames[i], HW_IF_PRESSURE, &tactile_sensor[i]);
                     num_state_interfaces += 1;
                 }
                 catch(std::logic_error &err)
@@ -229,15 +243,25 @@ namespace allegro_hand_hw_interface{
                 // update joint positions:
                 canDevice->getJointInfo(current_position);
 
-                // low-pass filtering:
-                for (int i = 0; i < DOF_JOINTS; i++) {
+                // a) Finite Difference:
+                /*for (int i = 0; i < DOF_JOINTS; i++) {
                     current_position_filtered[i] = current_position[i];
                     current_velocity[i] = (current_position[i] - previous_position[i]) / dt;
                     current_velocity_filtered[i] =  current_velocity[i];
-                }
-                /*
-                // Kalman filtering:
+                }*/
+                // b) Low-pass filtering:
                 for (int i = 0; i < DOF_JOINTS; i++) {
+                    current_position_filtered[i] = (0.6 * current_position_filtered[i]) +
+                                                (0.198 * previous_position[i]) +
+                                                (0.198 * current_position[i]);
+                    current_velocity[i] = (current_position_filtered[i] - previous_position_filtered[i]) / dt;
+                    current_velocity_filtered[i] = (0.6 * current_velocity_filtered[i]) +
+                                                (0.198 * previous_velocity[i]) +
+                                                (0.198 * current_velocity[i]);
+                    current_velocity[i] = (current_position[i] - previous_position[i]) / dt;
+                }
+                // c) Kalman filtering:
+                /*for (int i = 0; i < DOF_JOINTS; i++) {
                     kf[i].prediction(dt);
                     kf[i].update(current_position[i]);
                     kf[i].get_q(urrent_position_filtered[i]);
@@ -300,7 +324,7 @@ namespace allegro_hand_hw_interface{
     {
         // check if hand is activate
         if (!active_) {
-            return hardware_interface::return_type::OK;
+            std::memset(desired_torque, 0.0, sizeof(desired_torque));
         }
 
         // set & write torque to each joint:

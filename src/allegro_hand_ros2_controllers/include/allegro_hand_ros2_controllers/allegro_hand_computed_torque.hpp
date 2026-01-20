@@ -17,7 +17,11 @@
 #include "sensor_msgs/msg/joint_state.hpp"
 
 #include "allegro_hand_ros2_controllers/thunder_ahand_finger.h"
-#include "allegro_hand_ros2_controllers/thunder_ahand_thumb.h"
+#include "allegro_hand_ros2_controllers/ahand_finger_beta.h"
+//#include "allegro_hand_ros2_controllers/thunder_ahand_thumb.h"
+#include "allegro_hand_ros2_controllers/ahand_thumb_beta.h"
+
+#include "thunder_ahand/thunder_ahand_thumb.h"
 
 # define DOF_JOINTS 16
 namespace allegro_hand_computed_torque

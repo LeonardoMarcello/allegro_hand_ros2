@@ -25,7 +25,8 @@
 using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
 
 
-#include <allegro_hand_driver/AllegroHandDrv.h>
+// #include <allegro_hand_driver/AllegroHandDrv.h>
+#include <allegro_hand_hw_interface/AllegroHandDrv.h>
 using namespace allegro;
 #include "bhand/BHand.h"
 #include <allegro_hand_hw_interface/kalman_filter_joint.hpp>
@@ -105,9 +106,15 @@ namespace allegro_hand_hw_interface{
 
                 // Flags
                 int lEmergencyStop = 0;             // can check
-                bool active_{false};                // switch for actiate deactivate hand
+                //bool active_{false};                // switch for actiate deactivate hand
+                //rclcpp::Node::SharedPtr activate_node_;
+                //rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr activate_service_;
+                
+                rclcpp::Node::SharedPtr activate_node_;
                 rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr activate_service_;
-
+                std::atomic_bool active_{false};
+                rclcpp::executors::SingleThreadedExecutor executor_;
+                std::thread executor_thread_;
 
     };
 

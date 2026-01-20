@@ -1,5 +1,6 @@
 import time
 import os
+import sys
 import shutil
 import matplotlib.pyplot as plt
 from scipy.linalg import solve_continuous_lyapunov, block_diag
@@ -15,28 +16,39 @@ import pandas as pd
 
 from scipy.signal import butter, filtfilt, savgol_filter
 
-import sys
-sys.path.append("/home/leo/thunder_dynamics/ahand_finger_generatedFiles_py/build") # Where the .so file is located. 
-sys.path.append("/home/leo/thunder_dynamics/franka_as_generatedFiles/build") # Where the .so file is located. 
-# Note: This is not needed if the .so file is in the same directory as the python script
+# =========================================================================================================================== 
+# IMPORT THUNDER FILES
+rel_paths = ["./ahand_finger_generatedFiles/build", "./ahand_thumb_generatedFiles/build", "./franka_generatedFiles/build"]
+for rel_path in rel_paths:
+    dir_path = os.path.dirname(os.path.abspath(__file__))
+    build_path = os.path.join(dir_path, rel_path)
+    if os.path.exists(build_path):
+        sys.path.append(os.path.abspath(build_path))
+    else:
+        print(f"Warning: path '{build_path}' does not exist.")
 
 from thunder_ahand_finger_py import thunder_ahand_finger
+from thunder_ahand_thumb_py import thunder_ahand_thumb
+from thunder_franka_py import thunder_franka
 
-MESH_DIR = './description/urdf/meshes/'
-URDF_PATH = './description/urdf/allegro_hand_description_right_B.urdf'
-XML_PATH = './description/urdf/allegro_hand_description_right_B.xml'
-BAG_PATH = '/home/leo/Desktop/allegro_hand_ros2_ws/workdir/allegro_hand_pb_gc_bag'
-JOINT_NAMES = ['joint_4_0', 'joint_5_0', 'joint_6_0', 'joint_7_0']
-SAVE_FILENAME = '/home/leo/Desktop/ahand_dynamic_gravity_compensation.txt'
+# MESH_DIR = './description/urdf/meshes/'
+# URDF_PATH = './description/urdf/allegro_hand_description_right_B.urdf'
+# XML_PATH = './description/urdf/allegro_hand_description_right_B.xml'
+# BAG_PATH = '/home/leo/Desktop/allegro_hand_ros2_ws/workdir/allegro_hand_pb_gc_bag'
+# JOINT_NAMES = ['joint_4_0', 'joint_5_0', 'joint_6_0', 'joint_7_0']
+# SAVE_FILENAME = '/home/leo/Desktop/ahand_dynamic_gravity_compensation.txt'
 
-MASSES_URDF = [0.0176, 0.086, 0.0367, 0.0057] # [Kg]
-HCK_MASSES = [0.0168, 0.1023, 0.0405, 0.0603] # [Kg]
-HCK_KP = [1, 1, 1, 1] # [Nm/rad]
-HCK_KD = [0.04, 0.15, 0.04, 0.04] # [Nm/(rad/s^2)]
-HCK_D = [0.015*0.004*np.sqrt(80), 0.015*0.008*np.sqrt(90), 0.015*0.008*np.sqrt(90), 0.015*0.004*np.sqrt(80)] # [Nm/(rad/s^2)]
-# =========================================================================================================================== Define Function
+# MASSES_URDF = [0.0176, 0.086, 0.0367, 0.0057] # [Kg]
+# HCK_MASSES = [0.0168, 0.1023, 0.0405, 0.0603] # [Kg]
+# HCK_KP = [1, 1, 1, 1] # [Nm/rad]
+# HCK_KD = [0.04, 0.15, 0.04, 0.04] # [Nm/(rad/s^2)]
+# HCK_D = [0.015*0.004*np.sqrt(80), 0.015*0.008*np.sqrt(90), 0.015*0.008*np.sqrt(90), 0.015*0.004*np.sqrt(80)] # [Nm/(rad/s^2)]
+
+# =========================================================================================================================== 
+# READER
+
 # Bag Read/Write
-def read_bag(file_path, topic_name = '/allegroHand_0/joint_states', store=False, path_out=None):
+def read_bag(file_path, topic_name = '/allegroHand_0/joint_states', joint_names=None, store=False, path_out=None):
     first = True
     # Open the bag reader
     reader = rosbag2_py.SequentialReader()
@@ -54,13 +66,13 @@ def read_bag(file_path, topic_name = '/allegroHand_0/joint_states', store=False,
         if topic == topic_name:
         #if topic == '/allegroHand_0/torque_cmd':
             msg = deserialize_message(data, JointState)
-            joint_names = msg.name
+            msg_joint_names = msg.name
 
             # select specific joints
-            indices = [joint_names.index(name) for name in JOINT_NAMES if name in joint_names]
-            selected_joint_names = [joint_names[i] for i in indices]
+            indices = [msg_joint_names.index(name) for name in joint_names if name in msg_joint_names]
+            selected_joint_names = [msg_joint_names[i] for i in indices]
             if first:
-                joint_names = msg.name
+                msg_joint_names = msg.name
                 # get header
                 pos_header    = [f"pos_{name}" for name in selected_joint_names]
                 effort_header = [f"eff_{name}" for name in selected_joint_names]
@@ -69,7 +81,7 @@ def read_bag(file_path, topic_name = '/allegroHand_0/joint_states', store=False,
                 #header = ['t'] + pos_header + vel_header + acc_header + effort_header
                 header = ['t'] + pos_header + effort_header + vel_header
                 first = False
-            elif joint_names != msg.name:
+            elif msg_joint_names != msg.name:
                 raise ValueError("Joint names do not match")
 
             # Store data
@@ -165,103 +177,399 @@ def write_filtered_bag(file_path, t_log, q_log, tau_log, joint_names_filtered):
 
     print(f"Filtered bag written to {file_path} with all joints 0-14")
 
+# ============================================
+# PARAMETER REDUCTION
+# ============================================
+def Lambda(alpha, a, d, theta):
+    sa = np.sin(alpha)
+    ca = np.cos(alpha)
+    st = np.sin(theta)
+    ct = np.cos(theta)
 
-# Matrix Eigenvalues
-def powerm(v, A, niter): #POWER ITERATION METHOD
-    for i in range(niter):
-        v = A @ v
-        v = v/casadi.norm_2(v)
-    l = v.T@A@v
-    return v, l
-def def_powerm(a, niter=None): #DEFLATION VERSION OF PIM FOR 3X3 MATRIX ---> CALCULATE ALL EIGENVALUES FROM GREATER TO SMALLER
-    #AND THEIR EIGENVECTORS
-    v0 = casadi.DM([1,1,1])
+    ssa = np.sin(alpha)*np.sin(alpha)
+    cca = np.cos(alpha)*np.cos(alpha)
+    sst = np.sin(theta)*np.sin(theta)
+    cct = np.cos(theta)*np.cos(theta)
 
-    if niter is None:
-        niter = 40
+    csa = np.cos(alpha)*np.sin(alpha)
+    cst = np.cos(theta)*np.sin(theta)
 
-    v1,l1 = powerm(v0, a, niter)
+    L = np.zeros((10,10))
 
-    v0 = casadi.DM([0,1,1])
-    a2 = a - l1*(v1 @ v1.T)
-    v2, l2 = powerm(v0, a2, niter)
+    # Mass
+    L[:,0] = np.array([1,   a,-d*sa,d*ca,   d**2, a*d*sa, -a*d*ca, a**2 + d**2*cca, d**2*csa, a**2 + d**2*ssa])
+    # m*COM
+    L[:,1] = np.array([0,   ct, st*ca, st*sa,   0, -a*st*ca + d*ct*sa, -a*st*sa - d*ct*ca, 2*(a*ct + d*st*csa), d*st*(ssa-cca), 2*(a*ct - d*st*csa)])
+    L[:,1] = np.array([0,   -st, ct*ca, ct*sa,  0, -a*ct*ca + d*st*sa, -a*ct*sa - d*st*ca, 2*(-a*st + d*ct*csa), d*ct*(ssa-cca), 2*(-a*st - d*ct*csa)])
+    L[:,3] = np.array([0,   0, -sa, ca,         2*d, a*sa, -a*ca, 2*d*cca, 2*d*csa, 2*d*ssa])
+    # Inertia
+    L[:,4] = np.array([0,   0, 0, 0,  cct, cst*ca, cst*sa, sst*cca, sst*csa, sst*ssa])
+    L[:,5] = np.array([0,   0, 0, 0,  -2*cst, (cct -sst)*ca, (cct -sst)*sa, 2*cst*cca, 2*cst*csa, 2*cst*ssa])
+    L[:,6] = np.array([0,   0, 0, 0,  0, -ct*sa, -ct*sa, -2*st*csa, st*(cca-ssa), 2*st*csa])
+    L[:,7] = np.array([0,   0, 0, 0,  sst, -cst*ca, -cst*sa, cct*cca, cct*csa, cct*ssa])
+    L[:,8] = np.array([0,   0, 0, 0,  0, st*sa, -st*sa, -2*ct*csa, ct*(cca-ssa), 2*ct*csa])
+    L[:,9] = np.array([0,   0, 0, 0,  0, 0, 0, sst, -csa, cca])
 
-    v0 = casadi.DM([0,0,1])
-    a3 = a2 - l2 * (v2 @ v2.T)
-    v3, l3 = powerm(v0, a3, niter)
+    return L
+def S(k, n, add_rotor_inertia = False):
+    # selettore parametri k s.t. pi_r_k = S_k * pi_r
+    S = np.zeros((10, n*10))
+    S[:, k*10:(k+1)*10] = np.eye(10)
+
+    if add_rotor_inertia:
+        S_I = np.zeros((1, n))
+        S_I[:, k] = 1
+        S = block_diag(S, S_I)
+
+    return S
+def regrouping(DH, robot, add_rotor_inertia = False):
+    start = time.time()
+    n = len(DH['joints'])
+    pi_r = np.ones((n*10,1))                                    # original regressor parameter vector
+    pi_I = np.ones((n,1))                                       # rotor ineria params vector (may be unused)
+    if add_rotor_inertia: pi = np.vstack([pi_r, pi_I])
+    else: pi = pi_r
+
+    hat_pi_r =[]                                                # reduced parameter vector
+    g = np.array([0, 0, -9.81])                                 # gravity vector (<- nice to have from thunder_ahand)
+
+    E = []
+    H = []
+    W = []
+
+    tolerance = 1e-6                                           # use for zero detection
+
+    # 1_ get r1, r2 and p1, rp1 ------------------
+    # a) r1 = first revolute joint
+    for i in range(n):
+        if DH['joints'][i] == 'R':
+            r1 = i
+            print("r1 = ", r1)
+            break
+        if i==n-1:
+            print("revolute joint not found.")
+            r1 = n
+            break
+    T_0_r1 = getattr(robot, f"get_T_0_{r1+1}")()    # _Oss_. T_0_0 is the world frame not Frame 0
+    k_r1 = T_0_r1[0:3,2]                                    # z axis of frame r1 in world frame
+
+    # b) r2 = Next revolute joint not aligned to r1
+    for i in range(r1+1,n):
+        if DH['joints'][i] == 'R':
+            T_0_i = getattr(robot, f"get_T_0_{i+1}")()
+            k_i = T_0_i[0:3,2]
+            if np.abs(k_r1.transpose() @ k_i) < 1 - 1e-14:  # if z_i axis is not aligned to z_r1 axis
+                r2 = i
+                print("r2 = ", r2)
+                break
+            if i==n-1:
+                r2 = 0
+                print("r2 not found")
+    T_0_r2 = getattr(robot, f"get_T_0_{r2+1}")()    # Oss. T_0_0 is the world frame not Frame 0
+    k_r2 = T_0_r2[0:3,2]  # z axis of frame r1 in world frame
 
 
-    D = casadi.vertcat(l1,l2,l3)
-    V = casadi.horzcat(v1,v2,v3)
-    return V, D
-sym_matrix = casadi.SX.sym('M', 3, 3)
-eigenvalues = casadi.eig_symbolic(sym_matrix)
-f_eigen = casadi.Function('eigen', [sym_matrix], [eigenvalues])
-_, eigenvalues = def_powerm(sym_matrix)
-f_powerm = casadi.Function('powerm', [sym_matrix], [eigenvalues])
-#minimum eigenvalue
-def minimum(eigen):
-    min = 10000000000000
-    for i in range(3):
-        min = casadi.if_else(eigen[i] <= min, eigen[i], min)
+    # c) p1 = first prismatic joint
+    for i in range(n):
+        if DH['joints'][i] == 'P':
+            p1 = i
+            print("p1 = ", p1)
+            break
+        if i==n-1:
+            print("prismatic joint not found.")
+            p1 = -1
+            break
 
-    return min
-def SN(eigen):
-    p = 3
-    l1 = eigen[0]**(-p)
-    l2 = eigen[1]**(-p)
-    l3 = eigen[2]**(-p)
-
-    min = (l1 + l2 + l3)**(-1/p)
+    # d) rp1 = Last revolute joint preceding p1
+    for i in range(p1-1, -1, -1):
+        if DH['joints'][i] == 'R':
+            rp1 = i
+            print("rp1 = ", rp1)
+            break
+        elif i==0:
+            rp1 = n
+            print("rp1 not found")
 
 
-    return min
+    # 2_ Select and reduce ------------------------------------
+    for i in range(n-1, -1, -1):
+        if DH['joints'][i] == 'R':
+        #  ----------- REVOLUTE ----------------------------
+            # 1) Get i-th param
+            S_i = S(i, n, add_rotor_inertia)    # Link param selector
+            pi_i = S_i @ pi                     # pi_r_i = [m, cx,cy,cz, I_xx,I_xy,I_xz,I_yy,I_yz,I_zz(, I_r)]'
 
-# Skew-symmetric matrix
-def skew(v):
-    return np.array([[0, -v[2], v[1]],
-                     [v[2], 0, -v[0]],
-                     [-v[1], v[0], 0]])
-def casadi_skew(v):
-    return casadi.vertcat(
-        casadi.horzcat(0, -v[2], v[1]),
-        casadi.horzcat(v[2], 0, -v[0]),
-        casadi.horzcat(-v[1], v[0], 0)
-    )
-    masses = [(hat_Pi[i*par_per_link]).item() for i in range(n)]
+            # 2) Get type of param reduction (compute E_i)
+            E_i = block_diag(1,
+                               np.eye(3),
+                                        np.array([[1,0,0,-1,0,0],         # regroup I_yy in I_xx
+                                                  [0,1,0, 0,0,0],
+                                                  [0,0,1, 0,0,0],
+                                                  [0,0,0, 1,0,0],
+                                                  [0,0,0, 0,1,0],
+                                                  [0,0,0, 0,0,1]]))
+            print(f"Deleting I_yy, mc_z, m of link {i}...")
+            E_i = E_i[[ 1,2, 4,5,6,8,9],:]              # Remove m, m_cz, I_yy
+            if add_rotor_inertia: 
+                E_i =  block_diag(E_i, 1)               # (add rotor inertia block if needed)
 
-    CoMs_x = [(hat_Pi[i*par_per_link+1]/masses[i]).item() for i in range(n)]        #pi = m*cx
-    CoMs_y = [(hat_Pi[i*par_per_link+2]/masses[i]).item() for i in range(n)]
-    CoMs_z = [(hat_Pi[i*par_per_link+3]/masses[i]).item() for i in range(n)]
+            if add_rotor_inertia and i == r2 and np.abs(k_r2 @ k_r1) < tolerance:
+                print(f"Deleting I_r of link {i}...")
+                # r2 joint axis orthogonal to r1 joint axis
+                E_i[6,10] = 1       # regroup I_r in I_zz
+                E_i = E_i[0:7,:]          # Remove I_r
+            if add_rotor_inertia and i == r1:
+                print(f"Deleting I_r of link {i}...")
+                # joint r1
+                E_i[6,10] = 1       # regroup I_r in I_zz
+                E_i = E_i[0:7,:]          # Remove I_r
 
-    Is_xx = [(hat_Pi[i*par_per_link+4] - (masses[i]*CoMs_y[i]**2 - masses[i]*CoMs_z[i]**2)).item()        for i in range(n)]
-    Is_xy = [(hat_Pi[i*par_per_link+5] - (masses[i]*CoMs_x[i]*CoMs_y[i])).item()                          for i in range(n)]
-    Is_xz = [(hat_Pi[i*par_per_link+5] - (masses[i]*CoMs_x[i]*CoMs_z[i])).item()                          for i in range(n)]
-    Is_yy = [(hat_Pi[i*par_per_link+7] - (masses[i]*CoMs_x[i]**2 - masses[i]*CoMs_z[i]**2)).item()        for i in range(n)]
-    Is_yz = [(hat_Pi[i*par_per_link+8] - (masses[i]*CoMs_y[i]*CoMs_z[i])).item()                          for i in range(n)]
-    Is_zz = [(hat_Pi[i*par_per_link+9] - (masses[i]*CoMs_x[i]**2 - masses[i]*CoMs_y[i]**2)).item()        for i in range(n)]
+            if r1<=i and i<r2:
+                print(f"Deleting I_xx, I_xy, I_xz, I_yz of link {i}...")
+                E_i = np.vstack([E_i[[ 0,1],:], E_i[6:,:]])                     # remove I_xx, I_xy, I_xz, I_yz
 
-    if par_per_link>10:
-        Ds = [(hat_Pi[i*par_per_link+10]).item()        for i in range(n)]
-        Fs = [(hat_Pi[i*par_per_link+11]).item()        for i in range(n)]
-    print("=== Dynamic parameters ======")
-    print("PI size:", hat_Pi.shape)
-    for i in range(thunder_ahand.get_numJoints()):
-        print(f"\tlink {i+1}:")
-        print(f"\t\tinertial:")
-        print(f"\t\t\tsymb: [1,1,1,1,1,1,1,1,1,1]")
-        print(f"\t\t\tmass: {masses[i]}")
-        print(f"\t\t\tCoM_x: {CoMs_x[i]}")
-        print(f"\t\t\tCoM_y: {CoMs_y[i]}")
-        print(f"\t\t\tCoM_z: {CoMs_z[i]}")
-        print(f"\t\t\tIxx: {Is_xx[i]}")
-        print(f"\t\t\tIxy: {Is_xy[i]}")
-        print(f"\t\t\tIxz: {Is_xz[i]}")
-        print(f"\t\t\tIyy: {Is_yy[i]}")
-        print(f"\t\t\tIyz: {Is_yz[i]}")
-        print(f"\t\t\tIzz: {Is_zz[i]}")
-        if par_per_link>10:
-            print(f"\t\tfriction: ")
-            print(f"\t\t\tsymb: [1,1]")
-            print(f"\t\t\tDl: [{Ds[i]},{Fs[i]}]")
-    print("=============================")
+
+                T_0_i = getattr(robot, f"get_T_0_{i+1}")()
+                k_i = T_0_i[0:3,2]      # z axis of frame i in world frame
+                k_r1 = T_0_r1[0:3,2]    # z axis of frame r1 in world frame
+                k_g = g/np.linalg.norm(g)
+
+                if np.abs(k_i.transpose() @ k_r1) > 1 - tolerance:  # if z_i axis aligned to z_r1 axis
+                    if i == 0:
+                        if np.abs(k_i.transpose() @ k_g) > 1 - tolerance:   # if z_i axis aligned to gravity
+                            print(f"Deleting mc_x, mc_y of link {i}...")
+                            E_i = E_i[2:,:]                                               # remove mc_x, mc_y
+                        #print(f"Deleting mc_x, mc_y of link {i}...")
+                        #E_i = E_i[2:,:]                                               # (ori always delete) remove mc_x, mc_y
+                    else:
+                        for j in range(i):
+                            k_j = getattr(robot, f"get_T_0_{j+1}")()[0:3,2]
+                            if not(np.abs(k_j.transpose() @ k_r1) > 1 - tolerance and np.abs(k_j.transpose() @ k_g) > 1 - tolerance): # if NOT z_j axis aligned to z_r1 axis and to gravity
+                                break
+                            if j==i-1:
+                                print(f"Deleting mc_x, mc_y of link {i}...")
+                                E_i = E_i[2:,:]                                               # remove mc_x, mc_y
+
+            hat_pi_i = E_i @ pi_i.reshape(-1, 1)  # Extracting reduced params from i-th link
+
+            # 3) Remapping on previous link (compute H_iminus)
+            if i>0:
+                iminus_L_i = Lambda(DH['alpha'][i], DH['a'][i], DH['d'][i], DH['theta'][i])
+                if not(add_rotor_inertia):
+                    # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                    #                           m,                               cx,cy,        cz,                             I_xx,I_xy,I_xz,               I_yy,                                I_yz,I_zz,     |     pi_r
+                    # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                    H_iminus = np.hstack([iminus_L_i[:,0].reshape(-1, 1),  np.zeros((10,2)),iminus_L_i[:,3].reshape(-1, 1),  np.zeros((10,3)),(iminus_L_i[:,4] + iminus_L_i[:,7]).reshape(-1, 1),np.zeros((10,2)), np.eye(10)])
+                    pi[10*(i-1):10*i,:] = H_iminus @ np.vstack([pi_i,
+                                                                S(i-1,n)@pi])
+                else:
+                    # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                    #                                                m,                      cx,cy,        cz,                          I_xx,I_xy,I_xz,               I_yy,                                  I_yz,I_zz,Ir   |      pi_r, pi_I
+                    # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                    H_iminus = np.vstack([np.hstack([iminus_L_i[:,0].reshape(-1, 1),  np.zeros((10,2)),iminus_L_i[:,3].reshape(-1, 1),  np.zeros((10,3)),(iminus_L_i[:,4] + iminus_L_i[:,7]).reshape(-1, 1),np.zeros((10,3)), np.eye(10), np.zeros((10,1))]),
+                                          np.array([             0,                           0,0,         0,                              0,0,0,                       0,                                       0,0,0,        0,0,0,0,0,0,0,0,0,0,1])])
+
+                    tmp = H_iminus @ np.vstack([pi_i,
+                                                S(i-1,n, add_rotor_inertia) @ pi])
+                    pi[10*(i-1):10*i,:] = tmp[:10,:]
+                    pi[10*n + i,:] = tmp[10,:]
+
+            # 4) Get relationship parameters-reduced parameter i-th (Compute of W_i)
+            if i==n-1:
+                # last link
+                W_i = S_i
+                H_i = np.eye(10)
+                if (add_rotor_inertia): H_i = block_diag(H_i, 1)
+                H = [H_i] + H
+            else:
+                H_i = H[0]
+                H_iplus = H[1]
+                W_iplus = W[0]
+                W_i = np.vstack([H_iplus @ W_iplus,
+                                 S_i])
+            if i>0:  H = [H_iminus] + H
+            W = [W_i] + W
+            E = [E_i] + E
+
+
+            hat_pi_r = hat_pi_i.flatten().tolist() + hat_pi_r
+
+        #  ----------- PRISMATIC ----------------------------
+        elif DH['joints'][i] == 'P':
+            # 1) Get i-th param
+            S_i = S(i, n, add_rotor_inertia)                   # param selector
+            pi_i = S_i @ pi                                    # pi_r_i = [m, cx,cy,cz, I_xx,I_xy,I_xz,I_yy,I_yz,I_zz(, Ir)]
+
+            # 2) Get type of param reduction (compute E_i)
+            E_i = np.eye(10)
+            print(f"Deleting I_xx, I_xy, I_xz, I_yy, I_yz, I_zz of link {i}...")
+            E_i = E_i[0:4,:]
+
+            if r1 < i and  i < r2:
+                T_0_i = getattr(robot, f"get_T_0_{i+1}")()
+                k_i = T_0_i[0:3,2]      # z axis of frame i in world frame
+                k_r1 = T_0_r1[0:3,2]    # z axis of frame r1 in world frame
+                k_g = g/np.linalg.norm(g)
+
+                if np.abs(k_i.transpose() @ k_r1) > 1 - tolerance:       # if z_i axis parallel to z_r1 axis
+                    print(f"Deleting mc_z of link {i}...")
+                    E_i = E_i[0:3,:]                        # remove mc_z
+
+                else:                                                    # if z_i axis is not parallel to z_r1 axis
+                    T_i_r1 = np.linalg.inv(T_0_i) @ T_0_r1
+                    i_k_r1 = T_i_r1[0:3,2]
+                    if i_k_r1[3] > tolerance:
+                        E_i[1,3] = -i_k_r1[1] / i_k_r1[3]     # Regroup mc_z in mc_x
+                        E_i[2,3] = -i_k_r1[2] / i_k_r1[3]     # Regroup mc_z in mc_x
+                        E_i = E_i[0:3,:]                        # remove mc_z
+                    elif i_k_r1[0] > tolerance and i_k_r1[1] > tolerance:
+                        E_i[1,3] = -i_k_r1[1] / i_k_r1[2]     # Regroup mc_y in mc_x
+                        E_i = E_i[[0,1,3],:]                    # remove mc_y
+                    elif i_k_r1[2] > tolerance :
+                        E_i = E_i[[0,1,3],:]                    # remove mc_y
+                    else:
+                        E_i = E_i[[0,2,3],:]                    # remove mc_x
+            elif i < r1:
+                print(f"Deleting mc_x, mc_y, mc_z of link {i}...")
+                E_i = E_i[0,0]                                                      # remove mc_x, mc_y, mc_z
+
+
+            if add_rotor_inertia: E_i =  block_diag(E_i, 1)               # (add rotor inertia block if needed)
+            if add_rotor_inertia and i == p1:
+                T_0_p1 = getattr(robot, f"get_T_0_{p1+1}")()    # Oss. T_0_0 is the world frame not Frame 0
+                k_p1 = T_0_p1[0:3,2]  # z axis of frame r1 in world frame
+                T_0_rp1 = getattr(robot, f"get_T_0_{rp1+1}")()    # Oss. T_0_0 is the world frame not Frame 0
+                k_rp1 = T_0_rp1[0:3,2]  # z axis of frame r1 in world frame
+                k_g = g/np.linalg.norm(g)
+                if (np.abs(k_p1.transpose() @ k_g) < tolerance) and (p1 == 1 or  np.abs(k_p1.transpose() @ k_rp1) > 1 - tolerance):
+                    print(f"Deleting I_r of link {i}...")
+                    # r2 joint axis orthogonal to r1 joint axis
+                    E_i[0,10] = 1       # regroup I_r in m
+                    E_i[:-1,:]          # Remove I_r
+
+            hat_pi_i = E_i @ pi_i.reshape(-1, 1)  # Extracting reduced params from i-th link
+
+            # 3) Remapping on previous link (compute H_iminus)
+            if i>0:
+                iminus_L_i = Lambda(DH['alpha'][i], DH['a'][i], DH['d'][i], DH['theta'][i])
+                if not(add_rotor_inertia):
+                    # ------------------------------------------------------------------------------------------
+                    #                      m, cx,cy,cz,      I_xx,I_xy,I_xz,I_yy,I_yz,I_zz,     |     pi_r
+                    # ------------------------------------------------------------------------------------------
+                    H_iminus = np.hstack([np.zeros((10,4)),     iminus_L_i[:,4:10],                 np.eye(10)])
+                    pi[10*(i-1):10*i,:] = H_iminus @ np.vstack([pi_i,
+                                                                S(i-1,n)@pi])
+                else:
+                    # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                    #                               m,cx,cy,cz,         I_xx,I_xy,I_xz,I_yy,I_yz,I_zz,           Ir          |      pi_r, pi_I
+                    # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                    H_iminus = np.vstack([np.hstack([np.zeros((10,4)),     iminus_L_i[:,4:10],             np.zeros((10,1)),    np.eye(10), np.zeros((10,1))]),
+                                          np.array( [ 0,0,0,0,             0,0,0,0,0,0,                           0,            0,0,0,0,0,0,0,0,0,0,1])])
+
+                    tmp = H_iminus @ np.vstack([pi_i,
+                                                S(i-1,n, add_rotor_inertia) @ pi])
+                    pi[10*(i-1):10*i,:] = tmp[:10,:]
+                    pi[10*n + i,:] = tmp[10,:]
+
+
+            # 4) Get relationship parameters-reduced parameter i-th (Compute of W_i)
+            if i==n-1:
+                # last link
+                W_i = S_i
+                H_i = np.eye(10)
+                if (add_rotor_inertia): H_i = block_diag(H_i, 1)
+                H = [H_i] + H
+            else:
+                H_i = H[0]
+                H_iplus = H[1]
+                W_iplus = W[0]
+                W_i = np.vstack([H_iplus @ W_iplus,
+                                 S_i])
+            if i>0:  H = [H_iminus] + H
+            W = [W_i] + W
+            E = [E_i] + E
+
+
+            hat_pi_r = hat_pi_i.flatten().tolist() + hat_pi_r
+
+    beta = []
+    for i in range(n):
+        beta.append(E[i] @ H[i] @ W[i])
+    beta = np.vstack(beta)
+
+    # ----- Final reporting
+    end = time.time()
+    if add_rotor_inertia: print(f"Regrouping completed in {1000*(end - start)} ms. Parameters reduced from {len(pi_r.tolist())+len(pi_I.tolist())} to ", len(hat_pi_r))
+    else: print(f"Regrouping completed in {1000*(end - start)} ms. Parameters reduced from {len(pi_r.tolist())} to ", len(hat_pi_r))
+
+
+
+    return hat_pi_r, beta
+
+def save_beta(filename, beta, hat_Pi):
+    if not os.path.exists(filename):
+        beta_pinv = np.linalg.pinv(beta)
+        print("Creating sparse beta and pi_hat C++ header file...")
+        with open(filename, "w") as f:
+            f.write("// Auto-generated sparse beta and pi_hat\n")#include "beta_sparse.h"
+            f.write("/* Usage\n")
+            f.write(f"#include '{filename}'\n\n")
+            f.write("int main() {\n")
+            f.write("    Eigen::SparseMatrix<double> beta;\n")
+            f.write("    load_beta(beta);\n")
+            f.write("\n")
+            f.write("    auto pi_hat = load_pi_hat();\n")
+            f.write("\n")
+            f.write("    // Example usage:\n")
+            f.write("    Eigen::VectorXd tau = Y * beta.pinv() * pi_hat;\n")
+            f.write("\n")
+            f.write('    std::cout << "tau = \n" << tau << std::endl;\n')
+            f.write("}\n")
+            f.write("*/\n\n")
+
+            f.write("#include <Eigen/Dense>\n")
+            f.write("#include <Eigen/Sparse>\n")
+            f.write("#include <vector>\n\n")
+            f.write("{\n\n")
+
+            # 1) Beta as sparse matrix---
+            N, M = beta.shape
+            # Triplets
+            f.write("inline void load_beta(Eigen::SparseMatrix<double>& beta) {\n")
+            f.write(f"    beta.resize({N}, {M});\n")
+            f.write("    std::vector<Eigen::Triplet<double>> triplets;\n")
+            f.write(f"    triplets.reserve({np.count_nonzero(beta)});\n\n")
+
+            rows, cols = np.nonzero(beta)
+            for r, c in zip(rows, cols):
+                f.write(f"    triplets.emplace_back({r}, {c}, {beta[r,c]:.16g});\n")
+
+            f.write("\n    beta.setFromTriplets(triplets.begin(), triplets.end());\n")
+            f.write("}\n\n")
+
+            # 2) Beta Pseudo-Inverse as sparse matrix---
+            N, M = beta_pinv.shape
+            # Triplets
+            f.write("inline void load_beta_pinv(Eigen::SparseMatrix<double>& beta_pinv) {\n")
+            f.write(f"    beta_pinv.resize({N}, {M});\n")
+            f.write( "    std::vector<Eigen::Triplet<double>> triplets;\n")
+            f.write(f"    triplets.reserve({np.count_nonzero(beta_pinv)});\n\n")
+
+            rows, cols = np.nonzero(beta_pinv)
+            for r, c in zip(rows, cols):
+                f.write(f"    triplets.emplace_back({r}, {c}, {beta_pinv[r,c]:.16g});\n")
+
+            f.write("\n    beta_pinv.setFromTriplets(triplets.begin(), triplets.end());\n")
+            f.write("}\n\n")
+
+            # 3) pi_hat as dense vector----
+            f.write(f"inline Eigen::Matrix<double, {hat_Pi.shape[0]}, 1> load_pi_hat() {{\n")
+            f.write(f"    Eigen::Matrix<double, {hat_Pi.shape[0]}, 1> v;\n")
+            f.write("    v << \n")
+            for i in range(hat_Pi.shape[0]):
+                sep = "," if i < hat_Pi.shape[0]-1 else ";"
+                f.write(f"        {hat_Pi[i,0]:.16g}{sep}\n")
+            f.write("    return v;\n}\n")
+        print(f"{filename} created successfully.")
+    else:
+        print(f"{filename} already exists, skipping creation.")

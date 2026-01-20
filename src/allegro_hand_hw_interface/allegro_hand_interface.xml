@@ -5,7 +5,7 @@
         base_class_type="hardware_interface::SystemInterface">
 
         <description>
-           hardware interface to use Allegro Hand robotic system
+           hardware interface to use Allegro Hand V5 robotic system
         </description>
     </class>
 </library>

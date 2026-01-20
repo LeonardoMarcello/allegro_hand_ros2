@@ -1,0 +1,98 @@
+pipeline:
+  loaders: [dh_loader, dyn_loader]
+  builders: [kin_builder, dyn_builder, reg_builder, base_inertial_param_builder]
+  generators: [robot_generator]
+version: 1.0
+PI: &1 3.14163267948966
+PI_2: &2 1.5707963267948966
+PI_2_neg: &3 -1.5707963267948966
+robot_generator:
+  gen_python: true
+  gen_casadi: false
+  gen_robot: true
+  copy_gen: false
+dh_loader:
+  num_joints: 4
+  joints_type: [R, R, R, R]
+  DH:
+    symb: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    value: [0, *1, 0, *1, 0, *3, 0.069, *3, 0, *2, 0, *2, 0.038, 0, 0, 0]
+  Base_to_L0:
+    symb: [1, 1, 1, 1, 1, 1]
+    xyz: [0, 0, 0]
+    ypr: [0, 0, 0]
+  Ln_to_EE:
+    symb: [1, 1, 1, 1, 1, 1]
+    xyz: [0, 0, 0]
+    ypr: [0, 0, 0]
+dyn_loader:
+  Dl_order: 2
+  gravity:
+    symb: [1, 1, 1]
+    value: [0, 0, -9.81]
+  dynamics:
+    link1:
+      inertial:
+        symb: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        mass: 0.0446
+        CoM_x: -4.300055468143098e-17
+        CoM_y: -2.306753337806498e-17
+        CoM_z: 0.025000000245
+        Ixx: 5.440000000000001e-05
+        Ixy: 4e-07
+        Ixz: -1.12e-07
+        Iyy: 9.190000000000005e-06
+        Iyz: 1.0700000000000001e-05
+        Izz: 4.8e-05
+      friction:
+        symb: [1, 1]
+        Dl: [0.1, 0.01]
+    link2:
+      inertial:
+        symb: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        mass: 0.0173
+        CoM_x: -0.040809804301141624
+        CoM_y: 0.0037763149076687377
+        CoM_z: -0.009413150675963707
+        Ixx: 1.5197816112866858e-05
+        Ixy: -2.057183918529553e-08
+        Ixz: -9.404549108426731e-09
+        Iyy: 1.3321585795737896e-05
+        Iyz: -2.038926779701317e-06
+        Izz: 2.8489884814370336e-06
+      friction:
+        symb: [1, 1]
+        Dl: [0.1, 0.01]
+    link3:
+      inertial:
+        symb: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        mass: 0.0367
+        CoM_x: 0.02902183015400887
+        CoM_y: -0.012528142972810245
+        CoM_z: -0.014607607918363946
+        Ixx: 3.6980292183518227e-06
+        Ixy: 2.429998439555205e-07
+        Ixz: 6.479869121526535e-07
+        Iyy: 1.539802941153933e-05
+        Iyz: -3.107650600034444e-08
+        Izz: 1.3879999632956503e-05
+      friction:
+        symb: [1, 1]
+        Dl: [0.1, 0.01]
+    link4:
+      inertial:
+        symb: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        mass: 0.0348
+        CoM_x: 0.0035500101947624815
+        CoM_y: -0.002931112007812619
+        CoM_z: 0.02486699507226251
+        Ixx: 2.9395296384454636e-06
+        Ixy: 1.2439993991073175e-07
+        Ixz: 3.5199177096049447e-07
+        Iyy: 1.1299529519548273e-05
+        Iyz: -3.109656555608236e-08
+        Izz: 1.0599999830945504e-05
+      friction:
+        symb: [1, 1]
+        Dl: [0.1, 0.01]
+config_path: /home/thunder_dev/thunder_dynamics/robots/ahand/ahand_thumb.yaml

@@ -15,8 +15,14 @@ from functools import partial
 
 
 def setup_can(context, xacro_file):
+    hw_type = LaunchConfiguration('ros2_control_hardware_type').perform(context)
+    if hw_type != 'physical_device':
+        print(f"Mock hardware selected ({hw_type}), skipping CAN setup")
+        return []
+
     # --- Generate URDF from xacro ---
-    urdf_str = os.popen(f"xacro {xacro_file}").read()
+    urdf_str = os.popen(f"xacro {xacro_file} ros2_control_hardware_type:={hw_type}").read()
+    
 
     # --- Parse URDF for the ros2_control hardware params ---
     root = ET.fromstring(urdf_str)
@@ -54,13 +60,20 @@ def setup_can(context, xacro_file):
     return []
 
 def generate_launch_description():
+    # Argument
+    ros2_control_hardware_type = LaunchConfiguration("ros2_control_hardware_type",default="physical_device")
+
+    # Packages
     pkg_share = get_package_share_directory('allegro_hand_bringup')
     description_pkg_share = get_package_share_directory('allegro_hand_description')
     hw_pkg_share = get_package_share_directory('allegro_hand_hw_interface')
 
     # Path to your URDF or ros2 xacro
     xacro_file = os.path.join(pkg_share, 'config', 'allegro_hand_ros2control.xacro')
-    robot_description = Command(['xacro ',xacro_file])
+    robot_description = Command([
+        'xacro ', xacro_file,' ros2_control_hardware_type:=', ros2_control_hardware_type
+    ])
+
 
     # Controller manager params file (optional)
     config_path = os.path.join(pkg_share, 'config', 'allegro_controllers.yaml')
@@ -70,7 +83,7 @@ def generate_launch_description():
                 PythonLaunchDescriptionSource(
                     [os.path.join(pkg_share,'launch','rsp.launch.py')]
                 ),
-                launch_arguments={'use_sim_time': 'false', 'use_ros2_control': 'true'}.items()
+                launch_arguments={'use_sim_time': 'false', 'ros2_control_hardware_type':ros2_control_hardware_type}.items()
     )
 
 
@@ -116,6 +129,13 @@ def generate_launch_description():
 
     # Execute process
     return LaunchDescription([
+
+        # Declare ros2_control_hardware_type argument
+        DeclareLaunchArgument(
+            "ros2_control_hardware_type",
+            default_value="physical_device",
+            description="ROS2 control hardware interface type to use for the launch file -- possible values: [mock_components, physical_device, gazebo, isaac]"),
+
         # setup can device
         OpaqueFunction(function=setup_can_func),
 

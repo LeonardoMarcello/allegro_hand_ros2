@@ -1,9 +1,9 @@
-<library path="omni_vel_controller">
-  <class name="omni_vel_controller/Omni_Vel_Controller" 
-    type="omni_vel_controller::Omni_Vel_Controller"
+<library path="allegro_hand_computed_torque">
+  <class name="allegro_hand_computed_torque/ComputedTorque_Controller" 
+    type="allegro_hand_computed_torque::ComputedTorque_Controller"
     base_class_type="controller_interface::ControllerInterface">
     <description>
-    Omni Wheels driven base velocity controller
+    Computed Torque Controller for the Allegro Hand V5
     </description>
   </class>
 </library>

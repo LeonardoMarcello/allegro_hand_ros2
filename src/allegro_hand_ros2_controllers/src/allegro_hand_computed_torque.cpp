@@ -65,13 +65,13 @@ namespace allegro_hand_computed_torque
         Kd[8] = kd1;  Kd[9] = kd2;  Kd[10] = kd2; Kd[11] = kd3; // ring
         Kd[12] = kd1; Kd[13] = kd2; Kd[14] = kd2; Kd[15] = kd3; // thumb
 
-        if (!(get_node()->has_parameter("dt"))){
-            RCLCPP_ERROR(get_node()->get_logger(),"Could not load controller dt.");
-            return CallbackReturn::ERROR;
-        }
-        auto dt = get_node()->get_parameter("dt").as_int(); // in [ms]
+        // if (!(get_node()->has_parameter("dt"))){
+        //     RCLCPP_ERROR(get_node()->get_logger(),"Could not load controller dt.");
+        //     return CallbackReturn::ERROR;
+        // }
+        // auto dt = get_node()->get_parameter("dt").as_int(); // in [ms]
 
-        milliseconds dur{dt + 5};
+        // milliseconds dur{dt + 5};
 
 
         // load hand models
@@ -80,12 +80,13 @@ namespace allegro_hand_computed_torque
         thunder_index_handle_.load_conf(conf_path + "ahand_index_conf.yaml"); // or load_par_REG()
         thunder_middle_handle_.load_conf(conf_path + "ahand_middle_conf.yaml"); // or load_par_REG()
         thunder_ring_handle_.load_conf(conf_path + "ahand_ring_conf.yaml"); // or load_par_REG()
-        thunder_thumb_handle_.load_conf(conf_path + "ahand_thumb_conf.yaml"); // or load_par_REG()
-    
+        //thunder_thumb_handle_.load_conf(conf_path + "ahand_thumb_conf.yaml"); // NON esiste in nuovo thunder
+
 
         //set qos protocol
         rclcpp::QoS out_qos(10),in_qos(10);
-        if(get_node()->get_parameter("BestEffort_QOS").as_bool())
+        if(get_node()->has_parameter("BestEffort_QOS") &&
+            get_node()->get_parameter("BestEffort_QOS").as_bool())
         {
             out_qos.reliability(rclcpp::ReliabilityPolicy::BestEffort);
             in_qos.reliability(rclcpp::ReliabilityPolicy::BestEffort);
@@ -194,14 +195,16 @@ namespace allegro_hand_computed_torque
             q(i) = state_interfaces_[i * 3].get_value();
             dq(i) = state_interfaces_[i * 3 + 1].get_value();
             q_r(i) = joint_cmd_.position.at(i);
-            dq_r(i) = joint_cmd_.velocity.at(i);
+            //dq_r(i) = joint_cmd_.velocity.at(i);
+            dq_r(i) = 0.0;
         }
 
         Eigen::VectorXd tau(DOF_JOINTS);
         thunder_index_handle_.setArguments(q.segment(0, 4),dq.segment(0, 4),dq_r.segment(0, 4), ddq_r.segment(0, 4));
         thunder_middle_handle_.setArguments(q.segment(4, 4), dq.segment(4, 4), dq_r.segment(4, 4), ddq_r.segment(4, 4));
         thunder_ring_handle_.setArguments(q.segment(8, 4), dq.segment(8, 4), dq_r.segment(8, 4), ddq_r.segment(8, 4));
-        thunder_thumb_handle_.setArguments(q.segment(12, 4), dq.segment(12, 4), dq_r.segment(12, 4), ddq_r.segment(12, 4));
+        thunder_thumb_handle_.set_q(q.segment(12, 4));      thunder_thumb_handle_.set_dq(dq.segment(12, 4));
+        thunder_thumb_handle_.set_dqr(dq_r.segment(12, 4)); thunder_thumb_handle_.set_ddqr(ddq_r.segment(12, 4));
 
         // compute joint errors
         Eigen::VectorXd e = q_r - q;
@@ -213,16 +216,56 @@ namespace allegro_hand_computed_torque
         // Add here the desired contro Law
         // ----------------------------------
         // ...
-        tau.segment(0, 4) =  thunder_index_handle_.get_reg_G() *thunder_index_handle_.get_par_DYN();
-        tau.segment(4, 4) =  thunder_middle_handle_.get_reg_G()*thunder_middle_handle_.get_par_DYN();
-        tau.segment(8, 4) =  thunder_ring_handle_.get_reg_G()  *thunder_ring_handle_.get_par_DYN();
-        tau.segment(12, 4) = thunder_thumb_handle_.get_reg_G() *thunder_thumb_handle_.get_par_DYN();
+        Eigen::SparseMatrix<double> beta;
+        Eigen::SparseMatrix<double> beta_pinv;
+        finger_beta::load_beta(beta);
+        finger_beta::load_beta_pinv(beta_pinv);
+        auto hat_pi_reduced = finger_beta::load_pi_hat();
+
+
+        Eigen::SparseMatrix<double> thumb_beta;
+        Eigen::SparseMatrix<double> thumb_beta_pinv;
+        thumb_beta::load_beta(thumb_beta);
+        thumb_beta::load_beta_pinv(thumb_beta_pinv);
+        auto thumb_hat_pi_reduced = thumb_beta::load_pi_hat();
+
+
+
+        Eigen::MatrixXd Yr = thunder_index_handle_.get_reg_G();
+        Eigen::MatrixXd Y_Ir = 0*q.segment(0, 4).asDiagonal();
+        Eigen::MatrixXd Y_rIr(Yr.rows(), Yr.cols() + Y_Ir.cols());
+        Y_rIr << Yr, Y_Ir;
+        tau.segment(0, 4) =  Y_rIr*beta_pinv*hat_pi_reduced.segment(0,24);
+
+
+
+        Yr = thunder_middle_handle_.get_reg_G();
+        Y_Ir = 0*q.segment(4, 4).asDiagonal();
+        Y_rIr << Yr, Y_Ir;
+        tau.segment(4, 4) =  Y_rIr*beta_pinv*hat_pi_reduced.segment(0,24);
+
+
+
+        Yr = thunder_ring_handle_.get_reg_G();
+        Y_Ir = 0*q.segment(8, 4).asDiagonal();
+        Y_rIr << Yr, Y_Ir;
+        tau.segment(8, 4) =  Y_rIr*beta_pinv*hat_pi_reduced.segment(0,24);
+
+        Eigen::MatrixXd thumb_Yr = thunder_thumb_handle_.get_reg_G();
+        Eigen::MatrixXd thumb_Y_Ir = 0*q.segment(12, 4).asDiagonal();
+        Eigen::MatrixXd thumb_Y_rIr(thumb_Yr.rows(), thumb_Yr.cols() + thumb_Y_Ir.cols());
+        thumb_Y_rIr << thumb_Yr, thumb_Y_Ir;
+        tau.segment(12, 4) =  thumb_Y_rIr*thumb_beta_pinv*thumb_hat_pi_reduced.segment(0,24);
         // ...
 
         // write on command_interfaces_ : [eff_joint0, eff_joint1, ...]
         for (size_t i = 0; i < DOF_JOINTS; i++) {
             double effort_command = tau(i);
-            command_interfaces_[i * 2].set_value(effort_command);
+            // if (i>=12){
+            //     RCLCPP_INFO(get_node()->get_logger(), "Thumb Joint %zu: Computed Torque: %f", i, effort_command);
+            //     effort_command = 0.0; // disable thumb torque for safety
+            // }
+            command_interfaces_[i].set_value(effort_command);
         }
 
         return controller_interface::return_type::OK;

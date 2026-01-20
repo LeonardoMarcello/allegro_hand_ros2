@@ -9,6 +9,7 @@ import pinocchio
 from pinocchio.utils import *
 from pinocchio.visualize import GepettoVisualizer
 
+import matplotlib.pyplot as plt
 
 # Load the robot model
 # ---------------------------------------------------------------------------
@@ -206,6 +207,15 @@ ahand.viewer.gui.refresh()  # Refresh the window.
 
 time.sleep(10)
 dt = 0.01
+# --- Initialize data storage before the loop ---
+history = {
+    'time': [],
+    'error_norm': [],
+    'cond_number': [],
+    's_min': [],
+    'q': []
+}
+
 for i in range(10000):
     omega = 0.1
     theta = i*dt*omega
@@ -235,6 +245,12 @@ for i in range(10000):
     pinocchio.forwardKinematics(ahand.model, ahand.data, q)     # Compute joint placements
     pinocchio.updateFramePlacements(ahand.model, ahand.data)    # Also compute operational frame placements
 
+    # --- Store data for plotting ---
+    history['time'].append(i*dt)
+    history['error_norm'].append(np.linalg.norm(e))
+    history['cond_number'].append(cond_number)
+    history['s_min'].append(s.min())
+    history['q'].append(q.copy())
 
     #ahand.viewer.gui.applyConfiguration("world/sphere1", (x_t[0], x_t[1], x_t[2], 1.0 ,0.,0.,0. ))
     #ahand.viewer.gui.applyConfiguration("world/sphere2", (x_t[6], x_t[7], x_t[8], 1.0 ,0.,0.,0. ))
@@ -256,6 +272,41 @@ for i in range(10000):
     #print('-'*20)
 
 
+# --- Plotting Section (Add this before exit()) ---
+print("Generating plots...")
+fig, axs = plt.subplots(4, 1, figsize=(10, 12), sharex=True)
+
+# 1. Tracking Error
+axs[0].plot(history['time'], history['error_norm'], color='blue')
+axs[0].set_ylabel('L2 Error Norm (m)')
+axs[0].set_title('Control Tracking Performance')
+axs[0].grid(True)
+
+# 2. Condition Number (Log scale is better for singularity detection)
+axs[1].semilogy(history['time'], history['cond_number'], color='red')
+axs[1].set_ylabel('Cond Number (Log)')
+axs[1].set_title('Jacobian Conditioning (Singularity Check)')
+axs[1].grid(True)
+
+# 2. Condition Number (Log scale is better for singularity detection)
+axs[2].semilogy(history['time'], history['s_min'], color='red')
+axs[2].set_ylabel('Sigma min)')
+axs[2].set_title('Jacobian minimum eigenvalue)')
+axs[2].grid(True)
+
+# 3. Joint Positions
+q_history = np.array(history['q'])
+for j in range(q_history.shape[1]):
+    axs[3].plot(history['time'], q_history[:, j], label=f'q{j}')
+axs[3].set_ylabel('Joint Position (rad)')
+axs[3].set_xlabel('Time (s)')
+axs[3].set_title('Joint Trajectories')
+# axs[2].legend(loc='upper right', ncol=2, fontsize='small') # Uncomment if few joints
+axs[3].grid(True)
+
+plt.tight_layout()
+plt.show()
+exit()
 # ---------------------------------------------------------------------------
 # DYNAMICS
 # ---------------------------------------------------------------------------

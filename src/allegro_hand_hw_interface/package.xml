@@ -19,7 +19,6 @@
   <depend>tf2_ros</depend>
   <depend>tf2</depend>
   <depend>rosbag2_cpp</depend>
-  <depend>allegro_hand_driver</depend>
   <depend>bhand</depend>
   <depend>std_srvs</depend>
 

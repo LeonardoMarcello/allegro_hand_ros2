@@ -172,14 +172,14 @@ class JointRelay(Node):
         if delta_t > TRAJECT_TIME_PERIOD_S - 6 and delta_t < TRAJECT_TIME_PERIOD_S + 6:
             # if init transition
             if (self.enable_switch_traject):
-                #  - middle finger - 
+                #  - middle finger -
                 self.traject_2["idx"] = np.random.choice([0,1,2,3])
                 self.traject_2["q_bar"][[4,5,6,7]] = np.array([(TRAJECT_JOINT_LIMITS[self.traject_2["idx"]][i][1] + TRAJECT_JOINT_LIMITS[self.traject_2["idx"]][i][0])/2 for i in [0,1,2,3]])
                 self.traject_2["A"][[4,5,6,7]]= np.array([0.9 * (TRAJECT_JOINT_LIMITS[self.traject_2["idx"]][i][1] - TRAJECT_JOINT_LIMITS[self.traject_2["idx"]][i][0])/2 for i in [0,1,2,3]])
                 self.traject_2["f"][[4,5,6,7]]= np.array([np.random.choice(FREQUENCY) for _ in [0,1,2,3]])
                 self.traject_2["phi"][[4,5,6,7]] = np.array([np.random.choice(PHASE) for _ in [0,1,2,3]])
 
-                #  - thumb finger - 
+                #  - thumb finger -
                 #self.traject_2["idx"] = np.random.choice([0,1])
                 #self.traject_2["q_bar"][[12,13,14,15]] = np.array([(TRAJECT_JOINT_LIMITS[self.traject_2["idx"]][i][1] + TRAJECT_JOINT_LIMITS[self.traject_2["idx"]][i][0])/2 for i in [0,1,2,3]])
                 #self.traject_2["A"][[12,13,14,15]]= np.array([0.9 * (TRAJECT_JOINT_LIMITS[self.traject_2["idx"]][i][1] - TRAJECT_JOINT_LIMITS[self.traject_2["idx"]][i][0])/2 for i in [0,1,2,3]])

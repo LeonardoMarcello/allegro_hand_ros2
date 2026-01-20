@@ -12,8 +12,8 @@ import xacro
 
 def generate_launch_description():
     # Check if we're told to use sim time
+    ros2_control_hardware_type = LaunchConfiguration('ros2_control_hardware_type')
     use_sim_time = LaunchConfiguration('use_sim_time')
-    use_ros2_control = LaunchConfiguration('use_ros2_control')
 
     # Process the URDF file
     pkg_share = get_package_share_directory('allegro_hand_bringup')
@@ -21,7 +21,7 @@ def generate_launch_description():
     # Path to your URDF or xacro
     xacro_file = os.path.join(pkg_share, 'config', 'allegro_hand_ros2control.xacro')
     #robot_description_config = xacro.process_file(xacro_file).toxml() # <-- comment
-    robot_description_config = Command(['xacro ', xacro_file, ' use_ros2_control:=', use_ros2_control, ' sim_mode:=', use_sim_time]) # <- ORI
+    robot_description_config = Command(['xacro ', xacro_file, ' ros2_control_hardware_type:=', ros2_control_hardware_type]) # <- ORI
 
 
     # Create a robot_state_publisher node
@@ -41,9 +41,10 @@ def generate_launch_description():
             default_value='false',
             description='Use sim time if true'),
         DeclareLaunchArgument(
-            'use_ros2_control',
-            default_value='false',
-            description='Use ros2_control if true'),
+            "ros2_control_hardware_type",
+            default_value="physical_device",
+            description="ROS2 control hardware interface type to use for the launch file -- possible values: [mock_components, physical_device, gazebo, isaac]"),
+
 
         node_robot_state_publisher
     ])

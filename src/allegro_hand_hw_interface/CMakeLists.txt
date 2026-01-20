@@ -14,7 +14,7 @@ find_package(rclcpp_lifecycle REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(rosbag2_cpp REQUIRED)
-find_package(allegro_hand_driver REQUIRED)
+#find_package(allegro_hand_driver REQUIRED)
 find_package(bhand REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(std_srvs REQUIRED)
@@ -24,7 +24,7 @@ find_package(std_srvs REQUIRED)
 
 include_directories(
   include
-  ${allegro_hand_driver_INCLUDE_DIRS}
+  #${allegro_hand_driver_INCLUDE_DIRS}
   ${bhand_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIRS}
 )
@@ -34,6 +34,10 @@ add_library(
   ${PROJECT_NAME}
   SHARED
   src/allegro_hand_interface.cpp
+
+  src/AllegroHandDrv.cpp
+  src/candrv/socket_can.cpp
+  
   src/kalman_filter_joint.cpp
 )
 
@@ -44,7 +48,7 @@ add_library(
 #)
 target_include_directories(${PROJECT_NAME} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../allegro_hand_driver/include>
+  #$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../allegro_hand_driver/include>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../bhand/include>
   $<INSTALL_INTERFACE:include>
 )
@@ -60,7 +64,7 @@ ament_target_dependencies(
   rclcpp_lifecycle
   tf2_ros
   tf2
-  allegro_hand_driver
+  #allegro_hand_driver
   bhand
   std_srvs
 )
@@ -110,7 +114,7 @@ ament_export_dependencies(
   rclcpp_lifecycle
   tf2_ros
   tf2
-  allegro_hand_driver
+  #allegro_hand_driver
   bhand
 )
 
