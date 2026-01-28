@@ -42,19 +42,21 @@ class thunder_ahand_thumb{
 		// Velocity reference
 		Vector<double,4> dqr = {0.000000, 0.000000, 0.000000, 0.000000};
 		// Dynamic parameters
-		Vector<double,40> par_DYN = {0.044600, -0.000000, -0.000000, 0.025000, 0.000054, 0.000000, -0.000000, 0.000009, 0.000011, 0.000048, 0.017300, -0.040810, 0.003776, -0.009413, 0.000015, -0.000000, -0.000000, 0.000013, -0.000002, 0.000003, 0.036700, 0.029022, -0.012528, -0.014608, 0.000004, 0.000000, 0.000001, 0.000015, -0.000000, 0.000014, 0.034800, 0.003550, -0.002931, 0.024867, 0.000003, 0.000000, 0.000000, 0.000011, -0.000000, 0.000011};
+		Vector<double,40> par_DYN = {0.044600, 0.000000, 0.000000, 0.000000, 0.000054, 0.000000, -0.000000, 0.000009, 0.000011, 0.000048, 0.017300, 0.000000, 0.000000, 0.000000, 0.000015, -0.000000, -0.000000, 0.000013, -0.000002, 0.000003, 0.036700, 0.000000, 0.000000, 0.000000, 0.000004, 0.000000, 0.000001, 0.000015, -0.000000, 0.000014, 0.034800, 0.000000, 0.000000, 0.000000, 0.000003, 0.000000, 0.000000, 0.000011, -0.000000, 0.000011};
 		// Link friction parameters
 		Vector<double,8> par_Dl = {0.100000, 0.010000, 0.100000, 0.010000, 0.100000, 0.010000, 0.100000, 0.010000};
+		// Link motor inertia parameters
+		Vector<double,4> par_Ia = {0.000000, 0.000000, 0.000000, 0.000000};
 		// Last link to end-effector frame
-		Vector<double,6> par_Ln2EE = {0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000};
+		Vector<double,6> par_Ln2EE = {0.049000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000};
 		// Dynamic parameters for regressor
-		Vector<double,40> par_REG = {0.044600, -0.000000, -0.000000, 0.001115, 0.000082, 0.000000, -0.000000, 0.000037, 0.000011, 0.000048, 0.017300, -0.000706, 0.000065, -0.000163, 0.000017, 0.000003, -0.000007, 0.000044, -0.000001, 0.000032, 0.036700, 0.001065, -0.000460, -0.000536, 0.000017, 0.000014, 0.000016, 0.000054, -0.000007, 0.000051, 0.034800, 0.000124, -0.000102, 0.000865, 0.000025, 0.000000, -0.000003, 0.000033, 0.000003, 0.000011};
+		Vector<double,40> par_REG = {0.044600, 0.000000, 0.000000, 0.000000, 0.000054, 0.000000, -0.000000, 0.000009, 0.000011, 0.000048, 0.017300, 0.000000, 0.000000, 0.000000, 0.000015, -0.000000, -0.000000, 0.000013, -0.000002, 0.000003, 0.036700, 0.000000, 0.000000, 0.000000, 0.000004, 0.000000, 0.000001, 0.000015, -0.000000, 0.000014, 0.034800, 0.000000, 0.000000, 0.000000, 0.000003, 0.000000, 0.000000, 0.000011, -0.000000, 0.000011};
 		// Base inertial parameters for reduced regressor.
-		Vector<double,24> par_REG_red = {-0.000000, 0.005964, 0.000492, -0.000706, -0.000264, 0.000111, 0.000003, -0.000007, -0.000001, 0.000170, 0.002388, -0.000460, -0.000087, 0.000014, -0.000017, -0.000007, 0.000101, 0.000124, -0.000102, -0.000008, 0.000000, -0.000003, 0.000003, 0.000011};
+		Vector<double,26> par_REG_red = {0.000000, 0.006127, 0.000484, 0.000000, 0.000000, 0.000079, -0.000000, -0.000000, -0.000002, 0.000080, 0.001322, 0.000000, -0.000062, 0.000000, 0.000001, -0.000000, 0.000064, 0.000000, 0.000000, 0.000000, -0.000008, 0.000000, 0.000000, -0.000000, 0.000011, 0.000000};
 		// Gravity on world frame
 		Vector<double,3> par_gravity = {0.000000, 0.000000, -9.810000};
 		// World to base frame
-		Vector<double,6> par_world2L0 = {0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000};
+		Vector<double,6> par_world2L0 = {0.002000, 0.026710, -0.063420, 0.000000, 0.000000, -0.087266};
 		// Configuration
 		Vector<double,4> q = {0.000000, 0.000000, 0.000000, 0.000000};
 		// Wrench
@@ -107,12 +109,14 @@ class thunder_ahand_thumb{
 		Vector<double,40> get_par_DYN();
 		// get the parameter: par_Dl
 		Vector<double,8> get_par_Dl();
+		// get the parameter: par_Ia
+		Vector<double,4> get_par_Ia();
 		// get the parameter: par_Ln2EE
 		Vector<double,6> get_par_Ln2EE();
 		// get the parameter: par_REG
 		Vector<double,40> get_par_REG();
 		// get the parameter: par_REG_red
-		Vector<double,24> get_par_REG_red();
+		Vector<double,26> get_par_REG_red();
 		// get the parameter: par_gravity
 		Vector<double,3> get_par_gravity();
 		// get the parameter: par_world2L0
@@ -137,12 +141,14 @@ class thunder_ahand_thumb{
 		void set_par_DYN(Vector<double,40> value);
 		// set the parameter: par_Dl
 		void set_par_Dl(Vector<double,8> value);
+		// set the parameter: par_Ia
+		void set_par_Ia(Vector<double,4> value);
 		// set the parameter: par_Ln2EE
 		void set_par_Ln2EE(Vector<double,6> value);
 		// set the parameter: par_REG
 		void set_par_REG(Vector<double,40> value);
 		// set the parameter: par_REG_red
-		void set_par_REG_red(Vector<double,24> value);
+		void set_par_REG_red(Vector<double,26> value);
 		// set the parameter: par_gravity
 		void set_par_gravity(Vector<double,3> value);
 		// set the parameter: par_world2L0
@@ -236,6 +242,13 @@ class thunder_ahand_thumb{
 		 * - depends on: {q, dq, par_world2L0, par_gravity, par_DYN}
 		 */ 
 		Eigen::Matrix<double,4,1> get_G_dot();
+
+		/**
+		 * @brief Manipulator motor inertia torque
+		 * 
+		 * - depends on: {ddq, par_Ia}
+		 */ 
+		Eigen::Matrix<double,4,1> get_Ia();
 
 		/**
 		 * @brief Jacobian of frame 1
@@ -385,22 +398,26 @@ class thunder_ahand_thumb{
 		Eigen::Matrix<double,4,4> get_T_4();
 
 		/**
-		 * @brief Template transformation of joint P
+		 * @brief Template transformation of general prismatic joint R
 		 * 
 		 * @param q_joint Explicit parameter
 		 * 
+		 * @param [axis_0, axis_1, axis_2] Explicit parameter
+		 * 
 		 * - depends on: {}
 		 */ 
-		Eigen::Matrix<double,4,4> get_T_JOINT_P(Vector<double,1> q_joint);
+		Eigen::Matrix<double,4,4> get_T_JOINT_P(Vector<double,1> q_joint, Vector<double,3> axes);
 
 		/**
-		 * @brief Template transformation of joint R
+		 * @brief Template transformation of general rotoidal joint R
 		 * 
 		 * @param q_joint Explicit parameter
 		 * 
+		 * @param [axis_0, axis_1, axis_2] Explicit parameter
+		 * 
 		 * - depends on: {}
 		 */ 
-		Eigen::Matrix<double,4,4> get_T_JOINT_R(Vector<double,1> q_joint);
+		Eigen::Matrix<double,4,4> get_T_JOINT_R(Vector<double,1> q_joint, Vector<double,3> axes);
 
 		/**
 		 * @brief absolute transformation from frame world to base
@@ -463,14 +480,14 @@ class thunder_ahand_thumb{
 		 * 
 		 * - depends on: {q, dq, dqr, ddqr, par_world2L0, par_gravity}
 		 */ 
-		Eigen::Matrix<double,4,24> get_Yr_red();
+		Eigen::Matrix<double,4,26> get_Yr_red();
 
 		/**
 		 * @brief linear relationship between full dyn parameters and the reduced set. beta s.t. par_red = beta*par.
 		 * 
 		 * - depends on: {}
 		 */ 
-		Eigen::Matrix<double,24,40> get_beta();
+		Eigen::Matrix<double,26,44> get_beta();
 
 		/**
 		 * @brief Manipulator link friction
@@ -494,18 +511,18 @@ class thunder_ahand_thumb{
 		Eigen::Matrix<double,24,1> get_par_KIN();
 
 		/**
-		 * @brief Conversion from regressor to base inertial parameters.
-		 * 
-		 * - depends on: {par_REG}
-		 */ 
-		Eigen::Matrix<double,24,1> get_reg2base();
-
-		/**
 		 * @brief Conversion from regressor to dynamic parameters
 		 * 
 		 * - depends on: {par_REG}
 		 */ 
 		Eigen::Matrix<double,40,1> get_reg2dyn();
+
+		/**
+		 * @brief Conversion from regressor to base inertial parameters.
+		 * 
+		 * - depends on: {par_REG, par_Ia}
+		 */ 
+		Eigen::Matrix<double,26,1> get_reg2red();
 
 		/**
 		 * @brief Regressor matrix of term C*dqr
@@ -534,6 +551,13 @@ class thunder_ahand_thumb{
 		 * - depends on: {q, par_world2L0, par_gravity}
 		 */ 
 		Eigen::Matrix<double,4,24> get_reg_G_red();
+
+		/**
+		 * @brief Regressor matrix of the motor inertia
+		 * 
+		 * - depends on: {ddq}
+		 */ 
+		Eigen::Matrix<double,4,4> get_reg_Ia();
 
 		/**
 		 * @brief Regressor matrix of the quantity J^T*w

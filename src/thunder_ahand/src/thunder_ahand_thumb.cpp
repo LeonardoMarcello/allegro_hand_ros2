@@ -19,12 +19,14 @@ Vector<double,4> thunder_ahand_thumb::get_dqr() {return dqr;}
 Vector<double,40> thunder_ahand_thumb::get_par_DYN() {return par_DYN;}
 // get the parameter: par_Dl
 Vector<double,8> thunder_ahand_thumb::get_par_Dl() {return par_Dl;}
+// get the parameter: par_Ia
+Vector<double,4> thunder_ahand_thumb::get_par_Ia() {return par_Ia;}
 // get the parameter: par_Ln2EE
 Vector<double,6> thunder_ahand_thumb::get_par_Ln2EE() {return par_Ln2EE;}
 // get the parameter: par_REG
 Vector<double,40> thunder_ahand_thumb::get_par_REG() {return par_REG;}
 // get the parameter: par_REG_red
-Vector<double,24> thunder_ahand_thumb::get_par_REG_red() {return par_REG_red;}
+Vector<double,26> thunder_ahand_thumb::get_par_REG_red() {return par_REG_red;}
 // get the parameter: par_gravity
 Vector<double,3> thunder_ahand_thumb::get_par_gravity() {return par_gravity;}
 // get the parameter: par_world2L0
@@ -49,12 +51,14 @@ void thunder_ahand_thumb::set_dqr(Vector<double,4> value) {dqr = value;}
 void thunder_ahand_thumb::set_par_DYN(Vector<double,40> value) {par_DYN = value;}
 // set the parameter: par_Dl
 void thunder_ahand_thumb::set_par_Dl(Vector<double,8> value) {par_Dl = value;}
+// set the parameter: par_Ia
+void thunder_ahand_thumb::set_par_Ia(Vector<double,4> value) {par_Ia = value;}
 // set the parameter: par_Ln2EE
 void thunder_ahand_thumb::set_par_Ln2EE(Vector<double,6> value) {par_Ln2EE = value;}
 // set the parameter: par_REG
 void thunder_ahand_thumb::set_par_REG(Vector<double,40> value) {par_REG = value;}
 // set the parameter: par_REG_red
-void thunder_ahand_thumb::set_par_REG_red(Vector<double,24> value) {par_REG_red = value;}
+void thunder_ahand_thumb::set_par_REG_red(Vector<double,26> value) {par_REG_red = value;}
 // set the parameter: par_gravity
 void thunder_ahand_thumb::set_par_gravity(Vector<double,3> value) {par_gravity = value;}
 // set the parameter: par_world2L0
@@ -100,6 +104,10 @@ int thunder_ahand_thumb::save_par(string par_file, vector<string> par_list){
 		vector<double> par_Dl_vect(par_Dl.data(), par_Dl.data() + 8);
 		yamlFile["par_Dl"] = par_Dl_vect;
 	}
+	if ((par_list.size()==0)||(std::count(par_list.begin(), par_list.end(), "par_Ia"))){
+		vector<double> par_Ia_vect(par_Ia.data(), par_Ia.data() + 4);
+		yamlFile["par_Ia"] = par_Ia_vect;
+	}
 	if ((par_list.size()==0)||(std::count(par_list.begin(), par_list.end(), "par_Ln2EE"))){
 		vector<double> par_Ln2EE_vect(par_Ln2EE.data(), par_Ln2EE.data() + 6);
 		yamlFile["par_Ln2EE"] = par_Ln2EE_vect;
@@ -109,7 +117,7 @@ int thunder_ahand_thumb::save_par(string par_file, vector<string> par_list){
 		yamlFile["par_REG"] = par_REG_vect;
 	}
 	if ((par_list.size()==0)||(std::count(par_list.begin(), par_list.end(), "par_REG_red"))){
-		vector<double> par_REG_red_vect(par_REG_red.data(), par_REG_red.data() + 24);
+		vector<double> par_REG_red_vect(par_REG_red.data(), par_REG_red.data() + 26);
 		yamlFile["par_REG_red"] = par_REG_red_vect;
 	}
 	if ((par_list.size()==0)||(std::count(par_list.begin(), par_list.end(), "par_gravity"))){
@@ -228,6 +236,15 @@ int thunder_ahand_thumb::load_par(string par_file, vector<string> par_list){
 			return 0;
 		}
 	}
+	if ((par_list.size()==0)||(std::count(par_list.begin(), par_list.end(), "par_Ia"))){
+		if (yamlFile["par_Ia"]){
+			vector<double> vec(yamlFile["par_Ia"].as<vector<double>>());
+			par_Ia = Eigen::Map<Vector<double,4>>(vec.data(), vec.size());
+		} else {
+			std::cerr << "Error while loading parameters: par_Ia not found!" << std::endl;
+			return 0;
+		}
+	}
 	if ((par_list.size()==0)||(std::count(par_list.begin(), par_list.end(), "par_Ln2EE"))){
 		if (yamlFile["par_Ln2EE"]){
 			vector<double> vec(yamlFile["par_Ln2EE"].as<vector<double>>());
@@ -249,7 +266,7 @@ int thunder_ahand_thumb::load_par(string par_file, vector<string> par_list){
 	if ((par_list.size()==0)||(std::count(par_list.begin(), par_list.end(), "par_REG_red"))){
 		if (yamlFile["par_REG_red"]){
 			vector<double> vec(yamlFile["par_REG_red"].as<vector<double>>());
-			par_REG_red = Eigen::Map<Vector<double,24>>(vec.data(), vec.size());
+			par_REG_red = Eigen::Map<Vector<double,26>>(vec.data(), vec.size());
 		} else {
 			std::cerr << "Error while loading parameters: par_REG_red not found!" << std::endl;
 			return 0;
@@ -392,6 +409,17 @@ Eigen::Matrix<double,4,1> thunder_ahand_thumb::get_G_dot() {
 	const double* input_[] = {q.data(), dq.data(), par_world2L0.data(), par_gravity.data(), par_DYN.data()};
 	double* output_[] = {buffer};
 	int check = ahand_thumb_G_dot_fun(input_, output_, p3, p4, 0);
+	return Eigen::Map<Eigen::Matrix<double,4,1>>(buffer);
+}
+
+// Manipulator motor inertia torque
+Eigen::Matrix<double,4,1> thunder_ahand_thumb::get_Ia() {
+	thread_local double buffer[4];
+	thread_local long long p3[ahand_thumb_Ia_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_Ia_fun_SZ_W];
+	const double* input_[] = {ddq.data(), par_Ia.data()};
+	double* output_[] = {buffer};
+	int check = ahand_thumb_Ia_fun(input_, output_, p3, p4, 0);
 	return Eigen::Map<Eigen::Matrix<double,4,1>>(buffer);
 }
 
@@ -626,8 +654,8 @@ Eigen::Matrix<double,4,4> thunder_ahand_thumb::get_T_4() {
 	return Eigen::Map<Eigen::Matrix<double,4,4>>(buffer);
 }
 
-// Template transformation of joint P
-Eigen::Matrix<double,4,4> thunder_ahand_thumb::get_T_JOINT_P(Vector<double,1> q_joint) {
+// Template transformation of general prismatic joint R
+Eigen::Matrix<double,4,4> thunder_ahand_thumb::get_T_JOINT_P(Vector<double,1> q_joint, Vector<double,3> axes) {
 	thread_local double buffer[16];
 	thread_local long long p3[ahand_thumb_T_JOINT_P_fun_SZ_IW];
 	thread_local double p4[ahand_thumb_T_JOINT_P_fun_SZ_W];
@@ -637,8 +665,8 @@ Eigen::Matrix<double,4,4> thunder_ahand_thumb::get_T_JOINT_P(Vector<double,1> q_
 	return Eigen::Map<Eigen::Matrix<double,4,4>>(buffer);
 }
 
-// Template transformation of joint R
-Eigen::Matrix<double,4,4> thunder_ahand_thumb::get_T_JOINT_R(Vector<double,1> q_joint) {
+// Template transformation of general rotoidal joint R
+Eigen::Matrix<double,4,4> thunder_ahand_thumb::get_T_JOINT_R(Vector<double,1> q_joint, Vector<double,3> axes) {
 	thread_local double buffer[16];
 	thread_local long long p3[ahand_thumb_T_JOINT_R_fun_SZ_IW];
 	thread_local double p4[ahand_thumb_T_JOINT_R_fun_SZ_W];
@@ -737,25 +765,25 @@ Eigen::Matrix<double,4,40> thunder_ahand_thumb::get_Yr() {
 }
 
 // Regressor defined w.r.t the set of base iniertial parameters.
-Eigen::Matrix<double,4,24> thunder_ahand_thumb::get_Yr_red() {
-	thread_local double buffer[96];
+Eigen::Matrix<double,4,26> thunder_ahand_thumb::get_Yr_red() {
+	thread_local double buffer[104];
 	thread_local long long p3[ahand_thumb_Yr_red_fun_SZ_IW];
 	thread_local double p4[ahand_thumb_Yr_red_fun_SZ_W];
 	const double* input_[] = {q.data(), dq.data(), dqr.data(), ddqr.data(), par_world2L0.data(), par_gravity.data()};
 	double* output_[] = {buffer};
 	int check = ahand_thumb_Yr_red_fun(input_, output_, p3, p4, 0);
-	return Eigen::Map<Eigen::Matrix<double,4,24>>(buffer);
+	return Eigen::Map<Eigen::Matrix<double,4,26>>(buffer);
 }
 
 // linear relationship between full dyn parameters and the reduced set. beta s.t. par_red = beta*par.
-Eigen::Matrix<double,24,40> thunder_ahand_thumb::get_beta() {
-	thread_local double buffer[960];
+Eigen::Matrix<double,26,44> thunder_ahand_thumb::get_beta() {
+	thread_local double buffer[1144];
 	thread_local long long p3[ahand_thumb_beta_fun_SZ_IW];
 	thread_local double p4[ahand_thumb_beta_fun_SZ_W];
 	const double** input_ = nullptr;
 	double* output_[] = {buffer};
 	int check = ahand_thumb_beta_fun(input_, output_, p3, p4, 0);
-	return Eigen::Map<Eigen::Matrix<double,24,40>>(buffer);
+	return Eigen::Map<Eigen::Matrix<double,26,44>>(buffer);
 }
 
 // Manipulator link friction
@@ -791,17 +819,6 @@ Eigen::Matrix<double,24,1> thunder_ahand_thumb::get_par_KIN() {
 	return Eigen::Map<Eigen::Matrix<double,24,1>>(buffer);
 }
 
-// Conversion from regressor to base inertial parameters.
-Eigen::Matrix<double,24,1> thunder_ahand_thumb::get_reg2base() {
-	thread_local double buffer[24];
-	thread_local long long p3[ahand_thumb_reg2base_fun_SZ_IW];
-	thread_local double p4[ahand_thumb_reg2base_fun_SZ_W];
-	const double* input_[] = {par_REG.data()};
-	double* output_[] = {buffer};
-	int check = ahand_thumb_reg2base_fun(input_, output_, p3, p4, 0);
-	return Eigen::Map<Eigen::Matrix<double,24,1>>(buffer);
-}
-
 // Conversion from regressor to dynamic parameters
 Eigen::Matrix<double,40,1> thunder_ahand_thumb::get_reg2dyn() {
 	thread_local double buffer[40];
@@ -811,6 +828,17 @@ Eigen::Matrix<double,40,1> thunder_ahand_thumb::get_reg2dyn() {
 	double* output_[] = {buffer};
 	int check = ahand_thumb_reg2dyn_fun(input_, output_, p3, p4, 0);
 	return Eigen::Map<Eigen::Matrix<double,40,1>>(buffer);
+}
+
+// Conversion from regressor to base inertial parameters.
+Eigen::Matrix<double,26,1> thunder_ahand_thumb::get_reg2red() {
+	thread_local double buffer[26];
+	thread_local long long p3[ahand_thumb_reg2red_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_reg2red_fun_SZ_W];
+	const double* input_[] = {par_REG.data(), par_Ia.data()};
+	double* output_[] = {buffer};
+	int check = ahand_thumb_reg2red_fun(input_, output_, p3, p4, 0);
+	return Eigen::Map<Eigen::Matrix<double,26,1>>(buffer);
 }
 
 // Regressor matrix of term C*dqr
@@ -855,6 +883,17 @@ Eigen::Matrix<double,4,24> thunder_ahand_thumb::get_reg_G_red() {
 	double* output_[] = {buffer};
 	int check = ahand_thumb_reg_G_red_fun(input_, output_, p3, p4, 0);
 	return Eigen::Map<Eigen::Matrix<double,4,24>>(buffer);
+}
+
+// Regressor matrix of the motor inertia
+Eigen::Matrix<double,4,4> thunder_ahand_thumb::get_reg_Ia() {
+	thread_local double buffer[16];
+	thread_local long long p3[ahand_thumb_reg_Ia_fun_SZ_IW];
+	thread_local double p4[ahand_thumb_reg_Ia_fun_SZ_W];
+	const double* input_[] = {ddq.data()};
+	double* output_[] = {buffer};
+	int check = ahand_thumb_reg_Ia_fun(input_, output_, p3, p4, 0);
+	return Eigen::Map<Eigen::Matrix<double,4,4>>(buffer);
 }
 
 // Regressor matrix of the quantity J^T*w

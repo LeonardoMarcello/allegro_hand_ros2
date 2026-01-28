@@ -77,7 +77,7 @@ install(
 # export
 ament_export_targets(export_thunder_ahand HAS_LIBRARY_TARGET)
 ament_export_dependencies(yaml-cpp Eigen3)
-
+ament_export_include_directories(include)
 
 # =====================================================
 # Testing

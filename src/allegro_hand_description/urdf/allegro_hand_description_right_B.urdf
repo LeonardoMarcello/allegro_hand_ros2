@@ -23,7 +23,7 @@
   <link name="palm_link">
     <visual>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/palm.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/palm.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="0 3.14 1.57" xyz="0.02 -0.00 -0.1"/>
       <material name="black">
@@ -32,7 +32,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/palm.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/palm.stl" scale="0.001 0.001 0.001"/>
       </geometry>
  <origin rpy="0 3.14 1.57" xyz="0.02 -0.00 -0.1"/>
     </collision>
@@ -50,7 +50,7 @@
   <link name="link_0_0">
     <visual>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/new_l1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/new_l1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="0 0 -1.57" xyz="-0.0625 -0.022 0.167"/>
       <material name="black">
@@ -59,7 +59,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/new_l1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/new_l1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="0 0 -1.57" xyz="-0.0625 -0.022 0.167"/>
     </collision>
@@ -81,14 +81,14 @@
   <link name="link_1_0">
     <visual>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/new_l2.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/new_l2.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="0 0 -1.57" xyz="-0.0625 -0.022 0.1495"/>
       <material name="black"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/new_l2.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/new_l2.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="0 0 -1.57" xyz="-0.0625 -0.022 0.1495"/>
     </collision>
@@ -110,14 +110,14 @@
   <link name="link_2_0">
     <visual>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/new_l3.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/new_l3.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="0 0 -1.57" xyz="-0.0625 -0.022 0.1065"/>
       <material name="black"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/new_l3.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/new_l3.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="0 0 -1.57" xyz="-0.0625 -0.022 0.1065"/>
     </collision>
@@ -139,14 +139,14 @@
   <link name="link_3_0">
     <visual>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/new_l4.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/new_l4.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="0 0 -1.57" xyz="-0.0625 -0.022 0.0685"/>
       <material name="black"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/new_l4.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/new_l4.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="0 0 -1.57" xyz="-0.0625 -0.022 0.0685"/>
     </collision>
@@ -168,7 +168,7 @@
   <link name="link_3_0_tip">
     <visual>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/finger_tip.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/finger_tip.stl" scale="0.001 0.001 0.001"/>
       </geometry>
        <origin rpy="0 0 -1.57" xyz="-0.05482 -0.01493 -0.01795"/>
       <material name="white">
@@ -177,7 +177,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/finger_tip.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/finger_tip.stl" scale="0.001 0.001 0.001"/>
       </geometry>
        <origin rpy="0 0 -1.57" xyz="-0.05482 -0.01493 -0.01795"/>
     </collision>
@@ -196,7 +196,7 @@
   <link name="link_4_0">
      <visual>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/new_l1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/new_l1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="0 0 -1.57" xyz="-0.0625 -0.022 0.167"/>
       <material name="black">
@@ -205,7 +205,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/new_l1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/new_l1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="0 0 -1.57" xyz="-0.0625 -0.022 0.167"/>
     </collision>
@@ -227,14 +227,14 @@
   <link name="link_5_0">
     <visual>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/new_l2.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/new_l2.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="0 0 -1.57" xyz="-0.0625 -0.022 0.1495"/>
       <material name="black"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/new_l2.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/new_l2.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="0 0 -1.57" xyz="-0.0625 -0.022 0.1495"/>
     </collision>
@@ -256,14 +256,14 @@
   <link name="link_6_0">
    <visual>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/new_l3.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/new_l3.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="0 0 -1.57" xyz="-0.0625 -0.022 0.1065"/>
       <material name="black"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/new_l3.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/new_l3.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="0 0 -1.57" xyz="-0.0625 -0.022 0.1065"/>
     </collision>
@@ -285,14 +285,14 @@
   <link name="link_7_0">
     <visual>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/new_l4.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/new_l4.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="0 0 -1.57" xyz="-0.0625 -0.022 0.0685"/>
       <material name="black"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/new_l4.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/new_l4.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="0 0 -1.57" xyz="-0.0625 -0.022 0.0685"/>
     </collision>
@@ -314,7 +314,7 @@
   <link name="link_7_0_tip">
     <visual>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/finger_tip.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/finger_tip.stl" scale="0.001 0.001 0.001"/>
       </geometry>
        <origin rpy="0 0 -1.57" xyz="-0.05482 -0.01493 -0.01795"/>
       <material name="white">
@@ -323,7 +323,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/finger_tip.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/finger_tip.stl" scale="0.001 0.001 0.001"/>
       </geometry>
         <origin rpy="0 0 -1.57" xyz="-0.05482 -0.01493 -0.01795"/>
     </collision>
@@ -342,7 +342,7 @@
     <link name="link_8_0">
        <visual>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/new_l1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/new_l1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="0 0 -1.57" xyz="-0.0625 -0.022 0.167"/>
       <material name="black">
@@ -351,7 +351,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/new_l1.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/new_l1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="0 0 -1.57" xyz="-0.0625 -0.022 0.167"/>
     </collision>
@@ -373,14 +373,14 @@
   <link name="link_9_0">
     <visual>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/new_l2.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/new_l2.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="0 0 -1.57" xyz="-0.0625 -0.022 0.1495"/>
       <material name="black"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/new_l2.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/new_l2.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="0 0 -1.57" xyz="-0.0625 -0.022 0.1495"/>
     </collision>
@@ -402,14 +402,14 @@
   <link name="link_10_0">
     <visual>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/new_l3.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/new_l3.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="0 0 -1.57" xyz="-0.0625 -0.022 0.1065"/>
       <material name="black"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/new_l3.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/new_l3.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="0 0 -1.57" xyz="-0.0625 -0.022 0.1065"/>
     </collision>
@@ -431,14 +431,14 @@
   <link name="link_11_0">
     <visual>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/new_l4.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/new_l4.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="0 0 -1.57" xyz="-0.0625 -0.022 0.0685"/>
       <material name="black"/>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/new_l4.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/new_l4.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="0 0 -1.57" xyz="-0.0625 -0.022 0.0685"/>
     </collision>
@@ -460,7 +460,7 @@
   <link name="link_11_0_tip">
     <visual>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/finger_tip.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/finger_tip.stl" scale="0.001 0.001 0.001"/>
       </geometry>
        <origin rpy="0 0 -1.57" xyz="-0.05482 -0.01493 -0.01795"/>
       <material name="white">
@@ -469,7 +469,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/finger_tip.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/finger_tip.stl" scale="0.001 0.001 0.001"/>
       </geometry>
        <origin rpy="0 0 -1.57" xyz="-0.05482 -0.01493 -0.01795"/>
     </collision>
@@ -489,7 +489,7 @@
   <link name="link_12_0">
     <visual>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/t1_set.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/t1_set.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="3.926991 3.14 3.14" xyz="0.021 -0.1145 0.0725"/>
       <material name="black">
@@ -498,7 +498,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/t1_set.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/t1_set.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="3.926991 3.14 3.14" xyz="0.021 -0.1145 0.0725"/>
     </collision>
@@ -520,7 +520,7 @@
   <link name="link_13_0">
     <visual>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/t2_set.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/t2_set.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="3.14 3.14 1.57" xyz="-0.138 -0.0605 0.2143"/>
       <material name="black">
@@ -529,7 +529,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/t2_set.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/t2_set.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="3.14 3.14 1.57" xyz="-0.138 -0.0605 0.2143"/>
     </collision>
@@ -551,7 +551,7 @@
   <link name="link_14_0">
     <visual>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/t3_set.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/t3_set.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="3.14 3.14 1.57" xyz="-0.1265 -0.061 0.166"/>
       <material name="black">
@@ -559,7 +559,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/t3_set.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/t3_set.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="3.14 3.14 1.57" xyz="-0.1265 -0.061 0.166"/>
     </collision>
@@ -582,7 +582,7 @@
   <link name="link_15_0">
     <visual>
       <geometry>
-         <mesh filename="package://allegro_hand_controllers/meshes/t4_set.stl" scale="0.001 0.001 0.001"/>
+         <mesh filename="package://allegro_hand_description/meshes/t4_set.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="3.14 3.14 1.57" xyz="-0.149 -0.061 0.096"/>
       <material name="black">
@@ -590,7 +590,7 @@
     </visual>
     <collision>
       <geometry>
-         <mesh filename="package://allegro_hand_controllers/meshes/t4_set.stl" scale="0.001 0.001 0.001"/>
+         <mesh filename="package://allegro_hand_description/meshes/t4_set.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="3.14 3.14 1.57" xyz="-0.149 -0.061 0.096"/>
     </collision>
@@ -612,7 +612,7 @@
   <link name="link_15_0_tip">
     <visual>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/finger_tip_silicon.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/finger_tip_silicon.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="0 0 3.14" xyz="-0.014 0.0545 -0.0172"/>
       <material name="white">
@@ -621,7 +621,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://allegro_hand_controllers/meshes/finger_tip_silicon.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="package://allegro_hand_description/meshes/finger_tip_silicon.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <origin rpy="0 0 3.14" xyz="-0.014 0.0545 -0.0172"/>
     </collision>

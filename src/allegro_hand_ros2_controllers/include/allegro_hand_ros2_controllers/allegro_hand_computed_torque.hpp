@@ -16,11 +16,7 @@
 
 #include "sensor_msgs/msg/joint_state.hpp"
 
-#include "allegro_hand_ros2_controllers/thunder_ahand_finger.h"
-#include "allegro_hand_ros2_controllers/ahand_finger_beta.h"
-//#include "allegro_hand_ros2_controllers/thunder_ahand_thumb.h"
-#include "allegro_hand_ros2_controllers/ahand_thumb_beta.h"
-
+#include "thunder_ahand/thunder_ahand_finger.h"
 #include "thunder_ahand/thunder_ahand_thumb.h"
 
 # define DOF_JOINTS 16
@@ -50,6 +46,7 @@ class ComputedTorque_Controller : public controller_interface::ControllerInterfa
     private:
         realtime_tools::RealtimeBuffer<std::shared_ptr<CmdMsg>> rt_command_ptr_;
         rclcpp::Subscription<CmdMsg>::SharedPtr joints_cmd_sub_;
+        rclcpp::Publisher<CmdMsg>::SharedPtr controller_pub_;
         std::string logger_name_;
 
         std::string jointNames[DOF_JOINTS] =

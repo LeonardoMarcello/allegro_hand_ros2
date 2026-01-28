@@ -175,6 +175,24 @@ extern "C" int ahand_thumb_G_dot_fun_work_bytes(casadi_int *sz_arg, casadi_int* 
 #define ahand_thumb_G_dot_fun_SZ_RES 1
 #define ahand_thumb_G_dot_fun_SZ_IW 0
 #define ahand_thumb_G_dot_fun_SZ_W 0
+extern "C" int ahand_thumb_Ia_fun(const casadi_real** arg, casadi_real** res, casadi_int* iw, casadi_real* w, int mem);
+extern "C" int ahand_thumb_Ia_fun_checkout(void);
+extern "C" void ahand_thumb_Ia_fun_release(int mem);
+extern "C" void ahand_thumb_Ia_fun_incref(void);
+extern "C" void ahand_thumb_Ia_fun_decref(void);
+extern "C" casadi_int ahand_thumb_Ia_fun_n_in(void);
+extern "C" casadi_int ahand_thumb_Ia_fun_n_out(void);
+extern "C" casadi_real ahand_thumb_Ia_fun_default_in(casadi_int i);
+extern "C" const char* ahand_thumb_Ia_fun_name_in(casadi_int i);
+extern "C" const char* ahand_thumb_Ia_fun_name_out(casadi_int i);
+extern "C" const casadi_int* ahand_thumb_Ia_fun_sparsity_in(casadi_int i);
+extern "C" const casadi_int* ahand_thumb_Ia_fun_sparsity_out(casadi_int i);
+extern "C" int ahand_thumb_Ia_fun_work(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
+extern "C" int ahand_thumb_Ia_fun_work_bytes(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
+#define ahand_thumb_Ia_fun_SZ_ARG 2
+#define ahand_thumb_Ia_fun_SZ_RES 1
+#define ahand_thumb_Ia_fun_SZ_IW 0
+#define ahand_thumb_Ia_fun_SZ_W 0
 extern "C" int ahand_thumb_J_1_fun(const casadi_real** arg, casadi_real** res, casadi_int* iw, casadi_real* w, int mem);
 extern "C" int ahand_thumb_J_1_fun_checkout(void);
 extern "C" void ahand_thumb_J_1_fun_release(int mem);
@@ -567,7 +585,7 @@ extern "C" const casadi_int* ahand_thumb_T_JOINT_P_fun_sparsity_in(casadi_int i)
 extern "C" const casadi_int* ahand_thumb_T_JOINT_P_fun_sparsity_out(casadi_int i);
 extern "C" int ahand_thumb_T_JOINT_P_fun_work(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
 extern "C" int ahand_thumb_T_JOINT_P_fun_work_bytes(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
-#define ahand_thumb_T_JOINT_P_fun_SZ_ARG 1
+#define ahand_thumb_T_JOINT_P_fun_SZ_ARG 2
 #define ahand_thumb_T_JOINT_P_fun_SZ_RES 1
 #define ahand_thumb_T_JOINT_P_fun_SZ_IW 0
 #define ahand_thumb_T_JOINT_P_fun_SZ_W 0
@@ -585,7 +603,7 @@ extern "C" const casadi_int* ahand_thumb_T_JOINT_R_fun_sparsity_in(casadi_int i)
 extern "C" const casadi_int* ahand_thumb_T_JOINT_R_fun_sparsity_out(casadi_int i);
 extern "C" int ahand_thumb_T_JOINT_R_fun_work(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
 extern "C" int ahand_thumb_T_JOINT_R_fun_work_bytes(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
-#define ahand_thumb_T_JOINT_R_fun_SZ_ARG 1
+#define ahand_thumb_T_JOINT_R_fun_SZ_ARG 2
 #define ahand_thumb_T_JOINT_R_fun_SZ_RES 1
 #define ahand_thumb_T_JOINT_R_fun_SZ_IW 0
 #define ahand_thumb_T_JOINT_R_fun_SZ_W 0
@@ -823,24 +841,6 @@ extern "C" int ahand_thumb_par_KIN_fun_work_bytes(casadi_int *sz_arg, casadi_int
 #define ahand_thumb_par_KIN_fun_SZ_RES 1
 #define ahand_thumb_par_KIN_fun_SZ_IW 0
 #define ahand_thumb_par_KIN_fun_SZ_W 0
-extern "C" int ahand_thumb_reg2base_fun(const casadi_real** arg, casadi_real** res, casadi_int* iw, casadi_real* w, int mem);
-extern "C" int ahand_thumb_reg2base_fun_checkout(void);
-extern "C" void ahand_thumb_reg2base_fun_release(int mem);
-extern "C" void ahand_thumb_reg2base_fun_incref(void);
-extern "C" void ahand_thumb_reg2base_fun_decref(void);
-extern "C" casadi_int ahand_thumb_reg2base_fun_n_in(void);
-extern "C" casadi_int ahand_thumb_reg2base_fun_n_out(void);
-extern "C" casadi_real ahand_thumb_reg2base_fun_default_in(casadi_int i);
-extern "C" const char* ahand_thumb_reg2base_fun_name_in(casadi_int i);
-extern "C" const char* ahand_thumb_reg2base_fun_name_out(casadi_int i);
-extern "C" const casadi_int* ahand_thumb_reg2base_fun_sparsity_in(casadi_int i);
-extern "C" const casadi_int* ahand_thumb_reg2base_fun_sparsity_out(casadi_int i);
-extern "C" int ahand_thumb_reg2base_fun_work(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
-extern "C" int ahand_thumb_reg2base_fun_work_bytes(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
-#define ahand_thumb_reg2base_fun_SZ_ARG 1
-#define ahand_thumb_reg2base_fun_SZ_RES 1
-#define ahand_thumb_reg2base_fun_SZ_IW 0
-#define ahand_thumb_reg2base_fun_SZ_W 0
 extern "C" int ahand_thumb_reg2dyn_fun(const casadi_real** arg, casadi_real** res, casadi_int* iw, casadi_real* w, int mem);
 extern "C" int ahand_thumb_reg2dyn_fun_checkout(void);
 extern "C" void ahand_thumb_reg2dyn_fun_release(int mem);
@@ -859,6 +859,24 @@ extern "C" int ahand_thumb_reg2dyn_fun_work_bytes(casadi_int *sz_arg, casadi_int
 #define ahand_thumb_reg2dyn_fun_SZ_RES 1
 #define ahand_thumb_reg2dyn_fun_SZ_IW 0
 #define ahand_thumb_reg2dyn_fun_SZ_W 0
+extern "C" int ahand_thumb_reg2red_fun(const casadi_real** arg, casadi_real** res, casadi_int* iw, casadi_real* w, int mem);
+extern "C" int ahand_thumb_reg2red_fun_checkout(void);
+extern "C" void ahand_thumb_reg2red_fun_release(int mem);
+extern "C" void ahand_thumb_reg2red_fun_incref(void);
+extern "C" void ahand_thumb_reg2red_fun_decref(void);
+extern "C" casadi_int ahand_thumb_reg2red_fun_n_in(void);
+extern "C" casadi_int ahand_thumb_reg2red_fun_n_out(void);
+extern "C" casadi_real ahand_thumb_reg2red_fun_default_in(casadi_int i);
+extern "C" const char* ahand_thumb_reg2red_fun_name_in(casadi_int i);
+extern "C" const char* ahand_thumb_reg2red_fun_name_out(casadi_int i);
+extern "C" const casadi_int* ahand_thumb_reg2red_fun_sparsity_in(casadi_int i);
+extern "C" const casadi_int* ahand_thumb_reg2red_fun_sparsity_out(casadi_int i);
+extern "C" int ahand_thumb_reg2red_fun_work(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
+extern "C" int ahand_thumb_reg2red_fun_work_bytes(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
+#define ahand_thumb_reg2red_fun_SZ_ARG 2
+#define ahand_thumb_reg2red_fun_SZ_RES 1
+#define ahand_thumb_reg2red_fun_SZ_IW 0
+#define ahand_thumb_reg2red_fun_SZ_W 0
 extern "C" int ahand_thumb_reg_C_fun(const casadi_real** arg, casadi_real** res, casadi_int* iw, casadi_real* w, int mem);
 extern "C" int ahand_thumb_reg_C_fun_checkout(void);
 extern "C" void ahand_thumb_reg_C_fun_release(int mem);
@@ -931,6 +949,24 @@ extern "C" int ahand_thumb_reg_G_red_fun_work_bytes(casadi_int *sz_arg, casadi_i
 #define ahand_thumb_reg_G_red_fun_SZ_RES 1
 #define ahand_thumb_reg_G_red_fun_SZ_IW 0
 #define ahand_thumb_reg_G_red_fun_SZ_W 0
+extern "C" int ahand_thumb_reg_Ia_fun(const casadi_real** arg, casadi_real** res, casadi_int* iw, casadi_real* w, int mem);
+extern "C" int ahand_thumb_reg_Ia_fun_checkout(void);
+extern "C" void ahand_thumb_reg_Ia_fun_release(int mem);
+extern "C" void ahand_thumb_reg_Ia_fun_incref(void);
+extern "C" void ahand_thumb_reg_Ia_fun_decref(void);
+extern "C" casadi_int ahand_thumb_reg_Ia_fun_n_in(void);
+extern "C" casadi_int ahand_thumb_reg_Ia_fun_n_out(void);
+extern "C" casadi_real ahand_thumb_reg_Ia_fun_default_in(casadi_int i);
+extern "C" const char* ahand_thumb_reg_Ia_fun_name_in(casadi_int i);
+extern "C" const char* ahand_thumb_reg_Ia_fun_name_out(casadi_int i);
+extern "C" const casadi_int* ahand_thumb_reg_Ia_fun_sparsity_in(casadi_int i);
+extern "C" const casadi_int* ahand_thumb_reg_Ia_fun_sparsity_out(casadi_int i);
+extern "C" int ahand_thumb_reg_Ia_fun_work(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
+extern "C" int ahand_thumb_reg_Ia_fun_work_bytes(casadi_int *sz_arg, casadi_int* sz_res, casadi_int *sz_iw, casadi_int *sz_w);
+#define ahand_thumb_reg_Ia_fun_SZ_ARG 1
+#define ahand_thumb_reg_Ia_fun_SZ_RES 1
+#define ahand_thumb_reg_Ia_fun_SZ_IW 0
+#define ahand_thumb_reg_Ia_fun_SZ_W 0
 extern "C" int ahand_thumb_reg_JTw_fun(const casadi_real** arg, casadi_real** res, casadi_int* iw, casadi_real* w, int mem);
 extern "C" int ahand_thumb_reg_JTw_fun_checkout(void);
 extern "C" void ahand_thumb_reg_JTw_fun_release(int mem);

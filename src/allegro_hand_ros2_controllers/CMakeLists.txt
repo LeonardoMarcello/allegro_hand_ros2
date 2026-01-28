@@ -34,14 +34,10 @@ find_package(thunder_ahand REQUIRED)
 # Computed Torque Controller
 # -----------------------------
 add_library(allegro_hand_computed_torque SHARED
-  src/thunder_ahand_finger.cpp
-  src/ahand_finger_gen.cpp
-  src/thunder_ahand_thumb.cpp
-  src/ahand_thumb_gen.cpp
   src/allegro_hand_computed_torque.cpp
 )
 
-# ROS dependencies (NO yaml-cpp here)
+# ROS dependencies
 ament_target_dependencies(allegro_hand_computed_torque
   rclcpp
   rclcpp_lifecycle
@@ -59,6 +55,7 @@ target_link_libraries(allegro_hand_computed_torque
   yaml-cpp
   Eigen3::Eigen
   #${bhand_LIBRARIES} # <- needed when implementing via bhand library
+  thunder_ahand
 )
 
 # Include directories (target-scoped)

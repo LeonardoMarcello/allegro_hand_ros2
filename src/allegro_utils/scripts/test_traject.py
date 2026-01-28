@@ -55,7 +55,6 @@ TRAJECT_TIME_PERIOD_S = 30  # Duration of a single selected traject
 FREQUENCY = np.array([0, 0.01, 0.05, 0.1])
 PHASE = np.array([0, np.pi/3, np.pi/4, np.pi/2, 3*np.pi/4, np.pi])
 
-FINGER = 'thumb'
 
 # Test Traject Very Slow  search grid
 #FREQUENCY = np.array([0.01])#, 1, 1.2])
@@ -71,7 +70,9 @@ class JointRelay(Node):
         super().__init__('wave')
 
         # Declare parameters for input/output topics with default values
-        self.declare_parameter('output_topic', '/allegroHand_0/joint_cmd')
+        #self.declare_parameter('output_topic', '/allegroHand_0/joint_cmd')
+        self.declare_parameter('output_topic', '/allegro_effort_controller/command')
+        #self.declare_parameter('output_topic', '/allegroHand_0/joint_states')
         self.output_topic = self.get_parameter('output_topic').get_parameter_value().string_value
         self.pub = self.create_publisher(
             JointState,
@@ -86,6 +87,7 @@ class JointRelay(Node):
             1
         )
         self.oninit=True
+        self.oninit=False
 
         self.msg = JointState()
         self.msg.name = [
@@ -157,8 +159,8 @@ class JointRelay(Node):
 
         # =============== Define here target trajectory =========================================
         # get traject
-        for i in [4,5,6,7]:
-        #for i in [12,13,14,15]:
+        for i in [4,5,6,7]: # Middle Finger
+        #for i in [12,13,14,15]: # Thumb Finger
             q_bar = self.traject["q_bar"][i]
             amplitude = self.traject["A"][i]
             frequency = self.traject["f"][i]
@@ -190,8 +192,8 @@ class JointRelay(Node):
                 self.switch_t0 = t.nanoseconds*1e-9 + 6
 
 
-            for i in [4,5,6,7]:
-            #for i in [12,13,14,15]:
+            for i in [4,5,6,7]: # Middle Finger
+            #for i in [12,13,14,15]: # Thumb Finger
                 q_bar = self.traject_2["q_bar"][i]
                 amplitude = self.traject_2["A"][i]
                 frequency = self.traject_2["f"][i]
@@ -206,8 +208,8 @@ class JointRelay(Node):
 
         # if transition complete
         elif delta_t > TRAJECT_TIME_PERIOD_S + 6:
-            for i in [4,5,6,7]:
-            #for i in [12,13,14,15]:
+            for i in [4,5,6,7]: # Middle Finger
+            #for i in [12,13,14,15]: # Thumb Finger
                 q_bar = self.traject_2["q_bar"][i]
                 amplitude = self.traject_2["A"][i]
                 frequency = self.traject_2["f"][i]
@@ -231,7 +233,6 @@ class JointRelay(Node):
             self.msg.position[i] = q_target[i]
             self.msg.velocity[i] = dq_target[i]
             self.msg.effort[i] = 0.0
-
         self.pub.publish(self.msg)
 
 def main():

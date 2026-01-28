@@ -77,10 +77,10 @@ namespace allegro_hand_computed_torque
         // load hand models
         std::string pkg_path = ament_index_cpp::get_package_share_directory("allegro_hand_ros2_controllers");
         std::string conf_path = pkg_path + "/config/thunder/";
-        thunder_index_handle_.load_conf(conf_path + "ahand_index_conf.yaml"); // or load_par_REG()
-        thunder_middle_handle_.load_conf(conf_path + "ahand_middle_conf.yaml"); // or load_par_REG()
-        thunder_ring_handle_.load_conf(conf_path + "ahand_ring_conf.yaml"); // or load_par_REG()
-        //thunder_thumb_handle_.load_conf(conf_path + "ahand_thumb_conf.yaml"); // NON esiste in nuovo thunder
+        thunder_index_handle_.load_par(conf_path + "ahand_index_identification_par.yaml");
+        thunder_middle_handle_.load_par(conf_path + "ahand_middle_identification_par.yaml");
+        thunder_ring_handle_.load_par(conf_path + "ahand_ring_identification_par.yaml");
+        thunder_thumb_handle_.load_par(conf_path + "ahand_thumb_identification_par.yaml");
 
 
         //set qos protocol
@@ -118,6 +118,12 @@ namespace allegro_hand_computed_torque
             "~/command",
             in_qos,
             [this](const CmdMsg::SharedPtr msg) { rt_command_ptr_.writeFromNonRT(msg); });
+
+
+        //create conrollwr publisher
+        controller_pub_ = get_node()->create_publisher<CmdMsg>(
+            "~/command_torque",
+            out_qos);
 
 
         RCLCPP_INFO(get_node()->get_logger(),"configure succesfully");
@@ -195,14 +201,26 @@ namespace allegro_hand_computed_torque
             q(i) = state_interfaces_[i * 3].get_value();
             dq(i) = state_interfaces_[i * 3 + 1].get_value();
             q_r(i) = joint_cmd_.position.at(i);
-            //dq_r(i) = joint_cmd_.velocity.at(i);
-            dq_r(i) = 0.0;
+            try{
+               dq_r(i) = joint_cmd_.velocity.at(i);
+            }catch(const std::out_of_range & e){
+                dq_r(i) = 0.0;
+            }
         }
 
         Eigen::VectorXd tau(DOF_JOINTS);
-        thunder_index_handle_.setArguments(q.segment(0, 4),dq.segment(0, 4),dq_r.segment(0, 4), ddq_r.segment(0, 4));
-        thunder_middle_handle_.setArguments(q.segment(4, 4), dq.segment(4, 4), dq_r.segment(4, 4), ddq_r.segment(4, 4));
-        thunder_ring_handle_.setArguments(q.segment(8, 4), dq.segment(8, 4), dq_r.segment(8, 4), ddq_r.segment(8, 4));
+
+        thunder_index_handle_.set_q(q.segment(0, 4));      thunder_index_handle_.set_dq(dq.segment(0, 4));
+        thunder_index_handle_.set_dqr(dq_r.segment(0, 4)); thunder_index_handle_.set_ddqr(ddq_r.segment(0, 4));
+
+
+        thunder_middle_handle_.set_q(q.segment(4, 4));      thunder_middle_handle_.set_dq(dq.segment(4, 4));
+        thunder_middle_handle_.set_dqr(dq_r.segment(4, 4)); thunder_middle_handle_.set_ddqr(ddq_r.segment(4, 4));
+
+
+        thunder_ring_handle_.set_q(q.segment(8, 4));      thunder_ring_handle_.set_dq(dq.segment(8, 4));
+        thunder_ring_handle_.set_dqr(dq_r.segment(8, 4)); thunder_ring_handle_.set_ddqr(ddq_r.segment(8, 4));
+
         thunder_thumb_handle_.set_q(q.segment(12, 4));      thunder_thumb_handle_.set_dq(dq.segment(12, 4));
         thunder_thumb_handle_.set_dqr(dq_r.segment(12, 4)); thunder_thumb_handle_.set_ddqr(ddq_r.segment(12, 4));
 
@@ -216,57 +234,26 @@ namespace allegro_hand_computed_torque
         // Add here the desired contro Law
         // ----------------------------------
         // ...
-        Eigen::SparseMatrix<double> beta;
-        Eigen::SparseMatrix<double> beta_pinv;
-        finger_beta::load_beta(beta);
-        finger_beta::load_beta_pinv(beta_pinv);
-        auto hat_pi_reduced = finger_beta::load_pi_hat();
 
-
-        Eigen::SparseMatrix<double> thumb_beta;
-        Eigen::SparseMatrix<double> thumb_beta_pinv;
-        thumb_beta::load_beta(thumb_beta);
-        thumb_beta::load_beta_pinv(thumb_beta_pinv);
-        auto thumb_hat_pi_reduced = thumb_beta::load_pi_hat();
-
-
-
-        Eigen::MatrixXd Yr = thunder_index_handle_.get_reg_G();
-        Eigen::MatrixXd Y_Ir = 0*q.segment(0, 4).asDiagonal();
-        Eigen::MatrixXd Y_rIr(Yr.rows(), Yr.cols() + Y_Ir.cols());
-        Y_rIr << Yr, Y_Ir;
-        tau.segment(0, 4) =  Y_rIr*beta_pinv*hat_pi_reduced.segment(0,24);
-
-
-
-        Yr = thunder_middle_handle_.get_reg_G();
-        Y_Ir = 0*q.segment(4, 4).asDiagonal();
-        Y_rIr << Yr, Y_Ir;
-        tau.segment(4, 4) =  Y_rIr*beta_pinv*hat_pi_reduced.segment(0,24);
-
-
-
-        Yr = thunder_ring_handle_.get_reg_G();
-        Y_Ir = 0*q.segment(8, 4).asDiagonal();
-        Y_rIr << Yr, Y_Ir;
-        tau.segment(8, 4) =  Y_rIr*beta_pinv*hat_pi_reduced.segment(0,24);
-
-        Eigen::MatrixXd thumb_Yr = thunder_thumb_handle_.get_reg_G();
-        Eigen::MatrixXd thumb_Y_Ir = 0*q.segment(12, 4).asDiagonal();
-        Eigen::MatrixXd thumb_Y_rIr(thumb_Yr.rows(), thumb_Yr.cols() + thumb_Y_Ir.cols());
-        thumb_Y_rIr << thumb_Yr, thumb_Y_Ir;
-        tau.segment(12, 4) =  thumb_Y_rIr*thumb_beta_pinv*thumb_hat_pi_reduced.segment(0,24);
+        tau.segment(0, 4) =  thunder_index_handle_.get_G();
+        tau.segment(4, 4) =  thunder_middle_handle_.get_G();
+        tau.segment(8, 4) =  thunder_ring_handle_.get_G();
+        tau.segment(12, 4) =  thunder_thumb_handle_.get_G();
         // ...
 
         // write on command_interfaces_ : [eff_joint0, eff_joint1, ...]
+        CmdMsg tau_controller;
+        tau_controller.name.resize(DOF_JOINTS);
+        tau_controller.effort.resize(DOF_JOINTS);
+        tau_controller.header.stamp = get_node()->now();
+
         for (size_t i = 0; i < DOF_JOINTS; i++) {
             double effort_command = tau(i);
-            // if (i>=12){
-            //     RCLCPP_INFO(get_node()->get_logger(), "Thumb Joint %zu: Computed Torque: %f", i, effort_command);
-            //     effort_command = 0.0; // disable thumb torque for safety
-            // }
+            tau_controller.name[i] = jointNames[i];
+            tau_controller.effort[i] = effort_command;
             command_interfaces_[i].set_value(effort_command);
         }
+        controller_pub_->publish(tau_controller);
 
         return controller_interface::return_type::OK;
     }
