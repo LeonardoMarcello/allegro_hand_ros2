@@ -115,12 +115,12 @@ def launch_setup(context, *args, **kwargs):
         )
     )
 
-    # Spawner for HAND_controller
+    # Spawner for allegro_position_controller
     actions.append(
         Node(
             package="controller_manager",
             executable="spawner",
-            arguments=["HAND_controller", "-c", "/controller_manager"],
+            arguments=["allegro_position_controller", "-c", "/controller_manager"],
             output="screen",
 
             #remappings=[

@@ -151,6 +151,8 @@ int command_set_torque(void* ch, int findex, short* pwm);
 int command_pick(void* ch);
 int command_place(void* ch);
 
+int command_calibration(void* ch);
+
 /**
  * @brief command_set_pose
  * @param ch

@@ -8,13 +8,18 @@ from launch_ros.actions import Node
 from moveit_configs_utils.launch_utils import DeclareBooleanLaunchArg
 
 
+from ament_index_python.packages import get_package_share_directory
+import os
+
 def launch_setup(context, *args, **kwargs):
-    # Retrieve HAND and TYPE from the context
+    # Retrieve HAND, TYPE and hardware type from the context
     hand = LaunchConfiguration("HAND").perform(context)
     hand_type = LaunchConfiguration("TYPE").perform(context)
+    ros2_control_hardware_type = LaunchConfiguration("ros2_control_hardware_type").perform(context)
 
     # Dynamically construct the robot name
     robot_name = f"allegro_hand_{hand}_{hand_type}"
+    bringup_pkg_share = get_package_share_directory('allegro_hand_bringup') # Leo
 
     # Build the MoveIt config using the dynamically generated robot name
     moveit_config = MoveItConfigsBuilder(
@@ -41,15 +46,16 @@ def launch_setup(context, *args, **kwargs):
     )
     actions.append(DeclareBooleanLaunchArg("use_rviz", default_value=True))
 
-    # Include rsp.launch.py
+    # Hand hardware + controllers from bringup (sim: fake hardware, real: position control)
     actions.append(
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
-                str(moveit_config.package_path / "launch/rsp.launch.py")
+                os.path.join(bringup_pkg_share, 'launch', 'ahand_bringup.py')
             ),
             launch_arguments={
-                "HAND": hand,
-                "TYPE": hand_type,
+                "ros2_control_hardware_type": ros2_control_hardware_type,
+                "position_control": "true",   # MoveIt drives the real hand only in position control
+                "viz": "false",               # MoveIt has its own RViz
             }.items(),
         )
     )
@@ -87,38 +93,6 @@ def launch_setup(context, *args, **kwargs):
         )
     )
 
-    # Fake joint driver
-    actions.append(
-        Node(
-            package="controller_manager",
-            executable="ros2_control_node",
-            parameters=[
-                moveit_config.robot_description,
-                str(moveit_config.package_path / "config/ros2_controllers.yaml"),
-            ],
-        )
-    )
-
-    # Spawner for joint_state_broadcaster
-    actions.append(
-        Node(
-            package="controller_manager",
-            executable="spawner",
-            arguments=["joint_state_broadcaster", "--controller-manager", "/controller_manager"],
-            output="screen",
-        )
-    )
-
-    # Spawner for HAND_controller
-    actions.append(
-        Node(
-            package="controller_manager",
-            executable="spawner",
-            arguments=["HAND_controller", "-c", "/controller_manager"],
-            output="screen",
-        )
-    )
-
     # Add save_joint_angles_node
     actions.append(
         Node(
@@ -138,12 +112,18 @@ def generate_launch_description():
         "HAND", default_value="right", description="The hand side (left or right)"
     )
     type_arg = DeclareLaunchArgument(
-        "TYPE", default_value="A", description="The hand type (e.g., A, B, C)"
+        "TYPE", default_value="B", description="The hand type (e.g., A, B, C)"
+    )
+    hw_arg = DeclareLaunchArgument(
+        "ros2_control_hardware_type",
+        default_value="physical_device",
+        description="ROS2 control hardware interface type to use for the launch file -- possible values: [mock_components, physical_device, gazebo, isaac]"
     )
 
     # Create and return the LaunchDescription
     return LaunchDescription([
         hand_arg,
         type_arg,
+        hw_arg,
         OpaqueFunction(function=launch_setup),
     ])

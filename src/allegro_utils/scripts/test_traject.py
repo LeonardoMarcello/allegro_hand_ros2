@@ -51,7 +51,7 @@ TRAJECT_TIME_PERIOD_S = 30  # Duration of a single selected traject
 #FREQUENCY = np.array([0, 0.2, 0.4, 0.6, 0.8])#, 1, 1.2])
 #PHASE = np.array([0, np.pi/3, np.pi/4, np.pi/2, 3*np.pi/4, np.pi])
 
-# Test Traject Slow  search grid
+# Test Traject Slow  search grid [Hz]
 FREQUENCY = np.array([0, 0.01, 0.05, 0.1])
 PHASE = np.array([0, np.pi/3, np.pi/4, np.pi/2, 3*np.pi/4, np.pi])
 
@@ -70,8 +70,8 @@ class JointRelay(Node):
         super().__init__('wave')
 
         # Declare parameters for input/output topics with default values
-        #self.declare_parameter('output_topic', '/allegroHand_0/joint_cmd')
-        self.declare_parameter('output_topic', '/allegro_effort_controller/command')
+        self.declare_parameter('output_topic', '/allegroHand_0/joint_cmd')
+        #self.declare_parameter('output_topic', '/allegro_effort_controller/command')
         #self.declare_parameter('output_topic', '/allegroHand_0/joint_states')
         self.output_topic = self.get_parameter('output_topic').get_parameter_value().string_value
         self.pub = self.create_publisher(

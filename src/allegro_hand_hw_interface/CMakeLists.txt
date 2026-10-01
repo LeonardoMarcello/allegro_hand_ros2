@@ -14,13 +14,11 @@ find_package(rclcpp_lifecycle REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(rosbag2_cpp REQUIRED)
-#find_package(allegro_hand_driver REQUIRED)
 find_package(bhand REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(std_srvs REQUIRED)
-# uncomment the following section in order to fill in
-# further dependencies manually.
-# find_package(<dependency> REQUIRED)
+find_package(allegro_hand_interfaces REQUIRED)
+find_package(yaml-cpp REQUIRED)
 
 include_directories(
   include
@@ -33,7 +31,9 @@ include_directories(
 add_library(
   ${PROJECT_NAME}
   SHARED
-  src/allegro_hand_interface.cpp
+  src/allegro_hand_interface.cpp   # <-- Torque Controller
+  src/generic_system.cpp          # <-- Fake hardware
+  #src/allegro_hand_interface_pbhand.cpp  # <-- Position Controller
 
   src/AllegroHandDrv.cpp
   src/candrv/socket_can.cpp
@@ -48,7 +48,6 @@ add_library(
 #)
 target_include_directories(${PROJECT_NAME} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  #$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../allegro_hand_driver/include>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../bhand/include>
   $<INSTALL_INTERFACE:include>
 )
@@ -64,10 +63,11 @@ ament_target_dependencies(
   rclcpp_lifecycle
   tf2_ros
   tf2
-  #allegro_hand_driver
   bhand
   std_srvs
+  allegro_hand_interfaces
 )
+target_link_libraries(${PROJECT_NAME} yaml-cpp)
 
 
 pluginlib_export_plugin_description_file(hardware_interface allegro_hand_interface.xml)
@@ -119,7 +119,7 @@ ament_export_dependencies(
 )
 
 install(
-  DIRECTORY launch urdf config
+  DIRECTORY urdf config
   DESTINATION share/${PROJECT_NAME}
 )
 

@@ -36,8 +36,8 @@ m = mujoco.MjModel.from_xml_path(XML_PATH)
 d = mujoco.MjData(m)
 
 ahand = AHAND(URDF_PATH, MESH_DIR)
-ahand.initGepettoViewer()
-ahand.show()
+#ahand.initGepettoViewer()
+#ahand.show()
 
 q_rnd = ahand.getRandomConfig()
 q_rnd[13] = 0 # otherwise start with contact
@@ -65,7 +65,7 @@ integral_e = np.zeros((16,))
 with mujoco.viewer.launch_passive(m, d) as viewer:
   # Close the viewer automatically after 30 wall-seconds.
   start = time.time()
-  while viewer.is_running() and time.time() - start < 60:
+  while viewer.is_running() and time.time() - start < 20:
     step_start = time.time()
 
 
@@ -104,12 +104,12 @@ with mujoco.viewer.launch_passive(m, d) as viewer:
     M = ahand.getMassMatrix()                               # <-- I-T-M-R
 
     # Computed Torque
-    #tau = M @ (qdd_traj[[0,1,2,3,    12,13,14,15,   4,5,6,7,      8,9,10,11]] + 1*e + 0.1*de + 1*integral_e) + C
+    #tau = M @ (qdd_traj[[0,1,2,3,    12,13,14,15,   4,5,6,7,      8,9,10,11]] + 30*e + 3*de + 30*integral_e) + c
     #tau = M @ qdd_traj + b + 3*np.eye(16) @ ahand.dq        # <-- I-T-M-R
-    tau = g         # <-- I-T-M-R
+    #tau = g         # <-- I-T-M-R
     
     # PID
-    #tau = kp@e + ki@integral_e        # <-- I-T-M-R
+    tau = kp@e + ki@integral_e + g       # <-- I-T-M-R
     #tau = np.zeros_like(ahand.q)
 
     g = g[[0,1,2,3,   8,9,10,11,   12,13,14,15,   4,5,6,7]]               # <-- I-M-R-T
@@ -136,7 +136,7 @@ with mujoco.viewer.launch_passive(m, d) as viewer:
     ahand.set_thumb(d.qpos[12:16], d.qvel[12:16], d.qacc[12:16])
     ahand.set_target(q_traj)
     ahand.updateConfig()
-    ahand.show(target=True)
+    #ahand.show(target=True)
 
     # Example modification of a viewer option: toggle contact points every two seconds.
     with viewer.lock():

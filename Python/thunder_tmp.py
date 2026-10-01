@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import sys
 import os
 
-build_paths = ["./ahand_finger_generatedFiles_py/build", "./ahand_thumb_generatedFiles/build", "./franka_generatedFiles/build"]
+build_paths = ["./ahand_finger_generatedFiles/build", "./ahand_thumb_generatedFiles/build", "./franka_generatedFiles/build"]
 # Note: This is not needed if the .so file is in the same directory as the python script
 for build_path in build_paths:
     so_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), build_path)

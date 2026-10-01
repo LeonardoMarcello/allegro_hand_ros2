@@ -19,8 +19,13 @@ find_package(controller_interface REQUIRED)
 find_package(hardware_interface REQUIRED)
 find_package(realtime_tools REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(pluginlib REQUIRED)
+
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 
 find_package(Eigen3 REQUIRED)
 find_package(yaml-cpp REQUIRED)
@@ -33,36 +38,44 @@ find_package(thunder_ahand REQUIRED)
 
 # Computed Torque Controller
 # -----------------------------
-add_library(allegro_hand_computed_torque SHARED
+add_library(allegro_hand_ros2_controllers SHARED
   src/allegro_hand_computed_torque.cpp
+  src/allegro_hand_bhand_controller.cpp
 )
 
 # ROS dependencies
-ament_target_dependencies(allegro_hand_computed_torque
+ament_target_dependencies(allegro_hand_ros2_controllers
   rclcpp
   rclcpp_lifecycle
   controller_interface
   hardware_interface
   realtime_tools
   std_msgs
+  std_srvs
   sensor_msgs
   pluginlib
 
+  tf2
+  tf2_ros
+  tf2_geometry_msgs
+
+  bhand
   thunder_ahand
 )
 
-target_link_libraries(allegro_hand_computed_torque
+target_link_libraries(allegro_hand_ros2_controllers
   yaml-cpp
   Eigen3::Eigen
-  #${bhand_LIBRARIES} # <- needed when implementing via bhand library
-  thunder_ahand
+  ${bhand_LIBRARIES}            # <- needed when implementing via bhand library
+  thunder_ahand::thunder_ahand  # <- needed when implementing via thunder ahand library
 )
 
 # Include directories (target-scoped)
-target_include_directories(allegro_hand_computed_torque PUBLIC
+target_include_directories(allegro_hand_ros2_controllers PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
-  #${bhand_INCLUDE_DIRS} # <- needed when implementing via bhand library
+  ${bhand_INCLUDE_DIRS} # <- needed when implementing via bhand library
+  ${CMAKE_CURRENT_SOURCE_DIR}/../bhand/include
   ${thunder_ahand_INCLUDE_DIRS} # <- needed when implementing via thunder ahand library
 )
 
@@ -78,7 +91,7 @@ pluginlib_export_plugin_description_file(
 # Installation
 # =====================================================
 install(
-  TARGETS allegro_hand_computed_torque
+  TARGETS allegro_hand_ros2_controllers
   EXPORT export_${PROJECT_NAME}
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

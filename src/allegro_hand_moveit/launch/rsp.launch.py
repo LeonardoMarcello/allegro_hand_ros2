@@ -14,7 +14,8 @@ def launch_setup(context, *args, **kwargs):
 
     moveit_config = MoveItConfigsBuilder(robot_name, package_name="allegro_hand_moveit").to_moveit_configs()
     #moveit_config = MoveItConfigsBuilder("allegro_hand_right", package_name="allegro_hand_moveit").to_moveit_configs()
-    
+
+
     return [generate_rsp_launch(moveit_config)]
 
 def generate_launch_description():

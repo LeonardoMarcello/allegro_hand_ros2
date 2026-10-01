@@ -1,0 +1,377 @@
+<?xml version="1.0"?>
+<robot name="allegro_hand_right" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <link name="world"/>
+  <joint name="global" type="fixed">
+    <parent link="world"/>
+    <child link="palm_link"/>
+    <origin xyz="0 0 0.0" rpy="0 0 0"/>
+  </joint>
+
+  <link name="palm_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.4154"/>
+      <inertia ixx="0.001" iyy="0.001" izz="0.001" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual>
+      <origin xyz="0.02 0 -0.1" rpy="3.14159 0 -1.5708"/>
+      <geometry>
+        <mesh filename="package://allegro_hand/meshes/palm.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="dark_gray">
+        <color rgba="0.2 0.2 0.2 1"/>
+      </material>
+    </visual>
+  </link>
+
+  <link name="link_0_0">
+    <inertial>
+      <origin xyz="2.65572e-20 -1.15986e-13 1.98024e-19" rpy="0 0 0"/>
+      <mass value="0.0176"/>
+      <inertia ixx="0.000465922" iyy="0.000465616" izz="0.000460952" ixy="6.97088e-09" ixz="6.37267e-07" iyz="5.0898e-08"/>
+    </inertial>
+    <visual>
+      <origin xyz="-0.0625 -0.022 0.167" rpy="0 0 -1.5708"/>
+      <geometry>
+        <mesh filename="package://allegro_hand/meshes/new_l1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="dark_gray"><color rgba="0.2 0.2 0.2 1"/></material>
+    </visual>
+  </link>
+  <joint name="joint_0_0" type="revolute">
+    <parent link="palm_link"/>
+    <child link="link_0_0"/>
+    <origin xyz="0.0005 0.0425 -0.005" rpy="-0.08726 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-0.3" upper="0.3" effort="15" velocity="10"/>
+  </joint>
+
+  <link name="link_1_0">
+    <inertial>
+      <origin xyz="-0.0107507 0.0118766 -3.51839e-06" rpy="0 0 0"/>
+      <mass value="0.0891057"/>
+      <inertia ixx="0.000454265" iyy="0.000470589" izz="0.000467818" ixy="-3.2844e-06" ixz="-2.32695e-06" iyz="-8.5319e-08"/>
+    </inertial>
+    <visual>
+      <origin xyz="-0.0625 -0.022 0.1495" rpy="0 0 -1.5708"/>
+      <geometry>
+        <mesh filename="package://allegro_hand/meshes/new_l2.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="dark_gray"><color rgba="0.2 0.2 0.2 1"/></material>
+    </visual>
+  </link>
+  <joint name="joint_1_0" type="revolute">
+    <parent link="link_0_0"/>
+    <child link="link_1_0"/>
+    <origin xyz="0 0 0.017" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.01" upper="1.6" effort="15" velocity="10"/>
+  </joint>
+
+  <link name="link_2_0">
+    <inertial>
+      <origin xyz="0.0123708 0.00392042 1.63879e-06" rpy="0 0 0"/>
+      <mass value="0.0355798"/>
+      <inertia ixx="0.000462693" iyy="0.000465685" izz="0.000464101" ixy="4.8113e-07" ixz="-9.22307e-07" iyz="7.71125e-08"/>
+    </inertial>
+    <visual>
+      <origin xyz="-0.0625 -0.022 0.1065" rpy="0 0 -1.5708"/>
+      <geometry>
+        <mesh filename="package://allegro_hand/meshes/new_l3.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="dark_gray"><color rgba="0.2 0.2 0.2 1"/></material>
+    </visual>
+  </link>
+  <joint name="joint_2_0" type="revolute">
+    <parent link="link_1_0"/>
+    <child link="link_2_0"/>
+    <origin xyz="0 0 0.0431" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.07" upper="1.86" effort="15" velocity="10"/>
+  </joint>
+
+  <link name="link_3_0">
+    <inertial>
+      <origin xyz="0.0213877 -0.000373697 3.00672e-06" rpy="0 0 0"/>
+      <mass value="0.0285341"/>
+      <inertia ixx="0.00046898" iyy="0.000462819" izz="0.000460712" ixy="-5.62747e-08" ixz="-4.04291e-07" iyz="-2.3472e-07"/>
+    </inertial>
+    <visual>
+      <origin xyz="-0.0625 -0.022 0.0685" rpy="0 0 -1.5708"/>
+      <geometry><mesh filename="package://allegro_hand/meshes/new_l4.stl" scale="0.001 0.001 0.001"/></geometry>
+      <material name="dark_gray"><color rgba="0.2 0.2 0.2 1"/></material>
+    </visual>
+    <visual>
+      <origin xyz="-0.05482 -0.01493 0.02205" rpy="0 0 -1.5708"/>
+      <geometry><mesh filename="package://allegro_hand/meshes/finger_tip.stl" scale="0.001 0.001 0.001"/></geometry>
+      <material name="white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+  </link>
+  <joint name="joint_3_0" type="revolute">
+    <parent link="link_2_0"/>
+    <child link="link_3_0"/>
+    <origin xyz="0 0 0.038" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.02" upper="2.01" effort="15" velocity="10"/>
+  </joint>
+
+
+  <link name="link_4_0">
+    <inertial>
+      <origin xyz="2.65572e-20 -1.15986e-13 1.98024e-19" rpy="0 0 0"/>
+      <mass value="0.0176"/>
+      <inertia ixx="0.000465922" iyy="0.000465616" izz="0.000460952" ixy="6.97088e-09" ixz="6.37267e-07" iyz="5.0898e-08"/>
+    </inertial>
+    <visual>
+      <origin xyz="-0.0625 -0.022 0.167" rpy="0 0 -1.5708"/>
+      <geometry><mesh filename="package://allegro_hand/meshes/new_l1.stl" scale="0.001 0.001 0.001"/></geometry>
+      <material name="dark_gray"><color rgba="0.2 0.2 0.2 1"/></material>
+    </visual>
+  </link>
+  <joint name="joint_4_0" type="revolute">
+    <parent link="palm_link"/>
+    <child link="link_4_0"/>
+    <origin xyz="0 0 -0.002" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-0.26" upper="0.26" effort="15" velocity="10"/>
+  </joint>
+
+  <link name="link_5_0">
+    <inertial>
+      <origin xyz="-0.0107507 0.0118766 -3.51839e-06" rpy="0 0 0"/>
+      <mass value="0.0891057"/>
+      <inertia ixx="0.000454265" iyy="0.000470589" izz="0.000467818" ixy="-3.2844e-06" ixz="-2.32695e-06" iyz="-8.5319e-08"/>
+    </inertial>
+    <visual>
+      <origin xyz="-0.0625 -0.022 0.1495" rpy="0 0 -1.5708"/>
+      <geometry><mesh filename="package://allegro_hand/meshes/new_l2.stl" scale="0.001 0.001 0.001"/></geometry>
+      <material name="dark_gray"><color rgba="0.2 0.2 0.2 1"/></material>
+    </visual>
+  </link>
+  <joint name="joint_5_0" type="revolute">
+    <parent link="link_4_0"/>
+    <child link="link_5_0"/>
+    <origin xyz="0 0 0.017" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.21" upper="1.79" effort="15" velocity="10"/>
+  </joint>
+
+  <link name="link_6_0">
+    <inertial>
+      <origin xyz="0.0123708 0.00392042 1.63879e-06" rpy="0 0 0"/>
+      <mass value="0.0355798"/>
+      <inertia ixx="0.000462693" iyy="0.000465685" izz="0.000464101" ixy="4.8113e-07" ixz="-9.22307e-07" iyz="7.71125e-08"/>
+    </inertial>
+    <visual>
+      <origin xyz="-0.0625 -0.022 0.1065" rpy="0 0 -1.5708"/>
+      <geometry><mesh filename="package://allegro_hand/meshes/new_l3.stl" scale="0.001 0.001 0.001"/></geometry>
+      <material name="dark_gray"><color rgba="0.2 0.2 0.2 1"/></material>
+    </visual>
+  </link>
+  <joint name="joint_6_0" type="revolute">
+    <parent link="link_5_0"/>
+    <child link="link_6_0"/>
+    <origin xyz="0 0 0.0431" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.12" upper="1.86" effort="15" velocity="10"/>
+  </joint>
+
+  <link name="link_7_0">
+    <inertial>
+      <origin xyz="0.0213877 -0.000373697 3.00672e-06" rpy="0 0 0"/>
+      <mass value="0.0285341"/>
+      <inertia ixx="0.00046898" iyy="0.000462819" izz="0.000460712" ixy="-5.62747e-08" ixz="-4.04291e-07" iyz="-2.3472e-07"/>
+    </inertial>
+    <visual>
+      <origin xyz="-0.0625 -0.022 0.0685" rpy="0 0 -1.5708"/>
+      <geometry><mesh filename="package://allegro_hand/meshes/new_l4.stl" scale="0.001 0.001 0.001"/></geometry>
+      <material name="dark_gray"><color rgba="0.2 0.2 0.2 1"/></material>
+    </visual>
+    <visual>
+      <origin xyz="-0.05482 -0.01493 0.02205" rpy="0 0 -1.5708"/>
+      <geometry><mesh filename="package://allegro_hand/meshes/finger_tip.stl" scale="0.001 0.001 0.001"/></geometry>
+      <material name="white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+  </link>
+  <joint name="joint_7_0" type="revolute">
+    <parent link="link_6_0"/>
+    <child link="link_7_0"/>
+    <origin xyz="0 0 0.038" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.21" upper="1.85" effort="15" velocity="10"/>
+  </joint>
+
+
+  <link name="link_8_0">
+    <inertial>
+      <origin xyz="2.65572e-20 -1.15986e-13 1.98024e-19" rpy="0 0 0"/>
+      <mass value="0.0176"/>
+      <inertia ixx="0.000465922" iyy="0.000465616" izz="0.000460952" ixy="6.97088e-09" ixz="6.37267e-07" iyz="5.0898e-08"/>
+    </inertial>
+    <visual>
+      <origin xyz="-0.0625 -0.022 0.167" rpy="0 0 -1.5708"/>
+      <geometry><mesh filename="package://allegro_hand/meshes/new_l1.stl" scale="0.001 0.001 0.001"/></geometry>
+      <material name="dark_gray"><color rgba="0.2 0.2 0.2 1"/></material>
+    </visual>
+  </link>
+  <joint name="joint_8_0" type="revolute">
+    <parent link="palm_link"/>
+    <child link="link_8_0"/>
+    <origin xyz="0.0005 -0.0425 -0.005" rpy="0.08726 0 0"/> 
+    <axis xyz="0 0 1"/>
+    <limit lower="-0.26" upper="0.29" effort="15" velocity="10"/>
+  </joint>
+
+  <link name="link_9_0">
+    <inertial>
+      <origin xyz="-0.0107507 0.0118766 -3.51839e-06" rpy="0 0 0"/>
+      <mass value="0.0891057"/>
+      <inertia ixx="0.000454265" iyy="0.000470589" izz="0.000467818" ixy="-3.2844e-06" ixz="-2.32695e-06" iyz="-8.5319e-08"/>
+    </inertial>
+    <visual>
+      <origin xyz="-0.0625 -0.022 0.1495" rpy="0 0 -1.5708"/>
+      <geometry><mesh filename="package://allegro_hand/meshes/new_l2.stl" scale="0.001 0.001 0.001"/></geometry>
+      <material name="dark_gray"><color rgba="0.2 0.2 0.2 1"/></material>
+    </visual>
+  </link>
+  <joint name="joint_9_0" type="revolute">
+    <parent link="link_8_0"/>
+    <child link="link_9_0"/>
+    <origin xyz="0 0 0.017" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.21" upper="1.79" effort="15" velocity="10"/>
+  </joint>
+
+  <link name="link_10_0">
+    <inertial>
+      <origin xyz="0.0123708 0.00392042 1.63879e-06" rpy="0 0 0"/>
+      <mass value="0.0355798"/>
+      <inertia ixx="0.000462693" iyy="0.000465685" izz="0.000464101" ixy="4.8113e-07" ixz="-9.22307e-07" iyz="7.71125e-08"/>
+    </inertial>
+    <visual>
+      <origin xyz="-0.0625 -0.022 0.1065" rpy="0 0 -1.5708"/>
+      <geometry><mesh filename="package://allegro_hand/meshes/new_l3.stl" scale="0.001 0.001 0.001"/></geometry>
+      <material name="dark_gray"><color rgba="0.2 0.2 0.2 1"/></material>
+    </visual>
+  </link>
+  <joint name="joint_10_0" type="revolute">
+    <parent link="link_9_0"/>
+    <child link="link_10_0"/>
+    <origin xyz="0 0 0.0431" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.12" upper="1.86" effort="15" velocity="10"/>
+  </joint>
+
+  <link name="link_11_0">
+    <inertial>
+      <origin xyz="0.0213877 -0.000373697 3.00672e-06" rpy="0 0 0"/>
+      <mass value="0.0285341"/>
+      <inertia ixx="0.00046898" iyy="0.000462819" izz="0.000460712" ixy="-5.62747e-08" ixz="-4.04291e-07" iyz="-2.3472e-07"/>
+    </inertial>
+    <visual>
+      <origin xyz="-0.0625 -0.022 0.0685" rpy="0 0 -1.5708"/>
+      <geometry><mesh filename="package://allegro_hand/meshes/new_l4.stl" scale="0.001 0.001 0.001"/></geometry>
+      <material name="dark_gray"><color rgba="0.2 0.2 0.2 1"/></material>
+    </visual>
+    <visual>
+      <origin xyz="-0.05482 -0.01493 0.02205" rpy="0 0 -1.5708"/>
+      <geometry><mesh filename="package://allegro_hand/meshes/finger_tip.stl" scale="0.001 0.001 0.001"/></geometry>
+      <material name="white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+  </link>
+  <joint name="joint_11_0" type="revolute">
+    <parent link="link_10_0"/>
+    <child link="link_11_0"/>
+    <origin xyz="0 0 0.038" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.21" upper="1.85" effort="15" velocity="10"/>
+  </joint>
+
+
+  <link name="link_12_0">
+    <inertial>
+      <origin xyz="0.000435296 0.0016399 -1.54306e-15" rpy="0 0 0"/>
+      <mass value="0.0446645"/>
+      <inertia ixx="5.42799e-05" iyy="9.18154e-06" izz="4.78714e-05" ixy="4.31883e-07" ixz="-1.12e-07" iyz="1.07e-05"/>
+    </inertial>
+    <visual>
+      <origin xyz="0.021 -0.1145 0.0725" rpy="0.7854 0 0"/>
+      <geometry><mesh filename="package://allegro_hand/meshes/t1_set.stl" scale="0.001 0.001 0.001"/></geometry>
+      <material name="dark_gray"><color rgba="0.2 0.2 0.2 1"/></material>
+    </visual>
+  </link>
+  <joint name="joint_12_0" type="revolute">
+    <parent link="palm_link"/>
+    <child link="link_12_0"/>
+    <origin xyz="0.002 0.027 -0.06342" rpy="3.14159 -1.48353 1.57079"/>
+    <axis xyz="-1 0 0"/>
+    <limit lower="0" upper="1.78" effort="15" velocity="10"/>
+  </joint>
+
+  <link name="link_13_0">
+    <inertial>
+      <origin xyz="-0.00533011 -0.00255793 0.00078899" rpy="0 0 0"/>
+      <mass value="0.021489"/>
+      <inertia ixx="1.5046e-05" iyy="1.26991e-05" izz="2.0989e-06" ixy="2.72081e-07" ixz="-1.0017e-07" iyz="-2.08337e-06"/>
+    </inertial>
+    <visual>
+      <origin xyz="-0.138 -0.0605 0.2143" rpy="0 0 -1.5708"/>
+      <geometry><mesh filename="package://allegro_hand/meshes/t2_set.stl" scale="0.001 0.001 0.001"/></geometry>
+      <material name="dark_gray"><color rgba="0.2 0.2 0.2 1"/></material>
+    </visual>
+  </link>
+  <joint name="joint_13_0" type="revolute">
+    <parent link="link_12_0"/>
+    <child link="link_13_0"/>
+    <origin xyz="-0.001 0 0.06874" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-0.26" upper="1.65" effort="15" velocity="10"/>
+  </joint>
+
+  <link name="link_14_0">
+    <inertial>
+      <origin xyz="0.0111608 -0.00125084 0.00509317" rpy="0 0 0"/>
+      <mass value="0.0427875"/>
+      <inertia ixx="2.52313e-06" iyy="8.96034e-06" izz="8.48332e-06" ixy="-3.5433e-07" ixz="3.0802e-06" iyz="-3.03688e-07"/>
+    </inertial>
+    <visual>
+      <origin xyz="-0.1265 -0.061 0.166" rpy="0 0 -1.5708"/>
+      <geometry><mesh filename="package://allegro_hand/meshes/t3_set.stl" scale="0.001 0.001 0.001"/></geometry>
+      <material name="dark_gray"><color rgba="0.2 0.2 0.2 1"/></material>
+    </visual>
+  </link>
+  <joint name="joint_14_0" type="revolute">
+    <parent link="link_13_0"/>
+    <child link="link_14_0"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.05" upper="1.85" effort="15" velocity="10"/>
+  </joint>
+
+  <link name="link_15_0">
+    <inertial>
+      <origin xyz="0.00509882 -0.00353064 0.00580069" rpy="0 0 0"/>
+      <mass value="0.0487244"/>
+      <inertia ixx="6.9315e-07" iyy="8.39379e-06" izz="8.7259e-06" ixy="-7.52741e-07" ixz="1.79311e-06" iyz="-1.02898e-06"/>
+    </inertial>
+    <visual>
+      <origin xyz="-0.149 -0.061 0.096" rpy="0 0 -1.5708"/>
+      <geometry><mesh filename="package://allegro_hand/meshes/t4_set.stl" scale="0.001 0.001 0.001"/></geometry>
+      <material name="dark_gray"><color rgba="0.2 0.2 0.2 1"/></material>
+    </visual>
+    <visual>
+      <origin xyz="-0.014 0.0545 0.0328" rpy="0 0 3.14159"/>
+      <geometry><mesh filename="package://allegro_hand/meshes/finger_tip_silicon.stl" scale="0.001 0.001 0.001"/></geometry>
+      <material name="white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+  </link>
+  <joint name="joint_15_0" type="revolute">
+    <parent link="link_14_0"/>
+    <child link="link_15_0"/>
+    <origin xyz="0 0 0.038" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.09" upper="1.8" effort="15" velocity="10"/>
+  </joint>
+
+</robot>

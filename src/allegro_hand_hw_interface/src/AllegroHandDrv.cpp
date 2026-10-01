@@ -53,6 +53,23 @@
 
 using namespace std;
 
+#define MAX_DOF 16
+
+#define PWM_LIMIT_ROLL 250.0*1.5
+#define PWM_LIMIT_NEAR 450.0*1.5
+#define PWM_LIMIT_MIDDLE 300.0*1.5
+#define PWM_LIMIT_FAR 190.0*1.5
+
+#define PWM_LIMIT_THUMB_ROLL 350.0*1.5
+#define PWM_LIMIT_THUMB_NEAR 270.0*1.5
+#define PWM_LIMIT_THUMB_MIDDLE 180.0*1.5
+#define PWM_LIMIT_THUMB_FAR 180.0*1.5
+
+#define PWM_LIMIT_GLOBAL_8V 800.0 // maximum: 1200
+#define PWM_LIMIT_GLOBAL_24V 500.0
+#define PWM_LIMIT_GLOBAL_12V 1200.0
+
+
 namespace allegro
 {
 
@@ -99,6 +116,10 @@ bool AllegroHandDrv::init(std::string CAN_CH, int mode)
         return false;
     }
 
+    int id;
+    int len;
+    unsigned char data[8];
+
     RCLCPP_INFO(rclcpp::get_logger("allegro_hand_drv"), "CAN: Flush CAN receive buffer");
     CANAPI::command_can_flush(_can_handle);
     usleep(100);
@@ -110,10 +131,12 @@ bool AllegroHandDrv::init(std::string CAN_CH, int mode)
     RCLCPP_INFO(rclcpp::get_logger("allegro_hand_drv"), "CAN: Request Hand Information");
     CANAPI::request_hand_information(_can_handle);
     usleep(100);
+    _parseMessage(id, len, data);
 
     RCLCPP_INFO(rclcpp::get_logger("allegro_hand_drv"), "CAN: Request Hand Serial");
     CANAPI::request_hand_serial(_can_handle);
     usleep(100);
+    _parseMessage(id, len, data);
 
     RCLCPP_INFO(rclcpp::get_logger("allegro_hand_drv"), "CAN: Setting loop period(:= 3ms) and initialize system");
     short comm_period[3] = {3, 0, 0}; // millisecond {position, imu, temperature}
@@ -234,18 +257,17 @@ void AllegroHandDrv::_parseMessage(int id, int len, unsigned char* data)
     {
         case ID_RTR_HAND_INFO:
         {
-            printf(">CAN(%x): AllegroHand hardware version: 0x%02x%02x\n", _can_handle, data[1], data[0]);
-            printf("                      firmware version: 0x%02x%02x\n", data[3], data[2]);
-
-            printf("                      servo status: %s\n", (data[6] & 0x01 ? "ON" : "OFF"));
+            RCLCPP_INFO(rclcpp::get_logger("allegro_hand_drv"),">CAN(%x): AllegroHand hardware version: 0x%02x%02x", _can_handle, data[1], data[0]);
+            RCLCPP_INFO(rclcpp::get_logger("allegro_hand_drv"),"                      firmware version: 0x%02x%02x", data[3], data[2]);
+            RCLCPP_INFO(rclcpp::get_logger("allegro_hand_drv"),"                      servo status: %s", (data[6] & 0x01 ? "ON" : "OFF"));
 
         }
             break;
         case ID_RTR_SERIAL:
         {
-            printf(">CAN(%d): AllegroHand serial number: SAH0%d0 %c%c%c%c%c%c%c%c\n", _can_handle, /*HAND_VERSION*/4
+            RCLCPP_INFO(rclcpp::get_logger("allegro_hand_drv"),">CAN(%d): AllegroHand serial number: SAH0%d0 %c%c%c%c%c%c%c%c", _can_handle, /*HAND_VERSION*/5
                     , data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7]);
-            printf("                      hardware type: %s\n", (data[3] == 'R' ? "right" : "left"));
+            RCLCPP_INFO(rclcpp::get_logger("allegro_hand_drv"),"                      hardware type: %s", (data[3] == 'R' ? "right" : "left"));
         
         if(data[2] == 'A') HAND_TYPE_A = true;
         else HAND_TYPE_A = false;
@@ -279,9 +301,9 @@ void AllegroHandDrv::_parseMessage(int id, int len, unsigned char* data)
             break;
         case ID_RTR_IMU_DATA:
         {
-            printf(">CAN(%d): AHRS Roll : 0x%02x%02x\n", _can_handle, data[0], data[1]);
-            printf("               Pitch: 0x%02x%02x\n", data[2], data[3]);
-            printf("               Yaw  : 0x%02x%02x\n", data[4], data[5]);
+            RCLCPP_INFO(rclcpp::get_logger("allegro_hand_drv"),">CAN(%d): AHRS Roll : 0x%02x%02x\n", _can_handle, data[0], data[1]);
+            RCLCPP_INFO(rclcpp::get_logger("allegro_hand_drv"),"               Pitch: 0x%02x%02x\n", data[2], data[3]);
+            RCLCPP_INFO(rclcpp::get_logger("allegro_hand_drv"),"               Yaw  : 0x%02x%02x\n", data[4], data[5]);
         }
             break;
         case ID_RTR_TEMPERATURE_1:
@@ -294,7 +316,7 @@ void AllegroHandDrv::_parseMessage(int id, int len, unsigned char* data)
                             (int)(data[1] << 8 ) |
                             (int)(data[2] << 16) |
                             (int)(data[3] << 24);
-            printf(">CAN(%d): Temperature finger[%d]: %x (celsius)\n", _can_handle, sindex, celsius);
+            RCLCPP_INFO(rclcpp::get_logger("allegro_hand_drv"),">CAN(%d): Temperature finger[%d]: %x (celsius)\n", _can_handle, sindex, celsius);
             for(int i=0; i< 4; i++)
                 _curr_temperature[sindex*4 + i] = data[i];
         }
@@ -321,33 +343,16 @@ void AllegroHandDrv::_parseMessage(int id, int len, unsigned char* data)
             
             //printf("fingertip_sensor[%d] = %d, fingertip_sensor2[%d] = %d\n\n",findex, fingertip_sensor[findex], findex+1,fingertip_sensor[findex + 1]);
         }
-            break;
-        
-        case ID_PRESSURE: // added by Leo
-        case ID_PRESSURE_2:
+        break;
+        case ID_CMD_Position_Calibration_R:
         {
-            int findex = (id & 0x00000007);
-            int32_t fingertip1 = (int32_t)((data[3] << 24) | (data[2] << 16) | (data[1] << 8) | data[0]);
-            int32_t fingertip2 = (int32_t)((data[7] << 24) | (data[6] << 16) | (data[5] << 8) | data[4]);
-
-            fingertip_sensor[findex] = fingertip1;
-            fingertip_sensor[findex + 1] = fingertip2;
-
-            float alpha = 0.25;
-            for (int i = 0; i < 4; i++)
-            {
-                if ((fingertip_sensor[i] < 0) || (fingertip_sensor[i] > 5000))
-                        fingertip_sensor[i] = 0;
-
-                fingertip_sensor[i] = alpha * fingertip_sensor[i] + (1 - alpha) * fingertip_sensor_pre[i];
-                fingertip_sensor_pre[i] = fingertip_sensor[i];
-            }
+            RCLCPP_INFO(rclcpp::get_logger("allegro_hand_drv"), "CAN: Motor Calibration Done");
         }
-            break;
+        break;
         default:
             RCLCPP_WARN(rclcpp::get_logger("allegro_hand_drv"), "unknown command %d, len %d", id, len);
             for(int nd=0; nd<len; nd++)
-                printf("%d \n ", data[nd]);
+                RCLCPP_INFO(rclcpp::get_logger("allegro_hand_drv"),"%d \n ", data[nd]);
             return;
     }
 }

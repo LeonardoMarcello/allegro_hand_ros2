@@ -50,22 +50,6 @@
 #include <vector>
 #include "AllegroHandDef.h"
 
-#define MAX_DOF 16
-
-#define PWM_LIMIT_ROLL 250.0*1.5
-#define PWM_LIMIT_NEAR 450.0*1.5
-#define PWM_LIMIT_MIDDLE 300.0*1.5
-#define PWM_LIMIT_FAR 190.0*1.5
-
-#define PWM_LIMIT_THUMB_ROLL 350.0*1.5
-#define PWM_LIMIT_THUMB_NEAR 270.0*1.5
-#define PWM_LIMIT_THUMB_MIDDLE 180.0*1.5
-#define PWM_LIMIT_THUMB_FAR 180.0*1.5
-
-#define PWM_LIMIT_GLOBAL_8V 800.0 // maximum: 1200
-#define PWM_LIMIT_GLOBAL_24V 500.0
-#define PWM_LIMIT_GLOBAL_12V 1200.0
-
 
 inline int OperatingMode = 0;
 inline double f[4];

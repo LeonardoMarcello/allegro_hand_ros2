@@ -28,10 +28,6 @@ add_library(allegro_hand_driver
 ament_target_dependencies(allegro_hand_driver
   rclcpp
   std_msgs)
-
-# Ensure PIC (LEO Mod)
-set_target_properties(allegro_hand_driver PROPERTIES POSITION_INDEPENDENT_CODE ON)
-
 #############
 ## Install ##
 #############

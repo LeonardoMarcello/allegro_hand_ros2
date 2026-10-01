@@ -1,0 +1,1 @@
+xacro allegro_hand_description.xacro hand:=right link_prefix:=right_ joint_prefix:=right_ > allegro_right.urdf

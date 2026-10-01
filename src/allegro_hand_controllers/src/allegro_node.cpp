@@ -98,7 +98,6 @@ void AllegroNode::ControltimeCallback(const std_msgs::msg::Float32::SharedPtr ms
 }
 
 void AllegroNode::GraspforceCallback(const std_msgs::msg::Float32::SharedPtr msg) {
-
     force_get = msg->data;
 }
 

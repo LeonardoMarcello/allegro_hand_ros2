@@ -112,8 +112,8 @@ void DummyNode::timer_callback(){
     Eigen::VectorXd pB_tau_all = Eigen::VectorXd::Zero(16);
     Eigen::VectorXd pB_tau = Eigen::VectorXd::Zero(16);
     Eigen::VectorXd pB_G = Eigen::VectorXd::Zero(16);
-    double pB_kp[16] = {1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1};
-    double pB_kd[16] = {0.04,0.15,0.04,0.04, 0.04,0.15,0.04,0.04, 0.04,0.15,0.04,0.04, 0.04,0.15,0.04,0.04};
+    double pB_kp[16] = {1,1,1,1,   1,1,1,1,   1,1,1,1,   1,1,1,1};
+    double pB_kd[16] = {0.04,0.15,0.04,0.04,   0.04,0.15,0.04,0.04,   0.04,0.15,0.04,0.04,   0.04,0.15,0.04,0.04};
     // create msg
     joint_gc_cmd.header.stamp = get_clock()->now();
     for (int i = 0; i < 16; ++i) {

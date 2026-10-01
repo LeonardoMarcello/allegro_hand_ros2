@@ -3,7 +3,7 @@ close all
 
 %% Matlab
 % Load URDF
-robot = importrobot("description/urdf/allegro_hand_description_right_B.urdf");
+robot = importrobot("description/urdf/leo_allegro_hand_description_right_B.urdf");
 robot.DataFormat = 'column';               % use column vector for q
 
 % Create a figure
@@ -17,34 +17,34 @@ axis equal
 view(3);
 light;
 
-% %% --- Highlight Centers of Mass for links 4–7 ---
-% % Define which links to highlight (by name or index)
-% link_indices = [12 13 14 15];
-% 
-% hold on
-% for i = link_indices
-%     link = robot.Bodies{i};
-% 
-%     % Get CoM position in world frame
-%     T = getTransform(robot, robot.homeConfiguration, link.Name);
-%     com_local = link.CenterOfMass(:);           % [x y z] in link frame
-%     com_world = T(1:3,1:3) * com_local + T(1:3,4);
-% 
-%     % Plot small red sphere at CoM
-%     [xs, ys, zs] = sphere(10);
-%     r = 0.005; % sphere radius
-%     surf(r*xs + com_world(1), ...
-%          r*ys + com_world(2), ...
-%          r*zs + com_world(3), ...
-%          'FaceColor', 'r', 'EdgeColor', 'none', 'FaceAlpha', 0.8);
-% 
-%     % Label the link name
-%     text(com_world(1)+0.1, com_world(2), com_world(3), ...
-%          sprintf('  %s CoM', link.Name), ...
-%          'Color', 'r', 'FontSize', 8, 'FontWeight', 'bold');
-% end
-% 
-% hold off
+%% --- Highlight Centers of Mass for links 4–7 ---
+% Define which links to highlight (by name or index)
+link_indices = [12 13 14 15];
+
+hold on
+for i = link_indices
+    link = robot.Bodies{i};
+
+    % Get CoM position in world frame
+    T = getTransform(robot, robot.homeConfiguration, link.Name);
+    com_local = link.CenterOfMass(:);           % [x y z] in link frame
+    com_world = T(1:3,1:3) * com_local + T(1:3,4);
+
+    % Plot small red sphere at CoM
+    [xs, ys, zs] = sphere(10);
+    r = 0.005; % sphere radius
+    surf(r*xs + com_world(1), ...
+         r*ys + com_world(2), ...
+         r*zs + com_world(3), ...
+         'FaceColor', 'r', 'EdgeColor', 'none', 'FaceAlpha', 0.8);
+
+    % Label the link name
+    text(com_world(1)+0.1, com_world(2), com_world(3), ...
+         sprintf('  %s CoM', link.Name), ...
+         'Color', 'r', 'FontSize', 8, 'FontWeight', 'bold');
+end
+
+hold off
 
 
 function printRobotTFTree(robot, q)

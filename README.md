@@ -1,202 +1,158 @@
-#
-<img src="https://github.com/user-attachments/assets/b198accd-5de4-4cfc-a347-05899c0391b3" width="400" align="left">
-<img src="https://github.com/user-attachments/assets/48640d7e-a8db-4758-9770-bcc1b3e68434" width="400" align="center">
+# Allegro Hand V5 – ROS 2 Control Workspace
 
-# Allegro Hand V5 ROS2
-> [!IMPORTANT]</br>
-> **Date : 25/07/10**</br>
-> **We have recently resolved an issue where some fingertip sensor values were delayed. To address this, we have uploaded the updated firmware at the link below. Please update the firmware and download the modified ROS2 package.**</br>
-> [allegro_hand_v5_firmware](https://github.com/Wonikrobotics-git/allegro_hand_v5_firmware)</br>
-> **Please update the firmware by referring to the "Firmware Update" section in the user manual.**
+ROS 2 Humble workspace to control the **Allegro Hand V5** (Wonik Robotics) with **ros2_control**.
+It adds these parts on top of the original Wonik packages:
 
+- a ros2_control **hardware interface** that talks to the hand over CAN (effort or BHand position control),
+- a **computed torque controller** with model-based gravity compensation (from the thunder dynamics model),
+- services and scripts to **save and load hand poses**.
 
+> The original Wonik README is kept in [README_wonik.md](README_wonik.md). Personal notes are in [readme.txt](readme.txt).
 
-This is the official release to control Allegro Hand V5 with ROS2(**Only V5 supported, V4 is not supported**). Mostly, it is based on the release of Allegro Hand V5 ROS1 package.
-You can find our latest Allegro Hand V5 ROS1 package :(https://github.com/Wonikrobotics-git/allegro_hand_ros_v5)
-And the interfaces and controllers have been improved and rewritten by Soohoon Yang(Hibo) from Wonik Robotics.
-
-We have integrated the core elements of two ROS packages(allegro_hand_description, allegro_hand_parameters) into a main package(allegro_hand_controllers).
-
-**For now, we support three additional action.**
-- Visualize Allegro Hand V5 changing in real time using Rviz2.
-- Save customize pose using MOVEIT2 and move to the saved pose.
-- Simply control hand with GUI tool instead of using keyboard.
-
-These packages are tested on ROS2 Humble(Ubuntu 22.04). It will likely not work with newer or older versions(Rolling, Foxy ...).
-
-## Useful Links
-- Official Allegro Hand Website : https://www.allegrohand.com/
-- Community Forum :  https://www.allegrohand.com/forum
+---
 
 ## Packages
 
-**From Allegro Hand V5, the hand is fully based on torque controller.** 
+| Package | Description | README |
+|---|---|---|
+| [allegro_hand_bringup](src/allegro_hand_bringup) | Launch files, ros2_control xacro and controller configuration | [README](src/allegro_hand_bringup/README.md) |
+| [allegro_hand_hw_interface](src/allegro_hand_hw_interface) | ros2_control `SystemInterface` for the real hand (CAN) and a fake hardware | [README](src/allegro_hand_hw_interface/README.md) |
+| [allegro_hand_ros2_controllers](src/allegro_hand_ros2_controllers) | Computed torque controller (gravity compensation + PD) and BHand controller | [README](src/allegro_hand_ros2_controllers/README.md) |
+| [allegro_hand_interfaces](src/allegro_hand_interfaces) | Custom services (`SavePose`) | [README](src/allegro_hand_interfaces/README.md) |
+| [thunder_ahand](src/thunder_ahand) | Dynamic model of fingers and thumb (thunder library) | [README](src/thunder_ahand/README.md) |
+| [allegro_utils](src/allegro_utils) | Utility nodes (wave, trajectory test, GUI, recorder) | [README](src/allegro_utils/README.md) |
+| [allegro_hand_description](src/allegro_hand_description) | URDF and meshes (right/left, A/B) | – |
+| [allegro_hand_isaacsim](src/allegro_hand_isaacsim) | Isaac Sim real2sim / sim2real bridge | [README](src/allegro_hand_isaacsim/README.md) |
+| [allegro_hand_teleoperation](src/allegro_hand_teleoperation) | Teleoperation (MediaPipe hand tracking) | [README](src/allegro_hand_teleoperation/README.md) |
+| `allegro_hand_controllers`, `allegro_hand_driver`, `allegro_hand_keyboards`, `allegro_hand_gui`, `allegro_hand_moveit`, `bhand` | Original Wonik packages (standalone `allegro_node`, CAN driver, BHand library, …) | [README_wonik.md](README_wonik.md) |
+| [scripts/bash](scripts/bash) | Command line scripts (save/load poses) | [README](scripts/bash/README.md) |
 
-- allegro_hand_controllers : Contain two main nodes for control the hand and urdf descriptions,meshes.
-	- node : Receive encoder data and compute torque using `computeDesiredTorque`.
-	- grasp : Apply various pre-defined grasps or customized poses.
-- allegro_hand_driver : Main driver for sending and receiving data with the Allegro Hand.
-- allegro_hand_keyboard : Node that sends the command to control Allegro Hand. All commands need to be pre-defined.
-- allegro_hand_moveit : Provide MOVEIT2 package for Allegro Hand V5.
-- allegro_hand_gui : Node that control the allegro hand with gui program.
-- bhand : Library files for the predefined grasps and actions., available on 64 bit versions.
-  - ⚠ **Default: x86-64-bit.** If using a **ARM64**, update the symlink accordingly from [here](https://github.com/Wonikrobotics-git/Bhandlib_ARM).
-  
-  ## Topic description
+### Architecture
 
-- Control
-	- /allegroHand_(NUM)/lib_cmd :  Hand command.
- 	- /allegroHand_(NUM)/joint_cmd : Desired hand joint positions and control REAL Allegro Hand.
-  	- /allegroHand_(NUM)/force_chg : Change grasp force of grasping algorithm(grasp_3, grasp_4).
-  	- /allegroHand_(NUM)/time_chg : Change time of moving target positions of each joints.
-  	- /allegroHand_(NUM)/envelop_torque : Change torque of envelop command.
-- Joint States
-  	- /allegroHand_(NUM)/joint_states : REAL Allegro Hand current joint positions.
-  	- /allegroHand_sim/joint_states : ISAAC SIM Allegro Hand current joint positions.
-- Sensors
-  	- /allegroHand_(NUM)/tactile_sensors : REAL tactile sensors data {Finger1(Index),Finger2(Middle),Finger3(Pinky),Finger4(Thumb)}.
-  	- /allegroHand_sim/contact_sensors : ISAAC SIM contact sensors data {Finger1(Index),Finger2(Middle),Finger3(Pinky),Finger4(Thumb)}.
+```
+                       ┌──────────────────────── ros2_control_node (500 Hz) ────────────────────────┐
+ /allegroHand_0/  ───▶ │  allegro_effort_controller      ──effort──▶   AllegroHandV5 (hw interface) │ ──CAN──▶ Allegro Hand
+   joint_cmd           │  (computed torque / grav. comp)  ◀─state───   read(): positions, velocity   │ ◀─CAN───
+                       │  joint_state_broadcaster ──▶ /joint_states                                   │
+                       └──────────────────────────────────────────────────────────────────────────────┘
+                              /allegro_hand_service/activate    /allegro_hand_service/save_pose
+```
 
-## Install the PCAN driver
+---
 
-**With ROS2, you don't need to install PCAN driver anymore!**
+## Build
 
-If you have already installed PCAN driver, please follow instructions below.
-- [Optional] Disable previously installed PEAK-CAN driver.
-~~~bash
-# Temporarily
-sudo rmmod pcan
-sudo modprobe peak_usb
+> [!WARNING]
+> **Build with conda deactivated.** If a conda environment is active (including `base`), CMake may pick up
+> conda libraries (e.g. `libtinyxml2.so.11`) and `ros2_control_node` then crashes when it loads the plugin
+> (see [Troubleshooting](#troubleshooting)).
 
-# Permanent
-sudo rm /etc/modprobe.d/pcan.conf
-sudo rm /etc/modprobe.d/blacklist-peak.conf
-~~~
-
-## Run main controller nodes
-
-1. Make new workspace.
-~~~bash
-mkdir allegro_ws
-~~~
-
-2. Install necessart package.
-~~~bash
-sudo apt-get update
-sudo apt-get install ros-<distro>-xacro
-sudo apt install ros-<distro>-moveit
-sudo apt install ros-<distro>-controller-manager
-sudo apt install ros-<distro>-joint-state-broadcaster
-sudo apt install ros-<distro>-joint-trajectory-controller
-~~~
-
-3. Download ROS2 package for Allegro Hand V5 using below command.
-~~~bash
-cd ~/allegro_ws
-git clone https://github.com/Wonikrobotics-git/allegro_hand_ros2_v5.git
-~~~
-
-4. Build.
-~~~bash
-cd ~/allegro_ws
-source /opt/ros/<distro>/setup.bash
+```bash
+conda deactivate            # repeat until no environment is active (also leave "base")
+cd ~/Desktop/allegro_hand_ros2_ws
+source /opt/ros/humble/setup.bash
 colcon build
-~~~
-
-5. Launch allegro main node.
-~~~bash
 source install/setup.bash
-ros2 launch allegro_hand_controllers allegro_hand.launch.py HAND:=right TYPE:=B
-~~~
-**You need to write your password to open CAN port**
+```
 
+Build only the ros2_control part:
+```bash
+colcon build --packages-select allegro_hand_interfaces thunder_ahand allegro_hand_hw_interface allegro_hand_ros2_controllers allegro_hand_bringup
+```
 
-**Please check 'Launch file instructions below'.**
+Main dependencies (apt): `ros-humble-ros2-control`, `ros-humble-ros2-controllers`, `ros-humble-xacro`, `libyaml-cpp-dev`, `libeigen3-dev`.
 
-6. Run allegro hand keyboard node.
-~~~bash
-cd ~/allegro_ws
+---
+
+## Quick start
+
+### 1. Launch the hand (real hardware)
+```bash
 source install/setup.bash
-ros2 run allegro_hand_keyboards allegro_hand_keyboard
-~~~
+ros2 launch allegro_hand_bringup ahand_bringup.py
+```
+The launch file asks for the sudo password to configure `can0` (1 Mbit/s). Then it starts:
+- `robot_state_publisher`,
+- `ros2_control_node` with the `AllegroHandV5` hardware interface,
+- `joint_state_broadcaster`,
+- `allegro_effort_controller` (computed torque),
+- RViz.
 
-7. Control Hand using Keyboard command.
+When it starts, the controller runs **gravity compensation**, so you can move the fingers by hand.
 
-## Launch file instructions
+### 2. Send a joint command
+```bash
+ros2 topic pub --once /allegroHand_0/joint_cmd sensor_msgs/msg/JointState \
+  "{name: [joint_0_0, joint_1_0, joint_2_0, joint_3_0, joint_4_0, joint_5_0, joint_6_0, joint_7_0,
+          joint_8_0, joint_9_0, joint_10_0, joint_11_0, joint_12_0, joint_13_0, joint_14_0, joint_15_0],
+   position: [0.0, 0.5, 0.5, 0.5, 0.0, 0.5, 0.5, 0.5, 0.0, 0.5, 0.5, 0.5, 0.8, 0.5, 0.5, 0.5]}"
+```
+After the first valid command, the controller switches to **computed torque** and tracks the last received command.
 
-Same as the ROS1 package, you can simply control Allegro Hand V5 by launching *allegro_hand.launch.py* . At a minimum, you must specify the handedness and the hand type:
-~~~bash
-ros2 launch allegro_hand_controllers allegro_hand.launch.py HAND:=right|left TYPE:=A|B
-~~~
+### 3. Save and load poses
+```bash
+./scripts/bash/save_pose.bash open      # store the current pose as "open" in workdir/saved_pose.yaml
+./scripts/bash/load_pose.bash           # list the stored poses
+./scripts/bash/load_pose.bash open      # send the pose "open" to the controller
+```
 
-Optional arguments:
-~~~
-VISUALIZE:=true|false (default is false)
-MOVEIT:=true|false (default is false)
-GUI:=true|false (default is false)
-~~~
+### 4. Enable / disable the motors
+```bash
+ros2 service call /allegro_hand_service/activate std_srvs/srv/SetBool "{data: false}"   # zero torque
+ros2 service call /allegro_hand_service/activate std_srvs/srv/SetBool "{data: true}"    # enable again
+```
 
-- If you want to visualize Allegro Hand on Rviz2:
-~~~bash
-ros2 launch allegro_hand_controllers allegro_hand.launch.py HAND:=right TYPE:=B VISUALIZE:=true
-~~~
+### 5. Mock hardware (no hand connected)
+```bash
+ros2 launch allegro_hand_bringup ahand_bringup.py ros2_control_hardware_type:=mock_components
+```
+This skips the CAN setup and uses the fake hardware with the `allegro_position_controller` (JointTrajectoryController).
 
-- If you want to use Allegro Hand with MOVEIT2:
-~~~bash
-ros2 launch allegro_hand_controllers allegro_hand.launch.py HAND:=right TYPE:=B MOVEIT:=true
-~~~
+---
 
-- If you want to control Allegro Hand with GUI:
-~~~bash
-ros2 launch allegro_hand_controllers allegro_hand.launch.py HAND:=right TYPE:=B GUI:=true
-~~~
+## ROS interfaces (summary)
 
-## Control more than one hand
+| Name | Type | Description |
+|---|---|---|
+| `/allegroHand_0/joint_cmd` | `sensor_msgs/JointState` (sub) | Desired joint positions (optional velocities) for the computed torque controller |
+| `/joint_states` | `sensor_msgs/JointState` (pub) | Measured joint states (joint_state_broadcaster) |
+| `/allegro_effort_controller/command_torque` | `sensor_msgs/JointState` (pub) | Torque sent by the controller (debug) |
+| `/allegro_effort_controller/controller_error` | `sensor_msgs/JointState` (pub) | Position error `q_r - q` (debug) |
+| `/allegro_effort_controller/set_controller_mode` | `std_srvs/SetBool` | `true`: force gravity compensation, `false`: computed torque |
+| `/allegro_hand_service/activate` | `std_srvs/SetBool` | Enable (`true`) / disable (`false`, zero torque) the motors |
+| `/allegro_hand_service/save_pose` | `allegro_hand_interfaces/SavePose` | Save the current pose in a YAML file |
 
-To control more than one hand, you must specify CAN port number and Allegro Hand number.
+Joint order everywhere: `joint_0_0 … joint_3_0` index, `joint_4_0 … joint_7_0` middle, `joint_8_0 … joint_11_0` ring, `joint_12_0 … joint_15_0` thumb.
 
-Terminal 1:
-~~~bash
-ros2 launch allegro_hand_controllers allegro_hand.launch.py HAND:=right TYPE:=A CAN_DEVICE:=can0 NUM:=0
-~~~
+---
 
-Termianl 2:
-~~~bash
-ros2 launch allegro_hand_controllers allegro_hand.launch.py HAND:=left TYPE:=A CAN_DEVICE:=can1 NUM:=1
-~~~
+## Safety
 
-To control first hand,
+- **Zero torque on exit**: on Ctrl+C (hardware `on_shutdown`), on hardware deactivate/error and when the controller is deactivated, zero torque is sent to the hand. The firmware keeps the last torque it received, so this step matters.
+- **No jump at startup**: in position mode the hardware holds the measured pose on the first CAN frame. In effort mode the controller starts in gravity compensation.
+- Loading a pose far from the current one moves the fingers quickly (P-term step): load poses near the current configuration.
 
-Terminal 3:
-~~~bash
-ros2 run allegro_hand_keyboards allegro_hand_keyboard --ros-args allegroHand_0/lib_cmd:=allegroHand_0/lib_cmd
-~~~
+---
 
-To control second hand,
+## Troubleshooting
 
-Terminal 4:
-~~~bash
-ros2 run allegro_hand_keyboards allegro_hand_keyboard --ros-args allegroHand_0/lib_cmd:=allegroHand_1/lib_cmd
-~~~
+**`Failed to load library … liballegro_hand_hw_interface.so … libtinyxml2.so.11: cannot open shared object file`**
+The package was built with conda active. Clean and rebuild without conda:
+```bash
+conda deactivate   # until no env is active
+rm -rf build/allegro_hand_hw_interface install/allegro_hand_hw_interface \
+       build/allegro_hand_ros2_controllers install/allegro_hand_ros2_controllers
+source /opt/ros/humble/setup.bash
+colcon build --packages-select allegro_hand_interfaces allegro_hand_hw_interface allegro_hand_ros2_controllers
+```
+Check the result: `readelf -d install/allegro_hand_hw_interface/lib/liballegro_hand_hw_interface.so | grep tinyxml` must not show `.so.11`.
+To stop conda from activating `base` at login: `conda config --set auto_activate_base false`.
 
-**These are example commands.You may need to change CAN_DEVICE, PORT and NUM arguments accroding to your system.**
+**`WRONG HANDEDNESS DETECTED!` / `WRONG TYPE DETECTED!`**
+The `handness`/`type` parameters in [allegro_hand_ros2control.xacro](src/allegro_hand_bringup/config/allegro_hand_ros2control.xacro) do not match the connected hand.
 
-## ISAACSIM
+**`Cannot initialize CAN device`**
+Check that the hand is powered and the USB-CAN adapter is connected (`ip link show can0`).
 
-We now introuce two features —REAL2SIM and SIM2REAL—that integrate the Allegro Hand V5 with Isaac Sim.
-
-Please refer to the following guide for detailed information : [allegro_hand_isaacsim](https://github.com/Wonikrobotics-git/allegro_hand_ros2_v5/tree/master-4finger/src/allegro_hand_isaacsim)
-
-## MOVEIT2 
-
-These newly added feature function identically to their ROS1 counterparts. Please refer to the ROS1 manual for guidance.
-Our latest Allegro Hand V5 ROS1 package : [ROS1](https://github.com/Wonikrobotics-git/allegro_hand_ros_v5)
-
-**Make sure to install MOVEIT2 first in your PC and should install several additional packages to operate it**
-You can find installation guide in here : [MOVEIT2](https://moveit.picknik.ai/main/doc/tutorials/getting_started/getting_started.html)
-
-## GUI
-
-These newly added feature function identically to their ROS1 counterparts. Please refer to the ROS1 manual for guidance.
-Our latest Allegro Hand V5 ROS1 package : [ROS1](https://github.com/Wonikrobotics-git/allegro_hand_ros_v5)
-
+**The hand does not respond to commands**
+Check that the motors are enabled (`/allegro_hand_service/activate` → `true`) and that the controller is active (`ros2 control list_controllers`).

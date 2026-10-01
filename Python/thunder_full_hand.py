@@ -5,8 +5,8 @@ import os
 
 # Load the fingers model (Pinocchio Ahand)
 # ---------------------------------------------------------------------------
-from AHAND import AHAND, MESH_DIR, URDF_PATH, XML_PATH # Mujoco AHAND class
-mjHand = AHAND(URDF_PATH, MESH_DIR) # Mujoco AHAND instance
+# from AHAND import AHAND, MESH_DIR, URDF_PATH, XML_PATH # Mujoco AHAND class
+# mjHand = AHAND(URDF_PATH, MESH_DIR) # Mujoco AHAND instance
 
 
 
@@ -34,77 +34,77 @@ thumb.load_conf(os.path.join(os.path.dirname(os.path.abspath(__file__)),"./confi
 fingers = [index, middle, ring, thumb]
 
 
-# Fingertip base location
-# ---------------------------------------------------------------------------
-mj_finger_base_indeces = {
-                # 'index' :   mjHand.model.getFrameId('joint_0_0'), # red
-                # 'middle':   mjHand.model.getFrameId('joint_4_0'), # green
-                # 'ring'  :   mjHand.model.getFrameId('joint_8_0'), # blue
-                # 'thumb' :   mjHand.model.getFrameId('joint_12_0') # cyan
-                'index' :   mjHand.model.getFrameId('joint_1_0'), # red
-                'middle':   mjHand.model.getFrameId('joint_5_0'), # green
-                'ring'  :   mjHand.model.getFrameId('joint_9_0'), # blue
-                'thumb' :   mjHand.model.getFrameId('joint_13_0') # cyan
-        }
-print(mj_finger_base_indeces)
-print(mjHand.end_effector_indeces)
+# # Fingertip base location
+# # ---------------------------------------------------------------------------
+# mj_finger_base_indeces = {
+#                 # 'index' :   mjHand.model.getFrameId('joint_0_0'), # red
+#                 # 'middle':   mjHand.model.getFrameId('joint_4_0'), # green
+#                 # 'ring'  :   mjHand.model.getFrameId('joint_8_0'), # blue
+#                 # 'thumb' :   mjHand.model.getFrameId('joint_12_0') # cyan
+#                 'index' :   mjHand.model.getFrameId('joint_1_0'), # red
+#                 'middle':   mjHand.model.getFrameId('joint_5_0'), # green
+#                 'ring'  :   mjHand.model.getFrameId('joint_9_0'), # blue
+#                 'thumb' :   mjHand.model.getFrameId('joint_13_0') # cyan
+#         }
+# print(mj_finger_base_indeces)
+# print(mjHand.end_effector_indeces)
 
-mjHand.updateConfig()
-x_i = mjHand.data.oMf[mj_finger_base_indeces['index']].translation.copy()
-x_ii = mjHand.data.oMf[mj_finger_base_indeces['middle']].translation.copy()
-x_iii = mjHand.data.oMf[mj_finger_base_indeces['ring']].translation.copy()
-x_iv = mjHand.data.oMf[mj_finger_base_indeces['thumb']].translation.copy()
-x = np.hstack([x_i, x_ii, x_iii, x_iv])
-print(x_i*1000)
-print(x_ii*1000)
-print(x_iii*1000)
-print(x_iv*1000)
-print("")
+# mjHand.updateConfig()
+# x_i = mjHand.data.oMf[mj_finger_base_indeces['index']].translation.copy()
+# x_ii = mjHand.data.oMf[mj_finger_base_indeces['middle']].translation.copy()
+# x_iii = mjHand.data.oMf[mj_finger_base_indeces['ring']].translation.copy()
+# x_iv = mjHand.data.oMf[mj_finger_base_indeces['thumb']].translation.copy()
+# x = np.hstack([x_i, x_ii, x_iii, x_iv])
+# print(x_i*1000)
+# print(x_ii*1000)
+# print(x_iii*1000)
+# print(x_iv*1000)
+# print("")
 
-y_i = fingers[0].get_T_0_1()[0:3,3]
-y_ii = fingers[1].get_T_0_1()[0:3,3]
-y_iii = fingers[2].get_T_0_1()[0:3,3]
-y_iv = fingers[3].get_T_0_1()[0:3,3]
-y = np.hstack([y_i, y_ii, y_iii, y_iv])
-print(y_i*1000)
-print(y_ii*1000)
-print(y_iii*1000)
-print(y_iv*1000)
-print("")
+# y_i = fingers[0].get_T_0_1()[0:3,3]
+# y_ii = fingers[1].get_T_0_1()[0:3,3]
+# y_iii = fingers[2].get_T_0_1()[0:3,3]
+# y_iv = fingers[3].get_T_0_1()[0:3,3]
+# y = np.hstack([y_i, y_ii, y_iii, y_iv])
+# print(y_i*1000)
+# print(y_ii*1000)
+# print(y_iii*1000)
+# print(y_iv*1000)
+# print("")
 
-print("Fingertip base position error [mm]:")
-print((x[:3] - y[:3])*1000)
-print((x[3:6] - y[3:6])*1000)
-print((x[6:9] - y[6:9])*1000)
-print((x[9:12] - y[9:12])*1000)
-print("")
+# print("Fingertip base position error [mm]:")
+# print((x[:3] - y[:3])*1000)
+# print((x[3:6] - y[3:6])*1000)
+# print((x[6:9] - y[6:9])*1000)
+# print((x[9:12] - y[9:12])*1000)
+# print("")
 
-# Forward Kinematic on random config
-# ---------------------------------------------------------------------------
-#middle.set_world2L0(np.array([0, 0, 0]))
-#index.set_world2L0(np.array([0, 0.44, 0]))
-#ring.set_world2L0(np.array([0,-0.44, 0]))
-#thumb.set_world2L0(np.array([0,-0.44, -0.44]))
-mj_set_func = [mjHand.set_index, mjHand.set_middle, mjHand.set_ring, mjHand.set_thumb]
-for i in range(len(fingers)):
-    q = np.random.rand(fingers[i].get_numJoints())
-    fingers[i].set_q(q)
-    mj_set_func[i](q)
-mjHand.updateConfig()
-
-
-mj_ee = [mjHand.computeForwardKinematic()[3*i:3*i+3] for i in range(len(fingers))]
-for f in range(len(fingers)):
-    print(f"position of finger {f+1} at [m]:")
-    print(fingers[f].get_T_0_ee()[0:3,3])
-    print(mj_ee[f])
-    print(f"Error of finger {f+1} [mm]:")
-    print((fingers[f].get_T_0_ee()[0:3,3] - mj_ee[f])*1000)
-    print("")
+# # Forward Kinematic on random config
+# # ---------------------------------------------------------------------------
+# #middle.set_world2L0(np.array([0, 0, 0]))
+# #index.set_world2L0(np.array([0, 0.44, 0]))
+# #ring.set_world2L0(np.array([0,-0.44, 0]))
+# #thumb.set_world2L0(np.array([0,-0.44, -0.44]))
+# mj_set_func = [mjHand.set_index, mjHand.set_middle, mjHand.set_ring, mjHand.set_thumb]
+# for i in range(len(fingers)):
+#     q = np.random.rand(fingers[i].get_numJoints())
+#     fingers[i].set_q(q)
+#     mj_set_func[i](q)
+# mjHand.updateConfig()
 
 
-mjHand.initGepettoViewer()
-mjHand.show()
+# mj_ee = [mjHand.computeForwardKinematic()[3*i:3*i+3] for i in range(len(fingers))]
+# for f in range(len(fingers)):
+#     print(f"position of finger {f+1} at [m]:")
+#     print(fingers[f].get_T_0_ee()[0:3,3])
+#     print(mj_ee[f])
+#     print(f"Error of finger {f+1} [mm]:")
+#     print((fingers[f].get_T_0_ee()[0:3,3] - mj_ee[f])*1000)
+#     print("")
+
+
+# mjHand.initGepettoViewer()
+# mjHand.show()
 
 # ---------Plot-------------------------------------------------------------
 from mpl_toolkits.mplot3d import Axes3D

@@ -18,6 +18,7 @@ find_package(sensor_msgs REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(bhand REQUIRED)
+find_package(thunder_ahand REQUIRED)
 
 message(STATUS "bhand include dirs: ${bhand_INCLUDE_DIRS}")
 message(STATUS "bhand libraries: ${bhand_LIBRARIES}")
@@ -34,37 +35,52 @@ include_directories(
 	${YAML_CPP_INCLUDE_DIRS}
   ${bhand_INCLUDE_DIRS}
   ${CMAKE_CURRENT_SOURCE_DIR}/../bhand/include
+  ${thunder_ahand_INCLUDE_DIRS} # <- needed when implementing via thunder ahand library
 )
 
 # Create Cpp Libraries
-add_library(${PROJECT_NAME}
-	src/thunder_ahand_finger.cpp
-	src/ahand_finger_gen.cpp
-  src/kalman_filter_joint.cpp
-)
-ament_target_dependencies(${PROJECT_NAME} rclcpp yaml-cpp)
+ add_library(${PROJECT_NAME}
+# 	src/thunder_ahand_finger.cpp
+# 	src/ahand_finger_gen.cpp
+   src/kalman_filter_joint.cpp
+ )
+ ament_target_dependencies(${PROJECT_NAME} rclcpp yaml-cpp)
 
 
 # Create Cpp executable
-add_executable(test_thunder
-  src/test_thunder.cpp
+# --------------------------
+# add_executable(test_thunder
+#   src/test_thunder.cpp
+# )
+# target_link_libraries(test_thunder
+#   ${PROJECT_NAME}
+#   yaml-cpp
+# )
+# ament_target_dependencies(test_thunder rclcpp std_msgs sensor_msgs)
+
+# --------------------------
+add_executable(test_thunder_v2
+  src/test_thunder_v2.cpp
 )
-target_link_libraries(test_thunder
+target_link_libraries(test_thunder_v2
   ${PROJECT_NAME}
   yaml-cpp
+  Eigen3::Eigen
+  ${bhand_LIBRARIES}            # <- needed when implementing via bhand library
+  thunder_ahand::thunder_ahand  # <- needed when implementing via thunder ahand library
 )
-ament_target_dependencies(test_thunder rclcpp std_msgs sensor_msgs)
+ament_target_dependencies(test_thunder_v2 rclcpp std_msgs sensor_msgs bhand thunder_ahand)
 
-
-add_executable(test_controller
-  src/test_controller.cpp
-)
-target_link_libraries(test_controller
-  ${PROJECT_NAME}
-  yaml-cpp
-  ${bhand_LIBRARIES}
-)
-ament_target_dependencies(test_controller rclcpp std_msgs sensor_msgs bhand)
+# --------------------------
+# add_executable(test_controller
+#   src/test_controller.cpp
+# )
+# target_link_libraries(test_controller
+#   ${PROJECT_NAME}
+#   yaml-cpp
+#   ${bhand_LIBRARIES}
+# )
+# ament_target_dependencies(test_controller rclcpp std_msgs sensor_msgs bhand)
 
 
 
@@ -74,8 +90,9 @@ install(
   DESTINATION include
 )
 install(TARGETS
-  test_thunder
-  test_controller
+  #test_thunder
+  test_thunder_v2
+  #test_controller
   DESTINATION lib/${PROJECT_NAME}
 )
 
@@ -93,7 +110,7 @@ install(PROGRAMS
 )
 
 # install additional directories
-install(DIRECTORY config
+install(DIRECTORY launch config
 	DESTINATION share/${PROJECT_NAME}
 )
 

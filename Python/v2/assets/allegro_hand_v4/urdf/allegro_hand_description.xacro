@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<robot name="allegro" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:arg name="hand"              default="" />
+  <xacro:arg name="tip"               default="" />
+  <xacro:arg name="link_prefix"       default="" />
+  <xacro:arg name="joint_prefix"      default="" />
+
+  <xacro:property name="hand"           value="$(arg hand)"/>
+  <xacro:property name="link_prefix"    value="$(arg link_prefix)"/>
+  <xacro:property name="joint_prefix"   value="$(arg joint_prefix)"/>
+  <xacro:property name="tip"            value="$(arg tip)"/>
+
+<link name="${joint_prefix}_world"/>
+   <!-- LEFT HAND -->
+  <xacro:if value="${hand == 'left'}">
+      <xacro:include filename="leftAllegroHand.urdf.xacro" />
+      <xacro:left_allegro_hand  link_prefix="${link_prefix}" joint_prefix="${joint_prefix}" tip="${tip}" parent="${joint_prefix}_world">
+        <origin xyz="0 0 0" rpy="0 0 0" />
+         </xacro:left_allegro_hand>
+  </xacro:if>
+
+  <!-- RIGHT HAND -->
+  <xacro:unless value="${hand == 'left'}">
+      <xacro:include filename="rightAllegroHand.urdf.xacro" />
+      <xacro:right_allegro_hand  link_prefix="${link_prefix}" joint_prefix="${joint_prefix}" tip="${tip}" parent="${joint_prefix}_world">
+          <origin xyz="0 0 0" rpy="0 0 0" />
+         </xacro:right_allegro_hand>
+  </xacro:unless>
+
+</robot>
+
+   

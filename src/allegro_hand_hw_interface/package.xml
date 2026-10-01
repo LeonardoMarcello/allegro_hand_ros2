@@ -21,6 +21,8 @@
   <depend>rosbag2_cpp</depend>
   <depend>bhand</depend>
   <depend>std_srvs</depend>
+  <depend>allegro_hand_interfaces</depend>
+  <depend>yaml-cpp</depend>
 
   <export>
     <build_type>ament_cmake</build_type>

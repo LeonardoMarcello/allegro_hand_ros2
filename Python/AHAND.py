@@ -12,9 +12,9 @@ from pinocchio.visualize import GepettoVisualizer
 from pinocchio.robot_wrapper import RobotWrapper 
 from pinocchio.shortcuts import buildModelsFromUrdf, createDatas
 
-MESH_DIR = './description/urdf/meshes/'
-URDF_PATH = './description/urdf/allegro_hand_description_right_B.urdf'
-XML_PATH = './description/urdf/allegro_hand_description_right_B.xml'
+MESH_DIR = './assets/urdf/meshes/'
+URDF_PATH = './assets/urdf/allegro_hand_description_right_B.urdf'
+XML_PATH = './assets/urdf/allegro_hand_description_right_B.xml'
 
 class AHAND(RobotWrapper):
 

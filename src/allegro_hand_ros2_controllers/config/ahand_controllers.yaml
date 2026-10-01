@@ -1,3 +1,6 @@
+# This is a template for setting the effort Controller.
+# The running controller is defined in allegro_hasand_bringup package
+
 computed_torque_controller:
     type: ahand_controllers/ComputedTorque_Controller
     joints:
@@ -18,9 +21,24 @@ computed_torque_controller:
       - joint_14_0
       - joint_15_0
     # --- Controller parameters --- #
-    kp1: 300.0   #default: 120.0
-    kp2: 150.0   #default: 70.0
-    kp3: 30.0    #default: 50.0
-    kd1: 30.0
-    kd2: 15.0
-    kd3: 3.0
+    # kp1: 1.0
+    # kp2: 1.0
+    # kp3: 1.0
+    # kp4: 1.0
+    # kd1: 0.04
+    # kd2: 0.15
+    # kd3: 0.04
+    # kd4: 0.04
+    gains:
+      finger:
+        kp: [1.0, 1.0, 1.0, 1.0]
+        kd: [0.04, 0.15, 0.04, 0.04]
+      thumb:
+        kp: [1.0, 1.0, 1.0, 1.0]
+        kd: [0.04, 0.15, 0.04, 0.04]
+
+    # PD:
+    #   Kp = [1, 1, 1, 1];
+    #   Kd = [0.04, 0.15, 0.04, 0.04];
+    # GC:
+    #   Kd = [0.004*sqrt(80), 0.008*sqrt(90), 0.008*sqrt(90), 0.004*sqrt(80)];

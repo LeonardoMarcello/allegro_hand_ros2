@@ -1,0 +1,5 @@
+string name        # pose name, e.g. "open"
+string file_path   # YAML file where the pose is stored
+---
+bool success
+string message

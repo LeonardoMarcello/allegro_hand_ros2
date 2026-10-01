@@ -272,7 +272,6 @@ int command_pick(void* ch)
 
 	Txid = ID_CMD_PICK_STATUS;
 	ret = canSendMsg(ch, Txid, 0, data, TRUE, 0);
-    //printf("bye\n\n");
 	return ret;
 }
 
@@ -285,7 +284,18 @@ int command_place(void* ch)
 
 	Txid = ID_CMD_PLACE_STATUS;
 	ret = canSendMsg(ch, Txid, 0, data, TRUE, 0);
-    //printf("hi\n\n");
+	return ret;
+}
+
+int command_calibration(void* ch)
+{
+
+	long Txid;
+	unsigned char data[8];
+	int ret;
+
+	Txid = ID_CMD_Position_Calibration_S;
+	ret = canSendMsg(ch, Txid, 0, data, TRUE, 0);
 	return ret;
 }
 

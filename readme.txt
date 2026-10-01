@@ -31,6 +31,9 @@ https://github.com/Wonikrobotics-git/allegro_hand_ros2_v5.git
 
 # Run Joint publisher GUI for sliders controller
 ros2 run joint_state_publisher_gui joint_state_publisher_gui /home/leo/Desktop/allegro_hand_ros2_ws/src/allegro_hand_controllers/urdf/allegro_hand_description_right_B.urdf --ros-args -r /joint_states:=/allegroHand_0/joint_cmd
+# joint publisher gui
+ros2 run rqt_joint_trajectory_controller rqt_joint_trajectory_controller --force-discover
+
 
 # Use allegro_hand_bringup to setup ros2 control framework (TESTARE ROS2 CONTROLLER)
 ros2 launch allegro_hand_bringup ahand_bringup.py

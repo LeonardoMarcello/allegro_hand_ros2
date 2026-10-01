@@ -1,4 +1,6 @@
-<library path="allegro_hand_computed_torque">
+<library path="allegro_hand_ros2_controllers">
+
+
   <class name="allegro_hand_computed_torque/ComputedTorque_Controller" 
     type="allegro_hand_computed_torque::ComputedTorque_Controller"
     base_class_type="controller_interface::ControllerInterface">
@@ -6,4 +8,15 @@
     Computed Torque Controller for the Allegro Hand V5
     </description>
   </class>
+
+
+    <class name="allegro_hand_bhand_controller/BHand_Controller" 
+    type="allegro_hand_bhand_controller::BHand_Controller"
+    base_class_type="controller_interface::ControllerInterface">
+    <description>
+    Controller based on BHand Library of the Allegro Hand V5
+    </description>
+  </class>
+
+
 </library>

@@ -2,14 +2,14 @@ from launch import LaunchDescription
 from launch_ros.actions import Node
 from launch.actions import RegisterEventHandler,IncludeLaunchDescription, DeclareLaunchArgument, ExecuteProcess, OpaqueFunction
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration, Command
+from launch.substitutions import LaunchConfiguration, Command, PythonExpression
+from launch.conditions import IfCondition
 from launch.event_handlers import OnProcessStart
 from ament_index_python.packages import get_package_share_directory
 import os
 import getpass
 
 
-from ament_index_python.packages import get_package_share_directory
 import xml.etree.ElementTree as ET
 from functools import partial
 
@@ -62,6 +62,8 @@ def setup_can(context, xacro_file):
 def generate_launch_description():
     # Argument
     ros2_control_hardware_type = LaunchConfiguration("ros2_control_hardware_type",default="physical_device")
+    viz = LaunchConfiguration("viz", default="true")
+    position_control = LaunchConfiguration("position_control", default="false")
 
     # Packages
     pkg_share = get_package_share_directory('allegro_hand_bringup')
@@ -71,12 +73,20 @@ def generate_launch_description():
     # Path to your URDF or ros2 xacro
     xacro_file = os.path.join(pkg_share, 'config', 'allegro_hand_ros2control.xacro')
     robot_description = Command([
-        'xacro ', xacro_file,' ros2_control_hardware_type:=', ros2_control_hardware_type
+        'xacro ', xacro_file,' ros2_control_hardware_type:=', ros2_control_hardware_type,
+        ' position_control:=', position_control
     ])
-
+    # rviz2 configuration file
+    rviz_config_file = os.path.join(pkg_share, 'config', 'allegro_hand_config.rviz')
 
     # Controller manager params file (optional)
+    #config_path = os.path.join(pkg_share, 'config', 'allegro_controllers_position.yaml')
     config_path = os.path.join(pkg_share, 'config', 'allegro_controllers.yaml')
+    # # Use a PythonExpression to choose the string at runtime
+    # config_path = PythonExpression([
+    #     "'", config_position, "' if '", ros2_control_hardware_type, "' == 'mock_components' else '", config_effort, "'"
+    # ])
+
 
     # robot state publisher
     rsp = IncludeLaunchDescription(
@@ -111,18 +121,40 @@ def generate_launch_description():
         )
     )
 
-    # Effort controller node (apply torqu on hw)
-    effort_controller = Node(
+    # Hand controller node (effort for real hardware, position for mock)
+    target_controller = PythonExpression([
+        "'allegro_position_controller' if ('", ros2_control_hardware_type, "' == 'mock_components' or '",
+        position_control, "' == 'true') else 'allegro_effort_controller'"
+    ])
+
+    controller = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["allegro_effort_controller"],
+        arguments=[target_controller],
+        #arguments=["allegro_effort_controller"],
+        #arguments=["allegro_position_controller"],
     )
-    delayed_effort_controller = RegisterEventHandler(
+    delayed_controller = RegisterEventHandler(
         event_handler=OnProcessStart(
             target_action=controller_node,
-            on_start=[effort_controller],
+            on_start=[controller],
         )
     )
+
+
+
+    rviz_node = Node(
+        package='rviz2',
+        executable='rviz2',
+        name='rviz2',
+        output='screen',
+        arguments=['-d', rviz_config_file],
+        #remappings=[
+        #    ('tf', PythonExpression(["'allegroHand_0/tf'"]))
+        #],
+        condition=IfCondition(viz)  # Only launches if 'viz' is true
+    )
+
 
     # get setup_can function handle
     setup_can_func = partial(setup_can, xacro_file=xacro_file)
@@ -135,6 +167,10 @@ def generate_launch_description():
             "ros2_control_hardware_type",
             default_value="physical_device",
             description="ROS2 control hardware interface type to use for the launch file -- possible values: [mock_components, physical_device, gazebo, isaac]"),
+        DeclareLaunchArgument(
+            "position_control",
+            default_value="false",
+            description="true: real hand in position control (BHand PD) with allegro_position_controller; false: effort + computed torque"),
 
         # setup can device
         OpaqueFunction(function=setup_can_func),
@@ -149,7 +185,7 @@ def generate_launch_description():
         delayed_joint_broad_spawner,
 
         ## Delay the effort controller until the controller manager is up
-        delayed_effort_controller,
+        delayed_controller,
 
         ## Spawn the joint_state_broadcaster
         #ExecuteProcess(
@@ -162,4 +198,7 @@ def generate_launch_description():
         #    cmd=['ros2', 'control', 'load_controller', '--set-state', 'start', 'allegro_effort_controller'],
         #    output='screen'
         #),
+
+        ## Conditionally start RViz2
+        rviz_node
     ])
